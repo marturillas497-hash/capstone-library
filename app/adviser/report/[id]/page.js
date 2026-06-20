@@ -2,7 +2,7 @@ import { createClient } from "@/lib/supabase/server";
 import { redirect, notFound } from "next/navigation";
 import Navbar from "@/components/shared/Navbar";
 import { RISK_LABELS, RISK_COLORS } from "@/lib/risk";
-import AbstractModal from "@/components/shared/AbstractModal";
+import MatchesList from "@/components/shared/MatchesList";
 import Link from "next/link";
 
 export default async function AdviserReportPage({ params }) {
@@ -120,28 +120,7 @@ export default async function AdviserReportPage({ params }) {
         {matches.length > 0 && (
           <div>
             <h2 className="font-sans font-semibold text-foreground mb-4">Top Matched Studies</h2>
-            <div className="space-y-3">
-              {matches.map((match, index) => (
-                <AbstractModal key={match.id ?? index} abstract={match} showAccessionNote>
-                  <div className="bg-white rounded-xl border border-slate-200 p-4 hover:border-navy/30 hover:shadow-sm transition cursor-pointer">
-                    <div className="flex items-start justify-between gap-3">
-                      <div className="min-w-0">
-                        <p className="text-sm font-medium text-foreground">{match.title}</p>
-                        <p className="text-xs text-foreground/40 mt-0.5">
-                          {match.authors && `${match.authors} · `}
-                          {match.year && match.year}
-                          {match.accession_id && ` · ${match.accession_id}`}
-                        </p>
-                      </div>
-                      <span className="shrink-0 text-xs font-medium text-navy bg-navy/5 px-2.5 py-1 rounded-full">
-                        {(match.similarity * 100).toFixed(1)}%
-                      </span>
-                    </div>
-                    <p className="text-xs text-foreground/50 mt-2 line-clamp-2">{match.abstract_text}</p>
-                  </div>
-                </AbstractModal>
-              ))}
-            </div>
+            <MatchesList matches={matches} showAccessionNote />
           </div>
         )}
       </main>

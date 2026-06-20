@@ -1,6 +1,5 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
-import { createAdminClient } from "@/lib/supabase/admin";
 import { getPool } from "@/lib/db";
 import { getRiskLevel } from "@/lib/risk";
 import { GoogleGenerativeAI } from "@google/generative-ai";
@@ -92,7 +91,6 @@ function generateFallbackAdvisory(riskLevel) {
 
 export async function POST(request) {
   const supabase = await createClient();
-  const admin = createAdminClient();
 
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) {
@@ -158,7 +156,7 @@ export async function POST(request) {
   }
 
   // Save report
-  const { data: report, error: reportError } = await admin
+  const { data: report, error: reportError } = await supabase
     .from("similarity_reports")
     .insert({
       student_id: studentId,

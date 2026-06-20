@@ -236,9 +236,10 @@ export default function LibraryPage() {
         )}
       </main>
 
-      {modalOpen && selectedAbstract && (
+      {selectedAbstract && (
         <AbstractModal
           abstract={selectedAbstract}
+          isOpen={modalOpen}
           onClose={closeModal}
           isAdmin={profile.role === "admin"}
           onUpdated={handleAbstractUpdated}
