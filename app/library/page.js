@@ -116,9 +116,6 @@ export default function LibraryPage() {
   function openModal(abstract) {
     setSelectedAbstract(abstract);
     setModalOpen(true);
-    if (profile.role === "student") {
-      fetch(`/api/abstracts/${abstract.id}/view`, { method: "POST" }).catch(() => {});
-    }
   }
 
   function closeModal() {
@@ -243,6 +240,7 @@ export default function LibraryPage() {
           onClose={closeModal}
           isAdmin={profile.role === "admin"}
           onUpdated={handleAbstractUpdated}
+          trackView={profile.role === "student"}
         />
       )}
     </div>

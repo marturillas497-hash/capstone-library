@@ -1,7 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useEmbedding } from "@/components/shared/EmbeddingProvider";
+
+const VIEW_TRACK_DELAY_MS = 2500;
 
 export default function AbstractModal({
   abstract,
@@ -10,12 +12,32 @@ export default function AbstractModal({
   showAccessionNote = false,
   isAdmin = false,
   onUpdated,
+  trackView = false,
 }) {
   const { getEmbedding, isReady } = useEmbedding();
   const [editing, setEditing] = useState(false);
   const [saving, setSaving] = useState(false);
   const [saveError, setSaveError] = useState("");
   const [form, setForm] = useState({});
+  const viewTimerRef = useRef(null);
+
+  // Only count a view once the modal has stayed open for VIEW_TRACK_DELAY_MS.
+  // Closing before then clears the timer, so accidental clicks and rapid
+  // skimming never get recorded.
+  useEffect(() => {
+    if (isOpen && trackView && abstract?.id) {
+      viewTimerRef.current = setTimeout(() => {
+        fetch(`/api/abstracts/${abstract.id}/view`, { method: "POST" }).catch(() => {});
+      }, VIEW_TRACK_DELAY_MS);
+    }
+    return () => {
+      if (viewTimerRef.current) {
+        clearTimeout(viewTimerRef.current);
+        viewTimerRef.current = null;
+      }
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isOpen, abstract?.id]);
 
   if (!isOpen || !abstract) return null;
 
