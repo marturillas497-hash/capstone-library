@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef } from "react";
 import { useEmbedding } from "@/components/shared/EmbeddingProvider";
 
-const VIEW_TRACK_DELAY_MS = 2500;
+const VIEW_TRACK_DELAY_MS = 5000;
 
 export default function AbstractModal({
   abstract,
