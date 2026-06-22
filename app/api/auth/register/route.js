@@ -4,7 +4,7 @@ import { createClient } from "@/lib/supabase/server";
 
 export async function POST(request) {
   const body = await request.json();
-  const { role, fullName, email, password, studentId, adviserId } = body;
+  const { role, fullName, email, password, studentId, adviserId, agreedToTerms } = body;
 
   if (!role || !fullName || !email || !password) {
     return NextResponse.json({ error: "All required fields must be filled in." }, { status: 400 });
@@ -12,6 +12,13 @@ export async function POST(request) {
 
   if (!["student", "capstone_adviser"].includes(role)) {
     return NextResponse.json({ error: "Invalid role." }, { status: 400 });
+  }
+
+  if (!agreedToTerms) {
+    return NextResponse.json(
+      { error: "You must accept the Terms and Conditions to register." },
+      { status: 400 }
+    );
   }
 
   if (role === "student" && !studentId) {
@@ -66,7 +73,13 @@ export async function POST(request) {
 
   const { error: profileError } = await admin
     .from("profiles")
-    .insert({ id: userId, full_name: fullName.trim(), role, status });
+    .insert({
+      id: userId,
+      full_name: fullName.trim(),
+      role,
+      status,
+      terms_accepted_at: new Date().toISOString(),
+    });
 
   if (profileError) {
     await admin.auth.admin.deleteUser(userId);
