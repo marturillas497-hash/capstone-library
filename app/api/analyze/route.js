@@ -39,36 +39,45 @@ async function generateAdvisory(inputTitle, inputDescription, matches, riskLevel
     const matchContext = matches
       .map(
         (m, i) =>
-          `${i + 1}. Title: ${m.title}\n   Authors: ${m.authors ?? "Unknown"} (${m.year ?? "N/A"})\n   Abstract: ${m.abstract_text?.slice(0, 300)}…\n   Similarity: ${(m.similarity * 100).toFixed(1)}%`
+          `${i + 1}. Title: ${m.title}\n   Accession ID: ${m.accession_id ?? "N/A"}\n   Authors: ${m.authors ?? "Unknown"} (${m.year ?? "N/A"})\n   Abstract: ${m.abstract_text?.slice(0, 300)}...\n   Similarity: ${(m.similarity * 100).toFixed(1)}%`
       )
       .join("\n\n");
 
-    const prompt = `You are an academic adviser for Bachelor of Science in Information Systems (BSIS) capstone projects at Makilala Institute of Science and Technology (MIST).
+    const prompt = `You are an academic adviser for Bachelor of Science in Information Systems (BSIS) capstone projects at Makilala Institute of Science and Technology (MIST) in Makilala, North Cotabato, Philippines.
 
 A student has proposed the following capstone topic:
 
 Title: ${inputTitle}
 Abstract/Problem Statement: ${inputDescription}
 
-The system detected a similarity risk level of ${riskLevel} based on the following top matching studies already in the BSIS capstone library:
+The system found a similarity risk level of ${riskLevel} based on these existing studies in the BSIS capstone library:
 
 ${matchContext}
 
-Please provide a structured advisory with the following four sections:
+Write a structured advisory using exactly these four section headings in uppercase. Do not use markdown, asterisks, bold text, or bullet points. Do not open with a greeting. Do not close with a signature or closing remark. Write in plain text only. Do not number the sections.
 
-1. VERDICT
-A one to two sentence overall assessment of the proposal's uniqueness and viability.
+VERDICT
+Write exactly two sentences. Address the student directly using you and your, never refer to them in third person. Be direct. State whether the proposal can move forward and what the student specifically needs to change or improve. Do not use hedging words like may, perhaps, might, could potentially, or you might also.
 
-2. CRITICAL ANALYSIS OF OVERLAP
-Identify which specific aspects of the proposal overlap with existing studies. Be precise and academic.
+CRITICAL ANALYSIS OF OVERLAP
+Explain in plain and simple language which specific parts of the student's proposal are too similar to existing studies in the library. Name each matching study by its exact title and include its accession ID and similarity score. Address the student directly using you and your. Write as if you are explaining to a college student, not an academic reviewer. Keep it concise and easy to understand.
 
-3. PROPOSED UNIQUE TITLES (3 alternatives)
-Suggest 3 alternative capstone titles that differentiate from existing studies while staying within the same general domain.
+Before writing the next two sections, silently identify the core system type of the student's proposal in one short phrase, for example a document request and status tracking system, an inventory management system, or a job order and maintenance request system. Do not write this phrase in your output. Every title and every direction you write must be that exact same core system type applied to a different specific organization or a different specific record type. This rule has no exceptions.
 
-4. ALTERNATIVE RESEARCH DIRECTIONS
-Suggest 2 to 3 specific directions the student could pivot toward to ensure a unique contribution to the BSIS capstone library.
+PROPOSED UNIQUE TITLES
+Suggest exactly 3 alternative capstone titles. Every title must be the same core system type as the student's proposal. Do not suggest a title from a different system type no matter how related it seems.
 
-Keep the tone professional, constructive, and encouraging. Format each section with its heading in uppercase followed by its content.`;
+Each title must describe a system, a web-based application, or a platform. Do not suggest a feasibility study, an analysis, an assessment, or a review.
+Each title must name exactly one specific and realistic organization. Use names like Barangay Poblacion Makilala, Kidapawan City Rural Health Unit 1, or Makilala National High School. Do not use category names like rural barangays, local government units, or North Cotabato organizations.
+The organizations named must be realistic for the Makilala, Kidapawan, or nearby North Cotabato area in the Philippines.
+The third title must include AI as a core feature of the system. Only one technology may be featured in a title. Do not combine multiple technologies. The AI feature must still be the same core system type as the student's proposal applied to a specific local organization.
+Each title must be 12 to 15 words maximum.
+Each title must describe one system with one clear purpose. Do not chain multiple features or modules into the title.
+
+Write each title on its own line numbered 1, 2, and 3. Do not add any description, label, or explanation after the title. Do not add a sub-header or category name before any title.
+
+ALTERNATIVE RESEARCH DIRECTIONS
+Suggest exactly 3 directions the student can explore. Every direction must be the same core system type as the student's proposal applied to a different specific organization, a different specific record type, or a different specific document category not yet covered in the library. Do not suggest a direction from a different system type entirely. Do not use hedging words like might, may, perhaps, could consider, or you might also. Every direction must be written as a direct statement of what the student can build, not a suggestion. Write each direction as one short paragraph in plain and simple language. Do not add a sub-header, label, or title before any paragraph. Do not use bullet points or numbering.`;
 
     const result = await model.generateContent(prompt);
     return result.response.text();
@@ -80,10 +89,77 @@ Keep the tone professional, constructive, and encouraging. Format each section w
 
 function generateFallbackAdvisory(riskLevel) {
   const fallbacks = {
-    RED: `VERDICT\nYour proposed topic shows critical similarity with existing BSIS capstone studies. A significant pivot is strongly recommended before proceeding.\n\nCRITICAL ANALYSIS OF OVERLAP\nThe system detected high conceptual overlap with one or more studies already completed in the BSIS program. The core problem statement and likely methodology may already be addressed.\n\nPROPOSED UNIQUE TITLES (3 alternatives)\n1. Consider adding a geographic or institutional scope modifier to your title.\n2. Focus on a specific underserved population or sector not covered by existing studies.\n3. Combine your domain with an emerging technology not yet explored in the library.\n\nALTERNATIVE RESEARCH DIRECTIONS\n- Investigate a related but unexplored sub-problem within the same domain.\n- Apply the same solution domain to a different industry or context.\n- Focus on evaluation, improvement, or extension of existing approaches rather than replication.`,
-    ORANGE: `VERDICT\nYour proposed topic is in a well-explored area of the BSIS capstone library. Differentiation through scope, methodology, or focus is recommended.\n\nCRITICAL ANALYSIS OF OVERLAP\nThe system detected strong topical overlap with existing studies. While not a direct duplicate, the conceptual space is crowded.\n\nPROPOSED UNIQUE TITLES (3 alternatives)\n1. Narrow the scope to a specific location, organization, or demographic.\n2. Introduce a specific technology angle not present in existing studies.\n3. Reframe the study around a measurable outcome or performance metric.\n\nALTERNATIVE RESEARCH DIRECTIONS\n- Identify a gap in existing implementations and focus your study there.\n- Consider a comparative study that adds new analytical value.\n- Explore the integration of your domain with an adjacent emerging field.`,
-    YELLOW: `VERDICT\nYour proposed topic shares themes with existing BSIS studies but shows enough distinction to proceed with refinement.\n\nCRITICAL ANALYSIS OF OVERLAP\nShared themes were detected but no direct duplication. Strengthening the unique angle of your methodology or scope will improve differentiation.\n\nPROPOSED UNIQUE TITLES (3 alternatives)\n1. Emphasize the unique methodology or framework in your title.\n2. Specify the target beneficiary or organization type more precisely.\n3. Highlight the specific problem dimension your study uniquely addresses.\n\nALTERNATIVE RESEARCH DIRECTIONS\n- Deepen the methodological rigor or introduce a mixed-methods approach.\n- Expand the scope to include underrepresented stakeholders.\n- Integrate a performance evaluation component not present in similar studies.`,
-    GREEN: `VERDICT\nYour proposed topic appears conceptually distinct from existing BSIS capstone studies. You are on a strong path to a unique contribution.\n\nCRITICAL ANALYSIS OF OVERLAP\nNo significant overlap was detected. The topic occupies a relatively unexplored area of the BSIS capstone library.\n\nPROPOSED UNIQUE TITLES (3 alternatives)\n1. Your current title direction is strong. Consider making the scope or beneficiary more explicit.\n2. Add a methodological keyword to signal your approach clearly.\n3. Incorporate the specific context or setting for added precision.\n\nALTERNATIVE RESEARCH DIRECTIONS\n- Refine your problem statement to ensure it is measurable and scoped appropriately.\n- Consider how your study could be extended or replicated in future research.\n- Identify the specific deliverable (system, framework, model) your study will produce.`,
+    RED: `VERDICT
+Your proposed topic is too similar to studies already in the BSIS capstone library and cannot move forward without a major change in direction. You need to pick a significantly different problem or organization before submitting again.
+
+CRITICAL ANALYSIS OF OVERLAP
+The system detected very high similarity between your proposal and one or more existing studies in the library. The core idea, the main features, and the general approach of your proposal appear to already be covered by a previous capstone in the BSIS program.
+
+PROPOSED UNIQUE TITLES
+1. Consider a system for a specific organization in Makilala or Kidapawan that no existing study has addressed.
+2. Focus on a specific group of beneficiaries in North Cotabato that is not yet represented in the library.
+3. Build an AI-assisted version of a system in your domain, scoped to one specific institution in the area.
+
+ALTERNATIVE RESEARCH DIRECTIONS
+Look for a related problem within the same topic area that has not been studied yet in the BSIS program. A small but specific change in scope or in the target organization can make a significant difference in how your proposal is evaluated.
+
+Focus on a different type of organization in Makilala or Kidapawan. The same kind of system built for a distinct and specifically named institution can count as a new and valid contribution to the library.
+
+Make AI a core feature of your system rather than a general add-on. This can set your study apart from existing work that relies only on traditional approaches and has not yet been explored in this domain.`,
+
+    ORANGE: `VERDICT
+Your proposed topic overlaps strongly with existing studies in the library and needs a more specific scope before it can move forward. Narrowing your focus to one specific organization or one specific function will make your proposal distinct enough to proceed.
+
+CRITICAL ANALYSIS OF OVERLAP
+The system found strong similarities between your proposal and several existing capstone studies in the BSIS library. Your topic is in a well-covered area and the main features of your proposal have already been built and documented in previous studies.
+
+PROPOSED UNIQUE TITLES
+1. Narrow your scope to one specific and named organization in Makilala or Kidapawan that is not mentioned in any existing study.
+2. Focus on a specific type of transaction or record in your domain that no existing study has covered yet.
+3. Redesign your system around AI-assisted decision making, scoped to one specific institution in North Cotabato.
+
+ALTERNATIVE RESEARCH DIRECTIONS
+Identify a gap in how the existing similar studies handled their systems and make that gap the focus of your study. Addressing a known limitation with a new and specific approach is a valid and distinct contribution to the library.
+
+Shift your scope to a specific community, sector, or institution in North Cotabato that is not represented in any existing BSIS capstone. A locally grounded study with a named organization will stand apart from more general existing work.
+
+Build an AI feature into your system that solves a specific pain point your domain that the existing studies did not address. Keep the AI feature tied to one clear function and name the exact institution it will serve.`,
+
+    YELLOW: `VERDICT
+Your proposed topic shares some themes with existing studies but is different enough to move forward with minor revisions. You need to make your scope more specific and name the exact organization your system will serve before submitting.
+
+CRITICAL ANALYSIS OF OVERLAP
+The system found moderate similarities between your proposal and a few existing studies in the BSIS library. The overlap is not a direct duplicate but the general idea has been explored before, and your proposal needs a clearer angle to stand on its own.
+
+PROPOSED UNIQUE TITLES
+1. Add the name of a specific organization in Makilala or Kidapawan to your current title to make the scope immediately clear.
+2. Focus on a specific record type or transaction within your domain that the similar studies did not cover.
+3. Introduce AI as a core feature of your system and name the specific institution in North Cotabato it is built for.
+
+ALTERNATIVE RESEARCH DIRECTIONS
+Strengthen your proposal by naming the exact organization your system will serve. A system built for one specific barangay, school, or health unit is more clearly distinct than a system described for a general category of organizations.
+
+Look at what the similar studies did not cover and make that the center of your proposal. Even a small unexplored angle within the same domain can become a strong and defensible capstone topic.
+
+Add an AI component that directly addresses the main problem your system is solving. This gives your study a forward-looking angle that most existing studies in the library do not have and keeps it from blending in with earlier work.`,
+
+    GREEN: `VERDICT
+Your proposed topic appears to be distinct from existing BSIS capstone studies and you are in a good position to move forward. Focus now on making your scope more specific by naming the exact organization your system will serve.
+
+CRITICAL ANALYSIS OF OVERLAP
+The system did not find any significant overlap between your proposal and existing studies in the library. Your topic covers an area that has not been explored yet in the BSIS capstone program, which gives you a strong starting point.
+
+PROPOSED UNIQUE TITLES
+1. Your current direction is strong. Add the name of a specific organization in Makilala or Kidapawan to make the scope concrete and defensible.
+2. Identify the most important record or transaction your system will handle and build the title around that specific function.
+3. Build an AI-assisted version of your system scoped to one specific institution in North Cotabato for an even stronger and more forward-looking proposal.
+
+ALTERNATIVE RESEARCH DIRECTIONS
+Make your problem statement more specific by naming the exact organization your system will serve. A clearly scoped study is easier to defend during your panel presentation and more useful to future BSIS students looking for related work.
+
+Think about what output or record your system will produce and make that the center of your title and abstract. The more specific your deliverable, the stronger your proposal becomes and the less likely it is to overlap with future submissions.
+
+Add AI as a core feature if it fits naturally into the problem you are solving. This can give your study a distinct advantage and set it apart from earlier work in the library.`,
   };
 
   return fallbacks[riskLevel] ?? fallbacks.GREEN;
@@ -114,7 +190,6 @@ export async function POST(request) {
     return NextResponse.json({ error: "Missing required fields." }, { status: 400 });
   }
 
-  // Check rate limit
   const remaining = await getRemainingScans(supabase, user.id, profile.role);
   if (remaining <= 0) {
     return NextResponse.json(
@@ -123,7 +198,6 @@ export async function POST(request) {
     );
   }
 
-  // Run pgvector similarity search via direct pg connection
   const pool = getPool();
   const vectorStr = `[${embedding.join(",")}]`;
 
@@ -136,10 +210,8 @@ export async function POST(request) {
   const topScore = matches.length > 0 ? matches[0].similarity : 0;
   const riskLevel = getRiskLevel(topScore);
 
-  // Generate AI advisory
   const advisory = await generateAdvisory(title, description, matches, riskLevel);
 
-  // Determine student_id and adviser_id for the report
   let studentId = null;
   let adviserId = null;
 
@@ -155,7 +227,6 @@ export async function POST(request) {
     adviserId = user.id;
   }
 
-  // Save report
   const { data: report, error: reportError } = await supabase
     .from("similarity_reports")
     .insert({
