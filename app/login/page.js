@@ -146,7 +146,7 @@ function LoginForm() {
         <div className="relative">
           <div className="flex items-center gap-3 mb-6">
             <img
-              src="/mist-logo.png"
+              src="/is-logo.png"
               alt="MIST"
               className="h-10 w-10 object-contain"
             />
