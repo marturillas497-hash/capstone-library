@@ -18,6 +18,11 @@ module.exports = {
           light: "#FFD633",
           dark: "#E6B800",
         },
+        orange: {
+          DEFAULT: "#FF7A1F",
+          light: "#FF9147",
+          dark: "#E56200",
+        },
         background: "#F8FAFC",
         foreground: "#0F172A",
       },

@@ -34,6 +34,7 @@ function EyeOffIcon() {
 
 const FEATURES = [
   {
+    iconColor: "text-[#FFCC00]",
     icon: (
       <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
@@ -42,6 +43,7 @@ const FEATURES = [
     label: "Semantic Similarity Detection",
   },
   {
+    iconColor: "text-[#FF7A1F]",
     icon: (
       <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
@@ -50,6 +52,7 @@ const FEATURES = [
     label: "AI Advisory by Google Gemini",
   },
   {
+    iconColor: "text-[#FFCC00]",
     icon: (
       <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
@@ -128,35 +131,40 @@ function LoginForm() {
       {/* Left panel */}
       <div
         className="hidden lg:flex lg:w-[45%] flex-col justify-between p-10 relative overflow-hidden"
-        style={{
-          backgroundColor: "#003366",
-          /*
-            To add the school building photo later:
-            backgroundImage: "url('/mist-building.jpg')",
-            backgroundSize: "cover",
-            backgroundPosition: "center",
-          */
-        }}
+        style={{ backgroundColor: "#003366" }}
       >
         {/* Decorative circles */}
-        <div className="absolute -top-24 -right-24 w-96 h-96 rounded-full bg-white/5 pointer-events-none" />
-        <div className="absolute -bottom-16 -left-16 w-72 h-72 rounded-full bg-white/5 pointer-events-none" />
+        <div className="absolute -top-24 -right-24 w-96 h-96 rounded-full bg-white/[0.04] pointer-events-none" />
+        <div className="absolute -bottom-16 -left-16 w-72 h-72 rounded-full bg-white/[0.04] pointer-events-none" />
 
-        {/* Top: logo + title + description grouped together */}
+        {/* IS Orange accent strip */}
+        <div className="absolute top-0 left-0 right-0 h-[3px] bg-[#FF7A1F]" />
+
+        {/* Top section */}
         <div className="relative">
-          <div className="flex items-center gap-3 mb-6">
+
+          {/* Dual logo row */}
+          <div className="flex items-center gap-3 mb-3">
             <img
-              src="/is-logo.png"
+              src="/mist-logo.png"
               alt="MIST"
               className="h-10 w-10 object-contain"
             />
-            <div>
-              <p className="text-white font-semibold text-sm leading-tight">MIST</p>
-              <p className="text-white/50 text-xs leading-tight">
-                Makilala Institute of Science and Technology
-              </p>
-            </div>
+            <div className="w-px h-8 bg-white/15" />
+            <img
+              src="/is-logo.png"
+              alt="Information Systems"
+              className="h-10 w-10 object-contain"
+            />
           </div>
+
+          {/* School + department names */}
+          <p className="text-white/80 text-xs font-medium leading-snug mb-0.5">
+            Makilala Institute of Science and Technology
+          </p>
+          <p className="text-[#FF7A1F] text-[10px] leading-snug mb-7">
+            Department of Information Systems
+          </p>
 
           <h1 className="font-display text-4xl text-white mb-3 leading-tight">
             Capstone Library
@@ -172,7 +180,7 @@ function LoginForm() {
         <div className="relative space-y-3">
           {FEATURES.map((f) => (
             <div key={f.label} className="flex items-center gap-3">
-              <span className="text-[#FFCC00] shrink-0">{f.icon}</span>
+              <span className={`${f.iconColor} shrink-0`}>{f.icon}</span>
               <span className="text-white/70 text-sm">{f.label}</span>
             </div>
           ))}
@@ -268,7 +276,7 @@ function LoginForm() {
 
           <p className="mt-6 text-center text-sm text-foreground/50">
             No account yet?{" "}
-            <a href="/register" className="text-navy font-medium hover:underline">
+            <a href="/register" className="text-[#FF7A1F] font-medium hover:underline">
               Register here
             </a>
           </p>

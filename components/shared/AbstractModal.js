@@ -111,7 +111,7 @@ export default function AbstractModal({
         <div className="px-6 pt-6 pb-4 border-b border-slate-100">
           <div className="flex items-start justify-between gap-3">
             <div className="min-w-0">
-              <h2 className="font-display text-xl text-navy leading-snug">
+              <h2 className="font-sans font-semibold text-xl text-navy leading-snug">
                 {editing ? "Edit Abstract" : abstract.title}
               </h2>
               {!editing && (
