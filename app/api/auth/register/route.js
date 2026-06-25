@@ -36,7 +36,7 @@ export async function POST(request) {
 
     if (!whitelisted) {
       return NextResponse.json(
-        { error: "Your student ID was not found in the system. Please contact the administrator." },
+        { error: "Your student ID was not found in the system." },
         { status: 403 }
       );
     }

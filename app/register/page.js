@@ -11,6 +11,14 @@ function capitalizeName(value) {
     .join(" ");
 }
 
+function ChevronLeftIcon() {
+  return (
+    <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+    </svg>
+  );
+}
+
 function EyeIcon() {
   return (
     <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -183,207 +191,218 @@ export default function RegisterPage() {
       <div className="min-h-screen bg-background flex items-center justify-center px-4 py-10">
         <div className="w-full max-w-md">
 
+          {/* Back arrow */}
+          <a
+            href="/login"
+            className="inline-flex items-center gap-1.5 text-sm text-foreground/40 hover:text-orange transition mb-6 group"
+          >
+            <ChevronLeftIcon />
+            Back to sign in
+          </a>
+
           {/* Header */}
-          <div className="text-center mb-8">
-            <h1 className="font-display text-3xl text-navy mb-1">Capstone Library</h1>
+          <div className="mb-6">
+            <h1 className="font-display text-3xl text-navy mb-1">Create an account</h1>
             <p className="text-sm text-foreground/50">
               MIST · Bachelor of Science in Information Systems
             </p>
           </div>
 
           {/* Card */}
-          <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-8">
-            <h2 className="font-sans font-semibold text-lg text-foreground mb-6">
-              Create an account
-            </h2>
+          <div className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
 
-            <form onSubmit={handleRegister} className="space-y-4">
+            {/* Orange accent strip */}
+            <div className="h-1 bg-orange" />
 
-              {/* Role selector */}
-              <div>
-                <label className="block text-sm font-medium text-foreground mb-1">
-                  I am a
-                </label>
-                <div className="grid grid-cols-2 gap-2">
-                  {[
-                    { value: "student", label: "Student" },
-                    { value: "capstone_adviser", label: "Capstone Adviser" },
-                  ].map((opt) => (
-                    <button
-                      key={opt.value}
-                      type="button"
-                      onClick={() => setRole(opt.value)}
-                      className={`py-2 px-3 rounded-lg border text-sm font-medium transition ${
-                        role === opt.value
-                          ? "bg-navy text-white border-navy"
-                          : "bg-slate-50 text-foreground/60 border-slate-200 hover:border-navy/40"
-                      }`}
-                    >
-                      {opt.label}
-                    </button>
-                  ))}
+            <div className="p-8">
+              <form onSubmit={handleRegister} className="space-y-4">
+
+                {/* Role selector */}
+                <div>
+                  <label className="block text-sm font-medium text-foreground mb-2">
+                    Registering as
+                  </label>
+                  <div className="grid grid-cols-2 gap-2">
+                    {[
+                      { value: "student", label: "Student" },
+                      { value: "capstone_adviser", label: "Capstone Adviser" },
+                    ].map((opt) => (
+                      <button
+                        key={opt.value}
+                        type="button"
+                        onClick={() => setRole(opt.value)}
+                        className={`py-2 px-3 rounded-lg border text-sm font-medium transition ${
+                          role === opt.value
+                            ? "bg-navy text-white border-navy"
+                            : "bg-slate-50 text-foreground/60 border-slate-200 hover:border-navy/40"
+                        }`}
+                      >
+                        {opt.label}
+                      </button>
+                    ))}
+                  </div>
                 </div>
-              </div>
 
-              {/* Full name */}
-              <div>
-                <label className="block text-sm font-medium text-foreground mb-1">
-                  Full name
-                </label>
-                <input
-                  type="text"
-                  value={fullName}
-                  onChange={(e) => setFullName(capitalizeName(e.target.value))}
-                  required
-                  placeholder="Juan Dela Cruz"
-                  className={inputClass}
-                />
-              </div>
-
-              {/* Email */}
-              <div>
-                <label className="block text-sm font-medium text-foreground mb-1">
-                  Email address
-                </label>
-                <input
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  required
-                  placeholder="you@example.com"
-                  className={inputClass}
-                />
-              </div>
-
-              {/* Password */}
-              <div>
-                <label className="block text-sm font-medium text-foreground mb-1">
-                  Password
-                </label>
-                <div className="relative">
+                {/* Full name */}
+                <div>
+                  <label className="block text-sm font-medium text-foreground mb-1">
+                    Full name
+                  </label>
                   <input
-                    type={showPassword ? "text" : "password"}
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
+                    type="text"
+                    value={fullName}
+                    onChange={(e) => setFullName(capitalizeName(e.target.value))}
                     required
-                    placeholder="Min. 8 characters"
-                    className={passwordInputClass}
+                    placeholder="Juan Dela Cruz"
+                    className={inputClass}
                   />
-                  <button
-                    type="button"
-                    onClick={() => setShowPassword((v) => !v)}
-                    className="absolute inset-y-0 right-0 flex items-center px-3 text-foreground/30 hover:text-foreground/60 transition"
-                    tabIndex={-1}
-                  >
-                    {showPassword ? <EyeOffIcon /> : <EyeIcon />}
-                  </button>
                 </div>
-              </div>
 
-              {/* Confirm password */}
-              <div>
-                <label className="block text-sm font-medium text-foreground mb-1">
-                  Confirm password
-                </label>
-                <div className="relative">
+                {/* Email */}
+                <div>
+                  <label className="block text-sm font-medium text-foreground mb-1">
+                    Email address
+                  </label>
                   <input
-                    type={showConfirmPassword ? "text" : "password"}
-                    value={confirmPassword}
-                    onChange={(e) => setConfirmPassword(e.target.value)}
+                    type="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
                     required
-                    placeholder="••••••••"
-                    className={passwordInputClass}
+                    placeholder="you@example.com"
+                    className={inputClass}
                   />
-                  <button
-                    type="button"
-                    onClick={() => setShowConfirmPassword((v) => !v)}
-                    className="absolute inset-y-0 right-0 flex items-center px-3 text-foreground/30 hover:text-foreground/60 transition"
-                    tabIndex={-1}
-                  >
-                    {showConfirmPassword ? <EyeOffIcon /> : <EyeIcon />}
-                  </button>
                 </div>
-              </div>
 
-              {/* Student-only fields */}
-              {role === "student" && (
-                <>
-                  <div>
-                    <label className="block text-sm font-medium text-foreground mb-1">
-                      Student ID
-                    </label>
+                {/* Password */}
+                <div>
+                  <label className="block text-sm font-medium text-foreground mb-1">
+                    Password
+                  </label>
+                  <div className="relative">
                     <input
-                      type="text"
-                      value={studentId}
-                      onChange={(e) => setStudentId(e.target.value)}
+                      type={showPassword ? "text" : "password"}
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
                       required
-                      placeholder="e.g. 2316075"
-                      className={inputClass}
+                      placeholder="Min. 8 characters"
+                      className={passwordInputClass}
                     />
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-foreground mb-1">
-                      Capstone Adviser{" "}
-                      <span className="text-foreground/40 font-normal">
-                        (optional — you can set this later)
-                      </span>
-                    </label>
-                    <select
-                      value={adviserId}
-                      onChange={(e) => setAdviserId(e.target.value)}
-                      className={inputClass}
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword((v) => !v)}
+                      className="absolute inset-y-0 right-0 flex items-center px-3 text-foreground/30 hover:text-foreground/60 transition"
+                      tabIndex={-1}
                     >
-                      <option value="">No adviser selected</option>
-                      {advisers.map((a) => (
-                        <option key={a.id} value={a.id}>
-                          {a.full_name}
-                        </option>
-                      ))}
-                    </select>
+                      {showPassword ? <EyeOffIcon /> : <EyeIcon />}
+                    </button>
                   </div>
-                </>
-              )}
+                </div>
 
-              {/* Terms and Conditions checkbox */}
-              <div className="flex items-start gap-2.5 pt-1">
-                <input
-                  id="terms"
-                  type="checkbox"
-                  checked={agreedToTerms}
-                  onChange={(e) => setAgreedToTerms(e.target.checked)}
-                  className="mt-0.5 h-4 w-4 rounded border-slate-300 accent-navy cursor-pointer"
-                />
-                <label htmlFor="terms" className="text-sm text-foreground/60 leading-snug cursor-pointer">
-                  I have read and agree to the{" "}
-                  <button
-                    type="button"
-                    onClick={() => setShowTermsModal(true)}
-                    className="text-navy font-medium hover:underline"
-                  >
-                    Terms and Conditions
-                  </button>
-                </label>
-              </div>
+                {/* Confirm password */}
+                <div>
+                  <label className="block text-sm font-medium text-foreground mb-1">
+                    Confirm password
+                  </label>
+                  <div className="relative">
+                    <input
+                      type={showConfirmPassword ? "text" : "password"}
+                      value={confirmPassword}
+                      onChange={(e) => setConfirmPassword(e.target.value)}
+                      required
+                      placeholder="••••••••"
+                      className={passwordInputClass}
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowConfirmPassword((v) => !v)}
+                      className="absolute inset-y-0 right-0 flex items-center px-3 text-foreground/30 hover:text-foreground/60 transition"
+                      tabIndex={-1}
+                    >
+                      {showConfirmPassword ? <EyeOffIcon /> : <EyeIcon />}
+                    </button>
+                  </div>
+                </div>
 
-              {/* Inline error */}
-              {error && <p className="text-sm text-red-600">{error}</p>}
+                {/* Student-only fields */}
+                {role === "student" && (
+                  <>
+                    <div>
+                      <label className="block text-sm font-medium text-foreground mb-1">
+                        Student ID
+                      </label>
+                      <input
+                        type="text"
+                        value={studentId}
+                        onChange={(e) => setStudentId(e.target.value)}
+                        required
+                        placeholder="e.g. 2316075"
+                        className={inputClass}
+                      />
+                    </div>
 
-              <button
-                type="submit"
-                disabled={loading || !agreedToTerms}
-                className="w-full bg-navy text-white text-sm font-medium py-2.5 rounded-lg hover:bg-navy-light transition disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                {loading ? "Creating account…" : "Create account"}
-              </button>
-            </form>
+                    <div>
+                      <label className="block text-sm font-medium text-foreground mb-1">
+                        Capstone Adviser{" "}
+                        <span className="text-foreground/40 font-normal">
+                          (optional, you can set this later)
+                        </span>
+                      </label>
+                      <select
+                        value={adviserId}
+                        onChange={(e) => setAdviserId(e.target.value)}
+                        className={inputClass}
+                      >
+                        <option value="">No adviser selected</option>
+                        {advisers.map((a) => (
+                          <option key={a.id} value={a.id}>
+                            {a.full_name}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                  </>
+                )}
 
-            <p className="mt-5 text-center text-sm text-foreground/50">
-              Already have an account?{" "}
-              <a href="/login" className="text-navy font-medium hover:underline">
-                Sign in
-              </a>
-            </p>
+                {/* Terms and Conditions checkbox */}
+                <div className="flex items-start gap-2.5 pt-1">
+                  <input
+                    id="terms"
+                    type="checkbox"
+                    checked={agreedToTerms}
+                    onChange={(e) => setAgreedToTerms(e.target.checked)}
+                    className="mt-0.5 h-4 w-4 rounded border-slate-300 accent-navy cursor-pointer"
+                  />
+                  <label htmlFor="terms" className="text-sm text-foreground/60 leading-snug cursor-pointer">
+                    I have read and agree to the{" "}
+                    <button
+                      type="button"
+                      onClick={() => setShowTermsModal(true)}
+                      className="text-orange font-medium hover:underline"
+                    >
+                      Terms and Conditions
+                    </button>
+                  </label>
+                </div>
+
+                {/* Inline error */}
+                {error && <p className="text-sm text-red-600">{error}</p>}
+
+                <button
+                  type="submit"
+                  disabled={loading || !agreedToTerms}
+                  className="w-full bg-navy text-white text-sm font-medium py-2.5 rounded-lg hover:bg-navy-light transition disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {loading ? "Creating account…" : "Create account"}
+                </button>
+              </form>
+
+              <p className="mt-5 text-center text-sm text-foreground/50">
+                Already have an account?{" "}
+                <a href="/login" className="text-orange font-medium hover:underline">
+                  Sign in
+                </a>
+              </p>
+            </div>
           </div>
 
           {/* Adviser pending note */}
