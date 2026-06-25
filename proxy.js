@@ -1,7 +1,7 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse } from "next/server";
 
-const PUBLIC_PATHS = ["/login", "/register"];
+const PUBLIC_PATHS = ["/login", "/register", "/"];
 
 const HOME = {
   admin: "/admin",
@@ -53,9 +53,9 @@ export async function proxy(request) {
     data: { user },
   } = await supabase.auth.getUser();
 
-  // Public paths — redirect to home if already logged in
+  // Public paths — redirect to role home if already logged in, else pass through
   if (PUBLIC_PATHS.includes(pathname)) {
-    if (!user) return response;
+    if (!user) return pathname === "/" ? toLogin(request) : response;
 
     const { data: profile } = await supabase
       .from("profiles")
@@ -63,7 +63,7 @@ export async function proxy(request) {
       .eq("id", user.id)
       .single();
 
-    if (!profile) return response;
+    if (!profile) return toLogin(request);
     if (profile.role === "capstone_adviser" && profile.status === "pending") return response;
     if (profile.status === "rejected" || profile.status === "suspended") return response;
 
