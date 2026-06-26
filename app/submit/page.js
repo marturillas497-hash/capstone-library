@@ -131,7 +131,7 @@ export default function SubmitPage() {
       <main className="max-w-2xl mx-auto px-4 py-8">
         <div className="mb-8">
           <h1 className="font-display text-3xl text-navy mb-1">New Similarity Scan</h1>
-          <p className="text-sm text-foreground/50">
+          <p className="text-sm text-slate-600">
             Enter your proposed capstone title and abstract to check for conceptual overlap
             with existing BSIS studies.
           </p>
@@ -139,7 +139,7 @@ export default function SubmitPage() {
 
         {/* Model status */}
         {modelLoading && (
-          <div className="mb-5 flex items-center gap-2 text-sm text-foreground/50 bg-white border border-slate-200 rounded-lg px-4 py-3">
+          <div className="mb-5 flex items-center gap-2 text-sm text-slate-600 bg-white border border-slate-200 rounded-lg px-4 py-3">
             <span className="inline-block w-2 h-2 rounded-full bg-amber-400 animate-pulse" />
             Initializing embedding model in the background…
           </div>
@@ -153,7 +153,7 @@ export default function SubmitPage() {
 
         {/* Scans remaining */}
         {scansLeft !== null && (
-          <div className="mb-5 text-sm text-foreground/50">
+          <div className="mb-5 text-sm text-slate-600">
             {scansLeft > 0
               ? `${scansLeft} of ${DAILY_LIMIT} scans remaining today`
               : "Daily scan limit reached. Resets at 12:00 AM Philippine Standard Time."}
@@ -172,7 +172,7 @@ export default function SubmitPage() {
                 onChange={(e) => setTitle(e.target.value)}
                 required
                 placeholder="e.g. Automated Attendance Monitoring System Using Face Recognition"
-                className="w-full px-3 py-2 rounded-lg border border-slate-200 bg-slate-50 text-sm text-foreground placeholder:text-foreground/30 focus:outline-none focus:ring-2 focus:ring-navy/20 focus:border-navy transition"
+                className="w-full px-3 py-2 rounded-lg border border-slate-200 bg-slate-50 text-sm text-foreground placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-navy/20 focus:border-navy transition"
               />
             </div>
 
@@ -186,14 +186,14 @@ export default function SubmitPage() {
                 required
                 rows={7}
                 placeholder="Describe your proposed study, its objectives, and the problem it aims to address…"
-                className="w-full px-3 py-2 rounded-lg border border-slate-200 bg-slate-50 text-sm text-foreground placeholder:text-foreground/30 focus:outline-none focus:ring-2 focus:ring-navy/20 focus:border-navy transition resize-none"
+                className="w-full px-3 py-2 rounded-lg border border-slate-200 bg-slate-50 text-sm text-foreground placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-navy/20 focus:border-navy transition resize-none"
               />
             </div>
 
             {error && <p className="text-sm text-red-600">{error}</p>}
 
             {loading && status && (
-              <div className="flex items-center gap-2 text-sm text-foreground/50">
+              <div className="flex items-center gap-2 text-sm text-slate-600">
                 <span className="inline-block w-2 h-2 rounded-full bg-navy animate-pulse" />
                 {status}
               </div>
@@ -209,7 +209,7 @@ export default function SubmitPage() {
           </form>
         </div>
 
-        <p className="mt-4 text-xs text-foreground/40 text-center px-4">
+        <p className="mt-4 text-xs text-slate-600 text-center px-4">
           Scans are limited to {DAILY_LIMIT} per calendar day and reset at 12:00 AM
           Philippine Standard Time. This tool performs semantic similarity detection,
           not plagiarism checking.

@@ -78,7 +78,7 @@ export default async function AdviserScansPage() {
                 </div>
                 <div className="flex items-center gap-3 shrink-0">
                   {report.similarity_score !== null && (
-                    <span className="text-xs font-medium text-foreground/60">
+                    <span className="text-xs font-medium text-slate-600">
                       {(report.similarity_score * 100).toFixed(1)}%
                     </span>
                   )}

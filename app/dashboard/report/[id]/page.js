@@ -112,7 +112,7 @@ export default async function ReportPage({ params }) {
         {/* Back */}
         <Link
           href="/dashboard"
-          className="inline-flex items-center gap-1.5 text-sm text-foreground/50 hover:text-foreground mb-6 transition"
+          className="inline-flex items-center gap-1.5 text-sm text-slate-600 hover:text-foreground mb-6 transition"
         >
           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
@@ -128,7 +128,7 @@ export default async function ReportPage({ params }) {
               <h1 className="font-display text-2xl text-navy mb-1">
                 {report.input_title}
               </h1>
-              <p className="text-sm text-foreground/50">
+              <p className="text-sm text-slate-600">
                 Submitted on{" "}
                 {new Date(report.created_at).toLocaleDateString("en-PH", {
                   year: "numeric",
@@ -150,7 +150,7 @@ export default async function ReportPage({ params }) {
           {/* Similarity bar */}
           {report.similarity_score !== null && (
             <div className="mt-5">
-              <div className="flex justify-between text-xs text-foreground/50 mb-1.5">
+              <div className="flex justify-between text-xs text-slate-600 mb-1.5">
                 <span>Similarity Score</span>
                 <span>{(report.similarity_score * 100).toFixed(1)}%</span>
               </div>
@@ -165,10 +165,10 @@ export default async function ReportPage({ params }) {
 
           {/* Submitted abstract */}
           <div className="mt-5 pt-5 border-t border-slate-100">
-            <p className="text-xs font-medium text-foreground/40 uppercase tracking-wide mb-2">
+            <p className="text-xs font-medium text-slate-600 uppercase tracking-wide mb-2">
               Submitted Abstract / Problem Statement
             </p>
-            <p className="text-sm text-foreground/70 leading-relaxed whitespace-pre-wrap">
+            <p className="text-sm text-slate-600 leading-relaxed whitespace-pre-wrap">
               {report.input_description}
             </p>
           </div>
@@ -192,10 +192,10 @@ export default async function ReportPage({ params }) {
                   {/* Verdict */}
                   {advisory.verdict && (
                     <div className="bg-white rounded-2xl border border-slate-200 p-5">
-                      <p className="text-xs font-medium text-foreground/40 uppercase tracking-wide mb-2">
+                      <p className="text-xs font-medium text-slate-600 uppercase tracking-wide mb-2">
                         Verdict
                       </p>
-                      <p className="text-sm text-foreground/80 leading-relaxed">
+                      <p className="text-sm text-slate-700 leading-relaxed">
                         {advisory.verdict}
                       </p>
                     </div>
@@ -204,10 +204,10 @@ export default async function ReportPage({ params }) {
                   {/* Critical Analysis */}
                   {advisory.criticalAnalysis && (
                     <div className="bg-white rounded-2xl border border-slate-200 p-5">
-                      <p className="text-xs font-medium text-foreground/40 uppercase tracking-wide mb-2">
+                      <p className="text-xs font-medium text-slate-600 uppercase tracking-wide mb-2">
                         Critical Analysis of Overlap
                       </p>
-                      <p className="text-sm text-foreground/70 leading-relaxed">
+                      <p className="text-sm text-slate-600 leading-relaxed">
                         {advisory.criticalAnalysis}
                       </p>
 
@@ -217,10 +217,10 @@ export default async function ReportPage({ params }) {
                           <table className="w-full">
                             <thead>
                               <tr className="bg-slate-50 border-b border-slate-100">
-                                <th className="text-left text-xs font-medium text-foreground/40 uppercase tracking-wide px-4 py-2.5">
+                                <th className="text-left text-xs font-medium text-slate-600 uppercase tracking-wide px-4 py-2.5">
                                   Matched Study
                                 </th>
-                                <th className="text-right text-xs font-medium text-foreground/40 uppercase tracking-wide px-4 py-2.5 whitespace-nowrap">
+                                <th className="text-right text-xs font-medium text-slate-600 uppercase tracking-wide px-4 py-2.5 whitespace-nowrap">
                                   Similarity
                                 </th>
                               </tr>
@@ -229,10 +229,10 @@ export default async function ReportPage({ params }) {
                               {matches.map((m, i) => (
                                 <tr key={i} className="border-b border-slate-100 last:border-0">
                                   <td className="px-4 py-3">
-                                    <p className="text-sm text-foreground/80 leading-snug">
+                                    <p className="text-sm text-slate-700 leading-snug">
                                       {m.title}
                                     </p>
-                                    <p className="text-xs text-foreground/40 mt-0.5">
+                                    <p className="text-xs text-slate-600 mt-0.5">
                                       {m.accession_id ?? ""}
                                       {m.year ? ` · ${m.year}` : ""}
                                     </p>
@@ -257,17 +257,17 @@ export default async function ReportPage({ params }) {
                   {/* Proposed Unique Titles */}
                   {advisory.proposedTitles.length >= 1 && (
                     <div className="bg-white rounded-2xl border border-slate-200 p-5">
-                      <p className="text-xs font-medium text-foreground/40 uppercase tracking-wide mb-3">
+                      <p className="text-xs font-medium text-slate-600 uppercase tracking-wide mb-3">
                         Proposed Unique Titles
                       </p>
                       <div className="divide-y divide-slate-100">
                         {advisory.proposedTitles.map((title, i) => (
                           <div key={i} className="flex gap-3 py-3 first:pt-0 last:pb-0">
-                            <span className="text-xs font-medium text-foreground/30 mt-0.5 min-w-[16px] shrink-0">
+                            <span className="text-xs font-medium text-slate-400 mt-0.5 min-w-[16px] shrink-0">
                               {i + 1}
                             </span>
                             <div>
-                              <p className="text-sm text-foreground/80 leading-snug">
+                              <p className="text-sm text-slate-700 leading-snug">
                                 {title}
                               </p>
                               {i === 2 && (
@@ -285,12 +285,12 @@ export default async function ReportPage({ params }) {
                   {/* Alternative Research Directions */}
                   {advisory.alternativeDirections.length >= 1 && (
                     <div className="bg-white rounded-2xl border border-slate-200 p-5">
-                      <p className="text-xs font-medium text-foreground/40 uppercase tracking-wide mb-3">
+                      <p className="text-xs font-medium text-slate-600 uppercase tracking-wide mb-3">
                         Alternative Research Directions
                       </p>
                       <div className="space-y-3">
                         {advisory.alternativeDirections.map((direction, i) => (
-                          <p key={i} className="text-sm text-foreground/70 leading-relaxed">
+                          <p key={i} className="text-sm text-slate-600 leading-relaxed">
                             {direction}
                           </p>
                         ))}
@@ -301,7 +301,7 @@ export default async function ReportPage({ params }) {
                 </>
               ) : (
                 <div className="bg-white rounded-2xl border border-slate-200 p-5">
-                  <p className="text-sm text-foreground/70 leading-relaxed whitespace-pre-wrap">
+                  <p className="text-sm text-slate-600 leading-relaxed whitespace-pre-wrap">
                     {report.ai_recommendations}
                   </p>
                 </div>

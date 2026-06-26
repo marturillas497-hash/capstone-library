@@ -115,11 +115,11 @@ export default function AbstractModal({
                 {editing ? "Edit Abstract" : abstract.title}
               </h2>
               {!editing && (
-                <p className="text-sm text-foreground/50 mt-1">
+                <p className="text-sm text-slate-600 mt-1">
                   {abstract.authors && abstract.authors}
                   {abstract.year && ` · ${abstract.year}`}
                   {abstract.accession_id && (
-                    <span className="ml-2 font-mono text-xs bg-slate-100 text-foreground/60 px-1.5 py-0.5 rounded">
+                    <span className="ml-2 font-mono text-xs bg-slate-100 text-slate-600 px-1.5 py-0.5 rounded">
                       {abstract.accession_id}
                     </span>
                   )}
@@ -128,7 +128,7 @@ export default function AbstractModal({
             </div>
             <button
               onClick={editing ? closeEdit : onClose}
-              className="shrink-0 p-1.5 rounded-lg text-foreground/40 hover:text-foreground hover:bg-slate-100 transition"
+              className="shrink-0 p-1.5 rounded-lg text-slate-600 hover:text-foreground hover:bg-slate-100 transition"
             >
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -142,7 +142,7 @@ export default function AbstractModal({
           {editing ? (
             <div className="space-y-4">
               <div>
-                <label className="block text-xs font-medium text-foreground/50 mb-1 uppercase tracking-wide">Title</label>
+                <label className="block text-xs font-medium text-slate-600 mb-1 uppercase tracking-wide">Title</label>
                 <input
                   value={form.title}
                   onChange={(e) => setForm((f) => ({ ...f, title: e.target.value }))}
@@ -150,7 +150,7 @@ export default function AbstractModal({
                 />
               </div>
               <div>
-                <label className="block text-xs font-medium text-foreground/50 mb-1 uppercase tracking-wide">Abstract Text</label>
+                <label className="block text-xs font-medium text-slate-600 mb-1 uppercase tracking-wide">Abstract Text</label>
                 <textarea
                   value={form.abstract_text}
                   onChange={(e) => setForm((f) => ({ ...f, abstract_text: e.target.value }))}
@@ -160,7 +160,7 @@ export default function AbstractModal({
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-xs font-medium text-foreground/50 mb-1 uppercase tracking-wide">Authors</label>
+                  <label className="block text-xs font-medium text-slate-600 mb-1 uppercase tracking-wide">Authors</label>
                   <input
                     value={form.authors}
                     onChange={(e) => setForm((f) => ({ ...f, authors: e.target.value }))}
@@ -168,7 +168,7 @@ export default function AbstractModal({
                   />
                 </div>
                 <div>
-                  <label className="block text-xs font-medium text-foreground/50 mb-1 uppercase tracking-wide">Year</label>
+                  <label className="block text-xs font-medium text-slate-600 mb-1 uppercase tracking-wide">Year</label>
                   <input
                     type="number"
                     value={form.year}
@@ -178,7 +178,7 @@ export default function AbstractModal({
                 </div>
               </div>
               <div>
-                <label className="block text-xs font-medium text-foreground/50 mb-1 uppercase tracking-wide">Accession ID</label>
+                <label className="block text-xs font-medium text-slate-600 mb-1 uppercase tracking-wide">Accession ID</label>
                 <input
                   value={form.accession_id}
                   onChange={(e) => setForm((f) => ({ ...f, accession_id: e.target.value }))}
@@ -189,7 +189,7 @@ export default function AbstractModal({
             </div>
           ) : (
             <>
-              <p className="text-sm text-foreground/70 leading-relaxed whitespace-pre-wrap">
+              <p className="text-sm text-slate-600 leading-relaxed whitespace-pre-wrap">
                 {abstract.abstract_text}
               </p>
 
@@ -232,7 +232,7 @@ export default function AbstractModal({
               </button>
               <button
                 onClick={closeEdit}
-                className="flex-1 bg-slate-100 text-foreground/60 text-sm font-medium py-2 rounded-lg hover:bg-slate-200 transition"
+                className="flex-1 bg-slate-100 text-slate-600 text-sm font-medium py-2 rounded-lg hover:bg-slate-200 transition"
               >
                 Cancel
               </button>
@@ -249,7 +249,7 @@ export default function AbstractModal({
               )}
               <button
                 onClick={onClose}
-                className={`${isAdmin ? "flex-1" : "w-full"} bg-slate-100 text-foreground/60 text-sm font-medium py-2 rounded-lg hover:bg-slate-200 transition`}
+                className={`${isAdmin ? "flex-1" : "w-full"} bg-slate-100 text-slate-600 text-sm font-medium py-2 rounded-lg hover:bg-slate-200 transition`}
               >
                 Close
               </button>

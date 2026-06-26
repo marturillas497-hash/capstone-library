@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
+import Image from "next/image";
 
 const NAV_LINKS = {
   student: [
@@ -47,13 +48,22 @@ export default function Navbar({ role, fullName }) {
   }
 
   return (
-    <nav className="bg-white border-b border-slate-200 sticky top-0 z-40">
+    <nav className="bg-navy sticky top-0 z-40">
       <div className="max-w-6xl mx-auto px-4">
         <div className="flex items-center justify-between h-14">
 
-          {/* Logo */}
-          <a href="/" className="font-display text-lg text-navy shrink-0">
-            Capstone Library
+          {/* Logo + wordmark */}
+          <a href="/" className="flex items-center gap-2.5 shrink-0">
+            <Image
+              src="/mist-logo.png"
+              alt="MIST"
+              width={28}
+              height={28}
+              className="rounded-full"
+            />
+            <span className="font-display text-lg text-white leading-none">
+              Capstone Library
+            </span>
           </a>
 
           {/* Desktop links */}
@@ -62,25 +72,35 @@ export default function Navbar({ role, fullName }) {
               <a
                 key={link.href}
                 href={link.href}
-                className={`px-3 py-1.5 rounded-lg text-sm font-medium transition ${
+                className={`px-3 py-1.5 rounded-lg text-sm font-medium transition relative ${
                   isActive(link.href)
-                    ? "bg-navy/5 text-navy"
-                    : "text-foreground/60 hover:text-foreground hover:bg-slate-50"
+                    ? "text-white"
+                    : link.label === "New Scan"
+                    ? "text-orange hover:text-orange-light"
+                    : "text-white/50 hover:text-white"
                 }`}
               >
                 {link.label}
+                {isActive(link.href) && (
+                  <span className="absolute bottom-0 left-3 right-3 h-0.5 bg-gold rounded-full" />
+                )}
               </a>
             ))}
           </div>
 
-          {/* Desktop right side */}
+          {/* Desktop right: initials avatar + sign out */}
           <div className="hidden md:flex items-center gap-3">
-            <span className="text-sm text-foreground/50 truncate max-w-[160px]">
-              {fullName}
-            </span>
+            <div className="group flex items-center bg-gold rounded-full h-7 overflow-hidden max-w-[28px] hover:max-w-[200px] transition-[max-width] duration-300 ease-in-out cursor-default shrink-0">
+              <span className="text-xs font-bold text-navy leading-none shrink-0 w-7 flex items-center justify-center">
+                {fullName?.split(" ").map((n) => n[0]).slice(0, 2).join("")}
+              </span>
+              <span className="text-xs font-semibold text-navy whitespace-nowrap pr-3 opacity-0 group-hover:opacity-100 transition-opacity duration-200 delay-100">
+                {fullName}
+              </span>
+            </div>
             <button
               onClick={handleSignOut}
-              className="text-sm font-medium text-red-500 hover:text-red-600 transition"
+              className="text-sm font-medium text-red-400 hover:text-red-300 transition"
             >
               Sign out
             </button>
@@ -89,7 +109,7 @@ export default function Navbar({ role, fullName }) {
           {/* Mobile hamburger */}
           <button
             onClick={() => setMenuOpen((v) => !v)}
-            className="md:hidden p-2 rounded-lg text-foreground/60 hover:bg-slate-50 transition"
+            className="md:hidden p-2 rounded-lg text-white/60 hover:text-white hover:bg-white/10 transition"
             aria-label="Toggle menu"
           >
             {menuOpen ? (
@@ -107,7 +127,7 @@ export default function Navbar({ role, fullName }) {
 
       {/* Mobile menu */}
       {menuOpen && (
-        <div className="md:hidden border-t border-slate-100 bg-white px-4 py-3 space-y-1">
+        <div className="md:hidden border-t border-white/10 bg-navy px-4 py-3 space-y-1">
           {links.map((link) => (
             <a
               key={link.href}
@@ -115,19 +135,28 @@ export default function Navbar({ role, fullName }) {
               onClick={() => setMenuOpen(false)}
               className={`block px-3 py-2 rounded-lg text-sm font-medium transition ${
                 isActive(link.href)
-                  ? "bg-navy/5 text-navy"
-                  : "text-foreground/60 hover:text-foreground hover:bg-slate-50"
+                  ? "bg-white/10 text-white"
+                  : link.label === "New Scan"
+                  ? "text-orange hover:bg-white/5"
+                  : "text-white/50 hover:text-white hover:bg-white/5"
               }`}
             >
               {link.label}
             </a>
           ))}
 
-          <div className="pt-2 border-t border-slate-100 mt-2">
-            <p className="px-3 py-1 text-xs text-foreground/40 truncate">{fullName}</p>
+          <div className="pt-2 border-t border-white/10 mt-2">
+            <div className="flex items-center gap-2.5 px-3 py-1.5">
+              <div className="w-6 h-6 rounded-full bg-gold flex items-center justify-center shrink-0">
+                <span className="text-xs font-bold text-navy leading-none">
+                  {fullName?.split(" ").map((n) => n[0]).slice(0, 2).join("")}
+                </span>
+              </div>
+              <p className="text-xs text-white/60 truncate">{fullName}</p>
+            </div>
             <button
               onClick={handleSignOut}
-              className="w-full text-left px-3 py-2 rounded-lg text-sm font-medium text-red-500 hover:text-red-600 hover:bg-red-50 transition"
+              className="w-full text-left px-3 py-2 rounded-lg text-sm font-medium text-red-400 hover:text-red-300 hover:bg-white/5 transition"
             >
               Sign out
             </button>

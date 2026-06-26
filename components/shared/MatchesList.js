@@ -20,7 +20,7 @@ export default function MatchesList({ matches, showAccessionNote = false }) {
             <div className="flex items-start justify-between gap-3">
               <div className="min-w-0">
                 <p className="text-sm font-medium text-foreground">{match.title}</p>
-                <p className="text-xs text-foreground/40 mt-0.5">
+                <p className="text-xs text-slate-600 mt-0.5">
                   {match.authors && `${match.authors} · `}
                   {match.year && match.year}
                   {match.accession_id && ` · ${match.accession_id}`}
@@ -30,7 +30,7 @@ export default function MatchesList({ matches, showAccessionNote = false }) {
                 {(match.similarity * 100).toFixed(1)}%
               </span>
             </div>
-            <p className="text-xs text-foreground/50 mt-2 line-clamp-2">{match.abstract_text}</p>
+            <p className="text-xs text-slate-600 mt-2 line-clamp-2">{match.abstract_text}</p>
           </div>
         ))}
       </div>

@@ -41,7 +41,7 @@ export default async function DashboardPage() {
           <h1 className="font-display text-3xl text-navy mb-1">
             Welcome, {profile.full_name.split(" ")[0]}
           </h1>
-          <p className="text-sm text-foreground/50">
+          <p className="text-sm text-slate-600">
             {meta?.id_number && `${meta.id_number} · `}
             {meta?.year_level && `${meta.year_level} `}
             {meta?.section && `— Section ${meta.section}`}
@@ -52,17 +52,17 @@ export default async function DashboardPage() {
         {/* Stats row */}
         <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mb-8">
           <div className="bg-white rounded-xl border border-slate-200 p-4">
-            <p className="text-xs text-foreground/50 mb-1">Total Scans</p>
+            <p className="text-xs text-slate-600 mb-1">Total Scans</p>
             <p className="font-display text-3xl text-navy">{count ?? 0}</p>
           </div>
           <div className="bg-white rounded-xl border border-slate-200 p-4">
-            <p className="text-xs text-foreground/50 mb-1">Latest Risk</p>
+            <p className="text-xs text-slate-600 mb-1">Latest Risk</p>
             <p className="font-display text-3xl text-navy">
               {reports?.[0]?.risk_level ?? "—"}
             </p>
           </div>
           <div className="col-span-2 md:col-span-1 bg-navy rounded-xl p-4 flex flex-col justify-between">
-            <p className="text-xs text-white/60 mb-3">Ready to check your topic?</p>
+            <p className="text-xs text-white mb-3">Ready to check your topic?</p>
             <a
               href="/submit"
               className="inline-block bg-gold text-navy text-sm font-semibold px-4 py-2 rounded-lg hover:bg-gold-light transition text-center"
@@ -80,7 +80,7 @@ export default async function DashboardPage() {
 
           {!reports || reports.length === 0 ? (
             <div className="bg-white rounded-xl border border-slate-200 p-8 text-center">
-              <p className="text-foreground/40 text-sm">
+              <p className="text-slate-600 text-sm">
                 No scans yet. Run your first similarity check to get started.
               </p>
             </div>
@@ -97,7 +97,7 @@ export default async function DashboardPage() {
                       <p className="text-sm font-medium text-foreground truncate">
                         {report.input_title}
                       </p>
-                      <p className="text-xs text-foreground/40 mt-0.5">
+                      <p className="text-xs text-slate-600 mt-0.5">
                         {new Date(report.created_at).toLocaleDateString("en-PH", {
                           year: "numeric",
                           month: "short",
@@ -116,7 +116,7 @@ export default async function DashboardPage() {
                     )}
                   </div>
                   {report.similarity_score !== null && (
-                    <p className="text-xs text-foreground/40 mt-2">
+                    <p className="text-xs text-slate-600 mt-2">
                       Top match: {(report.similarity_score * 100).toFixed(1)}% similarity
                     </p>
                   )}

@@ -47,12 +47,12 @@ function TermsModal({ onClose }) {
           </h2>
           <button
             onClick={onClose}
-            className="text-foreground/40 hover:text-foreground transition text-lg leading-none"
+            className="text-slate-600 hover:text-foreground transition text-lg leading-none"
           >
             ✕
           </button>
         </div>
-        <div className="overflow-y-auto px-6 py-5 text-sm text-foreground/70 space-y-4">
+        <div className="overflow-y-auto px-6 py-5 text-sm text-slate-600 space-y-4">
           <p className="text-xs text-amber-600 font-medium bg-amber-50 border border-amber-200 rounded-lg px-3 py-2">
             Placeholder — final Terms and Conditions text has not been drafted yet.
           </p>
@@ -179,10 +179,10 @@ export default function RegisterPage() {
   }
 
   const inputClass =
-    "w-full px-3 py-2 rounded-lg border border-slate-200 bg-slate-50 text-sm text-foreground placeholder:text-foreground/30 focus:outline-none focus:ring-2 focus:ring-navy/20 focus:border-navy transition";
+    "w-full px-3 py-2 rounded-lg border border-slate-200 bg-slate-50 text-sm text-foreground placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-navy/20 focus:border-navy transition";
 
   const passwordInputClass =
-    "w-full px-3 py-2 pr-10 rounded-lg border border-slate-200 bg-slate-50 text-sm text-foreground placeholder:text-foreground/30 focus:outline-none focus:ring-2 focus:ring-navy/20 focus:border-navy transition";
+    "w-full px-3 py-2 pr-10 rounded-lg border border-slate-200 bg-slate-50 text-sm text-foreground placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-navy/20 focus:border-navy transition";
 
   return (
     <>
@@ -194,7 +194,7 @@ export default function RegisterPage() {
           {/* Back arrow */}
           <a
             href="/login"
-            className="inline-flex items-center gap-1.5 text-sm text-foreground/40 hover:text-orange transition mb-6 group"
+            className="inline-flex items-center gap-1.5 text-sm text-slate-600 hover:text-orange transition mb-6 group"
           >
             <ChevronLeftIcon />
             Back to sign in
@@ -203,7 +203,7 @@ export default function RegisterPage() {
           {/* Header */}
           <div className="mb-6">
             <h1 className="font-display text-3xl text-navy mb-1">Create an account</h1>
-            <p className="text-sm text-foreground/50">
+            <p className="text-sm text-slate-600">
               MIST · Bachelor of Science in Information Systems
             </p>
           </div>
@@ -234,7 +234,7 @@ export default function RegisterPage() {
                         className={`py-2 px-3 rounded-lg border text-sm font-medium transition ${
                           role === opt.value
                             ? "bg-navy text-white border-navy"
-                            : "bg-slate-50 text-foreground/60 border-slate-200 hover:border-navy/40"
+                            : "bg-slate-50 text-slate-600 border-slate-200 hover:border-navy/40"
                         }`}
                       >
                         {opt.label}
@@ -290,7 +290,7 @@ export default function RegisterPage() {
                     <button
                       type="button"
                       onClick={() => setShowPassword((v) => !v)}
-                      className="absolute inset-y-0 right-0 flex items-center px-3 text-foreground/30 hover:text-foreground/60 transition"
+                      className="absolute inset-y-0 right-0 flex items-center px-3 text-slate-400 hover:text-slate-600 transition"
                       tabIndex={-1}
                     >
                       {showPassword ? <EyeOffIcon /> : <EyeIcon />}
@@ -315,7 +315,7 @@ export default function RegisterPage() {
                     <button
                       type="button"
                       onClick={() => setShowConfirmPassword((v) => !v)}
-                      className="absolute inset-y-0 right-0 flex items-center px-3 text-foreground/30 hover:text-foreground/60 transition"
+                      className="absolute inset-y-0 right-0 flex items-center px-3 text-slate-400 hover:text-slate-600 transition"
                       tabIndex={-1}
                     >
                       {showConfirmPassword ? <EyeOffIcon /> : <EyeIcon />}
@@ -343,7 +343,7 @@ export default function RegisterPage() {
                     <div>
                       <label className="block text-sm font-medium text-foreground mb-1">
                         Capstone Adviser{" "}
-                        <span className="text-foreground/40 font-normal">
+                        <span className="text-slate-600 font-normal">
                           (optional, you can set this later)
                         </span>
                       </label>
@@ -372,7 +372,7 @@ export default function RegisterPage() {
                     onChange={(e) => setAgreedToTerms(e.target.checked)}
                     className="mt-0.5 h-4 w-4 rounded border-slate-300 accent-navy cursor-pointer"
                   />
-                  <label htmlFor="terms" className="text-sm text-foreground/60 leading-snug cursor-pointer">
+                  <label htmlFor="terms" className="text-sm text-slate-600 leading-snug cursor-pointer">
                     I have read and agree to the{" "}
                     <button
                       type="button"
@@ -396,7 +396,7 @@ export default function RegisterPage() {
                 </button>
               </form>
 
-              <p className="mt-5 text-center text-sm text-foreground/50">
+              <p className="mt-5 text-center text-sm text-slate-600">
                 Already have an account?{" "}
                 <a href="/login" className="text-orange font-medium hover:underline">
                   Sign in
@@ -407,7 +407,7 @@ export default function RegisterPage() {
 
           {/* Adviser pending note */}
           {role === "capstone_adviser" && (
-            <p className="mt-4 text-center text-xs text-foreground/40 px-4">
+            <p className="mt-4 text-center text-xs text-slate-600 px-4">
               Adviser accounts require admin approval before access is granted.
               You will receive an email notification once your application is reviewed.
             </p>

@@ -196,7 +196,7 @@ function LoginForm() {
             <h1 className="font-display text-3xl text-navy mb-1">
               Capstone Library
             </h1>
-            <p className="text-sm text-foreground/50">
+            <p className="text-sm text-slate-600">
               MIST · Bachelor of Science in Information Systems
             </p>
           </div>
@@ -204,7 +204,7 @@ function LoginForm() {
           <h2 className="font-display text-3xl text-foreground mb-1">
             Welcome back
           </h2>
-          <p className="text-sm text-foreground/50 mb-8">
+          <p className="text-sm text-slate-600 mb-8">
             Sign in to your Capstone Library account
           </p>
 
@@ -232,7 +232,7 @@ function LoginForm() {
                 required
                 autoComplete="email"
                 placeholder="you@example.com"
-                className="w-full px-3 py-2 rounded-lg border border-slate-200 bg-white text-sm text-foreground placeholder:text-foreground/30 focus:outline-none focus:ring-2 focus:ring-navy/20 focus:border-navy transition"
+                className="w-full px-3 py-2 rounded-lg border border-slate-200 bg-white text-sm text-foreground placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-navy/20 focus:border-navy transition"
               />
             </div>
 
@@ -248,12 +248,12 @@ function LoginForm() {
                   required
                   autoComplete="current-password"
                   placeholder="••••••••"
-                  className="w-full px-3 py-2 pr-10 rounded-lg border border-slate-200 bg-white text-sm text-foreground placeholder:text-foreground/30 focus:outline-none focus:ring-2 focus:ring-navy/20 focus:border-navy transition"
+                  className="w-full px-3 py-2 pr-10 rounded-lg border border-slate-200 bg-white text-sm text-foreground placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-navy/20 focus:border-navy transition"
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword((v) => !v)}
-                  className="absolute inset-y-0 right-0 flex items-center px-3 text-foreground/30 hover:text-foreground/60 transition"
+                  className="absolute inset-y-0 right-0 flex items-center px-3 text-slate-400 hover:text-slate-600 transition"
                   tabIndex={-1}
                 >
                   {showPassword ? <EyeOffIcon /> : <EyeIcon />}
@@ -274,7 +274,7 @@ function LoginForm() {
             </button>
           </form>
 
-          <p className="mt-6 text-center text-sm text-foreground/50">
+          <p className="mt-6 text-center text-sm text-slate-600">
             No account yet?{" "}
             <a href="/register" className="text-[#FF7A1F] font-medium hover:underline">
               Register here

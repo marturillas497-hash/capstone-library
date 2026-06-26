@@ -96,7 +96,7 @@ export default function ProfilePage() {
   if (loading) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
-        <p className="text-sm text-foreground/40">Loading profile…</p>
+        <p className="text-sm text-slate-600">Loading profile…</p>
       </div>
     );
   }
@@ -105,7 +105,7 @@ export default function ProfilePage() {
     "w-full px-3 py-2 rounded-lg border border-slate-200 bg-slate-50 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-navy/20 focus:border-navy transition";
 
   const readonlyClass =
-    "w-full px-3 py-2 rounded-lg border border-slate-100 bg-slate-50 text-sm text-foreground/50 cursor-not-allowed";
+    "w-full px-3 py-2 rounded-lg border border-slate-100 bg-slate-50 text-sm text-slate-600 cursor-not-allowed";
 
   return (
     <div className="min-h-screen bg-background">
@@ -114,7 +114,7 @@ export default function ProfilePage() {
       <main className="max-w-xl mx-auto px-4 py-8">
         <div className="mb-8">
           <h1 className="font-display text-3xl text-navy mb-1">My Profile</h1>
-          <p className="text-sm text-foreground/50">
+          <p className="text-sm text-slate-600">
             Update your year level, section, and assigned adviser.
           </p>
         </div>
@@ -124,14 +124,14 @@ export default function ProfilePage() {
 
             {/* Read-only fields */}
             <div>
-              <label className="block text-sm font-medium text-foreground/50 mb-1">
+              <label className="block text-sm font-medium text-slate-600 mb-1">
                 Full name
               </label>
               <div className={readonlyClass}>{profile.full_name}</div>
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-foreground/50 mb-1">
+              <label className="block text-sm font-medium text-slate-600 mb-1">
                 Student ID
               </label>
               <div className={readonlyClass}>{meta?.id_number}</div>
@@ -139,13 +139,13 @@ export default function ProfilePage() {
 
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <label className="block text-sm font-medium text-foreground/50 mb-1">
+                <label className="block text-sm font-medium text-slate-600 mb-1">
                   Role
                 </label>
                 <div className={readonlyClass}>Student</div>
               </div>
               <div>
-                <label className="block text-sm font-medium text-foreground/50 mb-1">
+                <label className="block text-sm font-medium text-slate-600 mb-1">
                   Status
                 </label>
                 <div className={readonlyClass + " capitalize"}>{profile.status}</div>
@@ -203,7 +203,7 @@ export default function ProfilePage() {
                   <option key={a.id} value={a.id}>{a.full_name}</option>
                 ))}
               </select>
-              <p className="text-xs text-foreground/40 mt-1">
+              <p className="text-xs text-slate-600 mt-1">
                 Changing your adviser updates visibility on all your past reports.
               </p>
             </div>

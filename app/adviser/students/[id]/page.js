@@ -63,7 +63,7 @@ export default async function AdviserStudentPage({ params }) {
 
         <Link
           href="/adviser"
-          className="inline-flex items-center gap-1.5 text-sm text-foreground/50 hover:text-foreground mb-6 transition"
+          className="inline-flex items-center gap-1.5 text-sm text-slate-600 hover:text-foreground mb-6 transition"
         >
           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
@@ -109,7 +109,7 @@ export default async function AdviserStudentPage({ params }) {
                 </div>
                 <div className="flex items-center gap-3 shrink-0">
                   {report.similarity_score !== null && (
-                    <span className="text-xs font-medium text-foreground/60">
+                    <span className="text-xs font-medium text-slate-600">
                       {(report.similarity_score * 100).toFixed(1)}%
                     </span>
                   )}

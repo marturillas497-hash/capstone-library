@@ -69,7 +69,7 @@ export default async function AdviserStudentReportPage({ params }) {
 
         <Link
           href={`/adviser/students/${id}`}
-          className="inline-flex items-center gap-1.5 text-sm text-foreground/50 hover:text-foreground mb-6 transition"
+          className="inline-flex items-center gap-1.5 text-sm text-slate-600 hover:text-foreground mb-6 transition"
         >
           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
@@ -80,11 +80,11 @@ export default async function AdviserStudentReportPage({ params }) {
         <div className="bg-white rounded-2xl border border-slate-200 p-6 mb-6">
           <div className="flex items-start justify-between gap-4 flex-wrap">
             <div>
-              <p className="text-xs font-medium text-foreground/40 uppercase tracking-wide mb-1">
+              <p className="text-xs font-medium text-slate-600 uppercase tracking-wide mb-1">
                 {studentProfile?.full_name} · {meta.id_number}
               </p>
               <h1 className="font-display text-2xl text-navy mb-1">{report.input_title}</h1>
-              <p className="text-sm text-foreground/50">
+              <p className="text-sm text-slate-600">
                 Submitted on{" "}
                 {new Date(report.created_at).toLocaleDateString("en-PH", {
                   year: "numeric", month: "long", day: "numeric",
@@ -100,7 +100,7 @@ export default async function AdviserStudentReportPage({ params }) {
 
           {report.similarity_score !== null && (
             <div className="mt-5">
-              <div className="flex justify-between text-xs text-foreground/50 mb-1.5">
+              <div className="flex justify-between text-xs text-slate-600 mb-1.5">
                 <span>Similarity Score</span>
                 <span>{(report.similarity_score * 100).toFixed(1)}%</span>
               </div>
@@ -114,16 +114,16 @@ export default async function AdviserStudentReportPage({ params }) {
           )}
 
           <div className="mt-5 pt-5 border-t border-slate-100">
-            <p className="text-xs font-medium text-foreground/40 mb-2 uppercase tracking-wide">
+            <p className="text-xs font-medium text-slate-600 mb-2 uppercase tracking-wide">
               Submitted Abstract / Problem Statement
             </p>
-            <p className="text-sm text-foreground/70 leading-relaxed whitespace-pre-wrap">
+            <p className="text-sm text-slate-600 leading-relaxed whitespace-pre-wrap">
               {report.input_description}
             </p>
           </div>
 
           <div className="mt-4 pt-4 border-t border-slate-100">
-            <span className="text-xs text-foreground/40 italic">Read-only view</span>
+            <span className="text-xs text-slate-600 italic">Read-only view</span>
           </div>
         </div>
 
@@ -133,7 +133,7 @@ export default async function AdviserStudentReportPage({ params }) {
               <span className="w-2 h-2 rounded-full bg-navy inline-block" />
               AI Advisory
             </h2>
-            <div className="text-sm text-foreground/70 leading-relaxed whitespace-pre-wrap">
+            <div className="text-sm text-slate-600 leading-relaxed whitespace-pre-wrap">
               {report.ai_recommendations}
             </div>
           </div>
