@@ -71,6 +71,7 @@ function LoginForm() {
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [inlineStatus, setInlineStatus] = useState(null);
 
   const statusKey = searchParams.get("status") || searchParams.get("error");
   const statusMessage = statusKey ? STATUS_MESSAGES[statusKey] : null;
@@ -107,12 +108,16 @@ function LoginForm() {
     }
 
     if (profile.role === "capstone_adviser" && profile.status === "pending") {
-      router.push("/login?status=pending");
+      await supabase.auth.signOut();
+      setInlineStatus({ message: STATUS_MESSAGES.pending, isInfo: true });
+      setLoading(false);
       return;
     }
 
     if (profile.status === "rejected" || profile.status === "suspended") {
-      router.push(`/login?error=${profile.status}`);
+      await supabase.auth.signOut();
+      setInlineStatus({ message: STATUS_MESSAGES[profile.status], isInfo: false });
+      setLoading(false);
       return;
     }
 
@@ -208,15 +213,15 @@ function LoginForm() {
             Sign in to your Capstone Library account
           </p>
 
-          {statusMessage && (
+          {(inlineStatus || statusMessage) && (
             <div
               className={`mb-6 px-4 py-3 rounded-lg text-sm ${
-                isInfo
+                (inlineStatus?.isInfo ?? isInfo)
                   ? "bg-blue-50 text-blue-700 border border-blue-200"
                   : "bg-red-50 text-red-700 border border-red-200"
               }`}
             >
-              {statusMessage}
+              {inlineStatus?.message ?? statusMessage}
             </div>
           )}
 
