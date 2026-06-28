@@ -23,7 +23,7 @@ function toLogin(request, params = "") {
   return NextResponse.redirect(new URL(`/login${params}`, request.url));
 }
 
-export async function proxy(request) {
+export async function middleware(request) {
   const { pathname } = request.nextUrl;
 
   let response = NextResponse.next({ request });
