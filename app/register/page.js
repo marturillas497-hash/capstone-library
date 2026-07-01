@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
 import { ArrowLeft, Eye, EyeOff, FileText, X } from "lucide-react";
 
@@ -402,4 +401,4 @@ export default function RegisterPage() {
       </div>
     </>
   );
-}s
+}
