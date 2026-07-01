@@ -10,7 +10,7 @@ const HOME = {
 };
 
 const STUDENT_ONLY = ["/dashboard", "/profile"];
-const NO_ADMIN = ["/submit", "/library"];
+const NO_ADMIN = ["/submit"];
 const ADVISER_ONLY = ["/adviser"];
 const ADMIN_ONLY = ["/admin"];
 
