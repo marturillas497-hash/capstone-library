@@ -2,6 +2,7 @@ import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import Navbar from "@/components/shared/Navbar";
 import StudentList from "./StudentList";
+import { Users, FileText } from "lucide-react";
 
 export default async function AdviserPage() {
   const supabase = await createClient();
@@ -78,18 +79,22 @@ export default async function AdviserPage() {
       <main className="max-w-5xl mx-auto px-4 py-10">
         <div className="mb-8 border-l-4 border-orange pl-4">
           <div className="flex items-center gap-3">
-            <h1 className="font-display text-3xl text-foreground">My Students</h1>
+            <div className="inline-flex items-center justify-center w-9 h-9 rounded-lg bg-navy">
+              <Users className="w-5 h-5 text-white" strokeWidth={1.75} />
+            </div>
+            <h1 className="font-display text-3xl text-navy">My Students</h1>
             {students.length > 0 && (
               <span className="text-sm font-semibold text-white bg-navy rounded-full px-2.5 py-0.5">
                 {students.length}
               </span>
             )}
           </div>
-          <p className="text-slate-600 mt-1 text-sm">
+          <p className="text-slate-500 mt-1 text-sm">
             Students who have assigned you as their capstone adviser.
           </p>
           {students.length > 0 && (
-            <p className="text-slate-600 text-xs mt-2">
+            <p className="text-slate-500 text-xs mt-2 inline-flex items-center gap-1">
+              <FileText className="w-3.5 h-3.5" strokeWidth={1.75} />
               {totalScans} total {totalScans === 1 ? "scan" : "scans"}
             </p>
           )}

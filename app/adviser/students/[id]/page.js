@@ -2,10 +2,27 @@ import { createClient } from "@/lib/supabase/server";
 import { redirect, notFound } from "next/navigation";
 import Navbar from "@/components/shared/Navbar";
 import { RISK_LABELS } from "@/lib/risk";
+import { parseAdvisory, getMatchRisk } from "@/lib/advisory";
+import MatchesList from "@/components/shared/MatchesList";
 import Link from "next/link";
+import { ArrowLeft, Sparkles } from "lucide-react";
 
-export default async function AdviserStudentPage({ params }) {
-  const { id } = await params;
+const riskBadgeColor = {
+  RED: "bg-red-50 border-red-200 text-red-700",
+  ORANGE: "bg-orange-50 border-orange-200 text-orange-700",
+  YELLOW: "bg-yellow-50 border-yellow-200 text-yellow-700",
+  GREEN: "bg-green-50 border-green-200 text-green-700",
+};
+
+const riskBarColor = {
+  RED: "bg-red-500",
+  ORANGE: "bg-orange-500",
+  YELLOW: "bg-yellow-500",
+  GREEN: "bg-green-500",
+};
+
+export default async function AdviserStudentReportPage({ params }) {
+  const { id, reportId } = await params;
   const supabase = await createClient();
 
   const { data: { user } } = await supabase.auth.getUser();
@@ -19,10 +36,9 @@ export default async function AdviserStudentPage({ params }) {
 
   if (!profile || profile.role !== "capstone_adviser") redirect("/login");
 
-  // Confirm this student is actually assigned to this adviser
   const { data: meta } = await supabase
     .from("student_metadata")
-    .select("profile_id, id_number, year_level, section, adviser_id")
+    .select("profile_id, id_number, adviser_id")
     .eq("profile_id", id)
     .eq("adviser_id", user.id)
     .single();
@@ -31,30 +47,21 @@ export default async function AdviserStudentPage({ params }) {
 
   const { data: studentProfile } = await supabase
     .from("profiles")
-    .select("full_name, status")
+    .select("full_name")
     .eq("id", id)
     .single();
 
-  if (!studentProfile) notFound();
-
-  const { data: reports } = await supabase
+  const { data: report } = await supabase
     .from("similarity_reports")
-    .select("id, input_title, similarity_score, risk_level, created_at")
+    .select("*")
+    .eq("id", reportId)
     .eq("student_id", id)
-    .order("created_at", { ascending: false });
+    .single();
 
-  const riskColor = {
-    RED: "bg-red-50 text-red-700 border-red-200",
-    ORANGE: "bg-orange-50 text-orange-700 border-orange-200",
-    YELLOW: "bg-yellow-50 text-yellow-700 border-yellow-200",
-    GREEN: "bg-green-50 text-green-700 border-green-200",
-  };
+  if (!report) notFound();
 
-  function formatDate(iso) {
-    return new Date(iso).toLocaleDateString("en-PH", {
-      year: "numeric", month: "short", day: "numeric",
-    });
-  }
+  const matches = report.results_json ?? [];
+  const advisory = parseAdvisory(report.ai_recommendations);
 
   return (
     <div className="min-h-screen bg-background">
@@ -62,68 +69,161 @@ export default async function AdviserStudentPage({ params }) {
       <main className="max-w-4xl mx-auto px-4 py-8">
 
         <Link
-          href="/adviser"
-          className="inline-flex items-center gap-1.5 text-sm text-slate-600 hover:text-foreground mb-6 transition"
+          href={`/adviser/students/${id}`}
+          className="inline-flex items-center gap-1.5 text-sm text-slate-500 hover:text-foreground mb-6 transition"
         >
-          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-          </svg>
-          Back to My Students
+          <ArrowLeft className="w-4 h-4" strokeWidth={1.75} />
+          Back to {studentProfile?.full_name ?? "Student"}
         </Link>
 
-        <div className="bg-white rounded-2xl border border-slate-200 p-6 mb-8">
-          <h1 className="text-2xl font-bold text-foreground mb-1" style={{ fontFamily: "'DM Serif Display', serif" }}>
-            {studentProfile.full_name}
+        <div className="mb-6 border-l-4 border-orange pl-4">
+          <h1 className="font-display text-2xl text-navy leading-snug">
+            {report.input_title}
           </h1>
-          <p className="text-sm text-gray-400">
-            {[
-              meta.id_number,
-              meta.year_level,
-              meta.section ? `Section ${meta.section}` : null,
-            ].filter(Boolean).join(" · ")}
+          <p className="text-sm text-slate-500 mt-1">
+            {studentProfile?.full_name} · {meta.id_number} · Submitted on{" "}
+            {new Date(report.created_at).toLocaleDateString("en-PH", {
+              year: "numeric", month: "long", day: "numeric",
+            })}
           </p>
         </div>
 
-        <h2 className="text-base font-semibold text-foreground mb-4">
-          Similarity Reports ({(reports || []).length})
-        </h2>
+        <div className="bg-white rounded-2xl border border-slate-200 p-6 mb-6">
 
-        {!reports || reports.length === 0 ? (
-          <div className="text-center py-16 text-gray-400">
-            <p className="text-base font-medium">No scans submitted yet</p>
-            <p className="text-sm mt-1">This student has not run any similarity checks.</p>
+          {report.risk_level && (
+            <span className={`inline-block text-sm font-semibold px-3 py-1.5 rounded-full border mb-4 ${riskBadgeColor[report.risk_level]}`}>
+              {RISK_LABELS[report.risk_level]}
+            </span>
+          )}
+
+          {report.similarity_score !== null && (
+            <div className="mb-5">
+              <div className="flex justify-between text-xs text-slate-500 mb-1.5">
+                <span>Similarity Score</span>
+                <span>{(report.similarity_score * 100).toFixed(1)}%</span>
+              </div>
+              <div className="h-2 bg-slate-100 rounded-full overflow-hidden">
+                <div
+                  className={`h-full rounded-full transition-all ${riskBarColor[report.risk_level]}`}
+                  style={{ width: `${(report.similarity_score * 100).toFixed(1)}%` }}
+                />
+              </div>
+            </div>
+          )}
+
+          <div className="pt-5 border-t border-slate-100">
+            <p className="text-xs font-medium text-slate-500 uppercase tracking-wide mb-2">
+              Submitted Abstract / Problem Statement
+            </p>
+            <p className="text-sm text-slate-600 leading-relaxed whitespace-pre-wrap">
+              {report.input_description}
+            </p>
           </div>
-        ) : (
-          <div className="space-y-3">
-            {reports.map((report) => (
-              <Link
-                key={report.id}
-                href={`/adviser/students/${id}/report/${report.id}`}
-                className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 bg-white border border-gray-100 rounded-xl px-5 py-4 shadow-sm hover:shadow-md hover:border-navy/20 transition-all group"
-              >
-                <div className="min-w-0">
-                  <p className="text-sm font-semibold text-foreground group-hover:text-navy transition-colors truncate">
-                    {report.input_title}
-                  </p>
-                  <p className="text-xs text-gray-400 mt-0.5">{formatDate(report.created_at)}</p>
-                </div>
-                <div className="flex items-center gap-3 shrink-0">
-                  {report.similarity_score !== null && (
-                    <span className="text-xs font-medium text-slate-600">
-                      {(report.similarity_score * 100).toFixed(1)}%
-                    </span>
+
+          <div className="mt-4 pt-4 border-t border-slate-100">
+            <span className="text-xs text-slate-400 italic">Read-only view</span>
+          </div>
+        </div>
+
+        {report.ai_recommendations && (
+          <div className="mb-6">
+            <h2 className="font-sans font-semibold text-foreground mb-3 flex items-center gap-2">
+              <Sparkles className="w-4 h-4 text-navy" strokeWidth={1.75} />
+              AI Advisory
+            </h2>
+
+            <div className="space-y-3">
+              {advisory ? (
+                <>
+                  {advisory.verdict && (
+                    <div className="bg-white rounded-2xl border border-slate-200 p-5">
+                      <p className="text-xs font-medium text-slate-500 uppercase tracking-wide mb-2">Verdict</p>
+                      <p className="text-sm text-slate-700 leading-relaxed">{advisory.verdict}</p>
+                    </div>
                   )}
-                  {report.risk_level && (
-                    <span className={`text-xs font-medium px-2.5 py-1 rounded-full border ${riskColor[report.risk_level]}`}>
-                      {RISK_LABELS[report.risk_level]}
-                    </span>
+
+                  {advisory.criticalAnalysis && (
+                    <div className="bg-white rounded-2xl border border-slate-200 p-5">
+                      <p className="text-xs font-medium text-slate-500 uppercase tracking-wide mb-2">Critical Analysis of Overlap</p>
+                      <p className="text-sm text-slate-600 leading-relaxed">{advisory.criticalAnalysis}</p>
+
+                      {matches.length >= 1 && (
+                        <div className="mt-4 rounded-xl overflow-hidden border border-slate-100">
+                          <table className="w-full">
+                            <thead>
+                              <tr className="bg-slate-50 border-b border-slate-100">
+                                <th className="text-left text-xs font-medium text-slate-500 uppercase tracking-wide px-4 py-2.5">Matched Study</th>
+                                <th className="text-right text-xs font-medium text-slate-500 uppercase tracking-wide px-4 py-2.5 whitespace-nowrap">Similarity</th>
+                              </tr>
+                            </thead>
+                            <tbody suppressHydrationWarning>
+                              {matches.map((m, i) => (
+                                <tr key={i} className="border-b border-slate-100 last:border-0">
+                                  <td className="px-4 py-3">
+                                    <p className="text-sm text-slate-700 leading-snug">{m.title}</p>
+                                    <p className="text-xs text-slate-500 mt-0.5">
+                                      {m.accession_id ?? ""}{m.year ? ` · ${m.year}` : ""}
+                                    </p>
+                                  </td>
+                                  <td className="px-4 py-3 text-right">
+                                    <span className={`inline-block text-xs font-medium px-2 py-0.5 rounded-full border ${riskBadgeColor[getMatchRisk(m.similarity)]}`}>
+                                      {(m.similarity * 100).toFixed(1)}%
+                                    </span>
+                                  </td>
+                                </tr>
+                              ))}
+                            </tbody>
+                          </table>
+                        </div>
+                      )}
+                    </div>
                   )}
-                  <svg className="w-4 h-4 text-gray-300 group-hover:text-navy transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                  </svg>
+
+                  {advisory.proposedTitles.length >= 1 && (
+                    <div className="bg-white rounded-2xl border border-slate-200 p-5">
+                      <p className="text-xs font-medium text-slate-500 uppercase tracking-wide mb-3">Proposed Unique Titles</p>
+                      <div className="divide-y divide-slate-100">
+                        {advisory.proposedTitles.map((title, i) => (
+                          <div key={i} className="flex gap-3 py-3 first:pt-0 last:pb-0">
+                            <span className="text-xs font-medium text-slate-400 mt-0.5 min-w-[16px] shrink-0">{i + 1}</span>
+                            <div>
+                              <p className="text-sm text-slate-700 leading-snug">{title}</p>
+                              {i === 2 && (
+                                <span className="inline-flex items-center gap-1 mt-1.5 text-xs bg-blue-50 text-blue-600 px-2 py-0.5 rounded">
+                                  includes AI integration
+                                </span>
+                              )}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {advisory.alternativeDirections.length >= 1 && (
+                    <div className="bg-white rounded-2xl border border-slate-200 p-5">
+                      <p className="text-xs font-medium text-slate-500 uppercase tracking-wide mb-3">Alternative Research Directions</p>
+                      <div className="space-y-3">
+                        {advisory.alternativeDirections.map((direction, i) => (
+                          <p key={i} className="text-sm text-slate-600 leading-relaxed">{direction}</p>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </>
+              ) : (
+                <div className="bg-white rounded-2xl border border-slate-200 p-5">
+                  <p className="text-sm text-slate-600 leading-relaxed whitespace-pre-wrap">{report.ai_recommendations}</p>
                 </div>
-              </Link>
-            ))}
+              )}
+            </div>
+          </div>
+        )}
+
+        {matches.length > 0 && (
+          <div>
+            <h2 className="font-sans font-semibold text-foreground mb-4">Top Matched Studies</h2>
+            <MatchesList matches={matches} showAccessionNote />
           </div>
         )}
       </main>
