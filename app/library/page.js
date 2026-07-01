@@ -5,6 +5,7 @@ import { createClient } from "@/lib/supabase/client";
 import Navbar from "@/components/shared/Navbar";
 import AbstractModal from "@/components/shared/AbstractModal";
 import { useEmbedding } from "@/components/shared/EmbeddingProvider";
+import { Search } from "lucide-react";
 
 const YEAR_OPTIONS = Array.from({ length: 20 }, (_, i) => new Date().getFullYear() - i);
 
@@ -139,11 +140,11 @@ export default function LibraryPage() {
     <div className="min-h-screen bg-background">
       <Navbar role={profile.role} fullName={profile.fullName} />
       <main className="max-w-7xl mx-auto px-4 py-10">
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-foreground" style={{ fontFamily: "'DM Serif Display', serif" }}>
-            Capstone Library
-          </h1>
-          <p className="text-gray-500 mt-1 text-sm">
+
+        {/* Page header */}
+        <div className="mb-8 border-l-4 border-orange pl-4">
+          <h1 className="font-display text-3xl text-foreground">Capstone Library</h1>
+          <p className="text-slate-500 mt-1 text-sm">
             Browse completed BSIS capstone studies. Use the accession ID to request the physical document from the librarian.
           </p>
         </div>
@@ -154,12 +155,12 @@ export default function LibraryPage() {
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="Search by title, author, or topic..."
-            className="flex-1 border border-gray-200 rounded-lg px-4 py-2.5 text-sm text-foreground bg-white shadow-sm focus:outline-none focus:ring-2 focus:ring-navy/30"
+            className="flex-1 border border-slate-200 rounded-lg px-4 py-2.5 text-sm text-foreground bg-white shadow-sm focus:outline-none focus:ring-2 focus:ring-navy/30 placeholder:text-slate-400"
           />
           <select
             value={yearFilter}
             onChange={(e) => setYearFilter(e.target.value)}
-            className="border border-gray-200 rounded-lg px-4 py-2.5 text-sm text-foreground bg-white shadow-sm focus:outline-none focus:ring-2 focus:ring-navy/30"
+            className="border border-slate-200 rounded-lg px-4 py-2.5 text-sm text-foreground bg-white shadow-sm focus:outline-none focus:ring-2 focus:ring-navy/30"
           >
             <option value="">All Years</option>
             {YEAR_OPTIONS.map((y) => (
@@ -169,9 +170,10 @@ export default function LibraryPage() {
           <button
             type="submit"
             disabled={searchLoading || !searchQuery.trim()}
-            className="bg-navy text-white text-sm font-medium px-5 py-2.5 rounded-lg hover:bg-navy-dark transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            className="flex items-center justify-center gap-2 bg-navy text-white text-sm font-medium px-5 py-2.5 rounded-lg hover:bg-navy-dark transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            {searchLoading ? "Searching..." : "Search"}
+            <Search className="w-4 h-4" strokeWidth={1.75} />
+            {searchLoading ? "Searching…" : "Search"}
           </button>
         </form>
 
@@ -184,28 +186,30 @@ export default function LibraryPage() {
         {loading || searchLoading ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
             {Array.from({ length: 6 }).map((_, i) => (
-              <div key={i} className="bg-white rounded-xl border border-gray-100 p-5 animate-pulse shadow-sm">
-                <div className="h-4 bg-gray-100 rounded w-3/4 mb-3" />
-                <div className="h-3 bg-gray-100 rounded w-1/2 mb-2" />
-                <div className="h-3 bg-gray-100 rounded w-full mb-1" />
-                <div className="h-3 bg-gray-100 rounded w-5/6" />
+              <div key={i} className="bg-white rounded-xl border border-slate-100 p-5 animate-pulse shadow-sm">
+                <div className="h-4 bg-slate-100 rounded w-3/4 mb-3" />
+                <div className="h-3 bg-slate-100 rounded w-1/2 mb-2" />
+                <div className="h-3 bg-slate-100 rounded w-full mb-1" />
+                <div className="h-3 bg-slate-100 rounded w-5/6" />
               </div>
             ))}
           </div>
         ) : displayedAbstracts.length === 0 ? (
-          <div className="text-center py-20 text-gray-400">
+          <div className="text-center py-20 text-slate-400">
             <p className="text-lg font-medium">No abstracts found</p>
             <p className="text-sm mt-1">Try adjusting your search or year filter.</p>
           </div>
         ) : (
           <>
-            <p className="text-xs text-gray-400 mb-4">{displayedAbstracts.length} result{displayedAbstracts.length !== 1 ? "s" : ""}</p>
+            <p className="text-xs text-slate-400 mb-4">
+              {displayedAbstracts.length} result{displayedAbstracts.length !== 1 ? "s" : ""}
+            </p>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
               {displayedAbstracts.map((abstract) => (
                 <button
                   key={abstract.id}
                   onClick={() => openModal(abstract)}
-                  className="text-left bg-white rounded-xl border border-gray-100 shadow-sm p-5 hover:shadow-md hover:border-navy/20 transition-all group"
+                  className="text-left bg-white rounded-xl border border-slate-100 shadow-sm p-5 hover:shadow-md hover:border-navy/20 transition-all group"
                 >
                   <div className="flex items-start justify-between gap-2 mb-2">
                     {abstract.accession_id && (
@@ -214,16 +218,16 @@ export default function LibraryPage() {
                       </span>
                     )}
                     {abstract.year && (
-                      <span className="text-xs text-gray-400 shrink-0">{abstract.year}</span>
+                      <span className="text-xs text-slate-400 shrink-0">{abstract.year}</span>
                     )}
                   </div>
                   <h3 className="font-semibold text-foreground text-sm leading-snug mb-2 group-hover:text-navy transition-colors line-clamp-3">
                     {abstract.title}
                   </h3>
                   {abstract.authors && (
-                    <p className="text-xs text-gray-500 mb-2 truncate">{abstract.authors}</p>
+                    <p className="text-xs text-slate-500 mb-2 truncate">{abstract.authors}</p>
                   )}
-                  <p className="text-xs text-gray-400 line-clamp-3 leading-relaxed">
+                  <p className="text-xs text-slate-400 line-clamp-3 leading-relaxed">
                     {abstract.abstract_text}
                   </p>
                 </button>

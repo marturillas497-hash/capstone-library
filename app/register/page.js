@@ -2,7 +2,9 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
+import { ArrowLeft, Eye, EyeOff, FileText, X } from "lucide-react";
 
 function capitalizeName(value) {
   return value
@@ -11,50 +13,26 @@ function capitalizeName(value) {
     .join(" ");
 }
 
-function ChevronLeftIcon() {
-  return (
-    <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-    </svg>
-  );
-}
-
-function EyeIcon() {
-  return (
-    <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-    </svg>
-  );
-}
-
-function EyeOffIcon() {
-  return (
-    <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" />
-    </svg>
-  );
-}
-
 function TermsModal({ onClose }) {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center px-4">
       <div className="absolute inset-0 bg-black/40" onClick={onClose} />
       <div className="relative bg-white rounded-2xl shadow-xl border border-slate-200 w-full max-w-lg max-h-[80vh] flex flex-col">
         <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100">
-          <h2 className="font-sans font-semibold text-base text-foreground">
+          <h2 className="font-sans font-semibold text-base text-foreground flex items-center gap-2">
+            <FileText className="w-4 h-4 text-slate-500" strokeWidth={1.75} />
             Terms and Conditions
           </h2>
           <button
             onClick={onClose}
-            className="text-slate-600 hover:text-foreground transition text-lg leading-none"
+            className="text-slate-500 hover:text-foreground transition"
           >
-            ✕
+            <X className="w-5 h-5" strokeWidth={1.75} />
           </button>
         </div>
         <div className="overflow-y-auto px-6 py-5 text-sm text-slate-600 space-y-4">
           <p className="text-xs text-amber-600 font-medium bg-amber-50 border border-amber-200 rounded-lg px-3 py-2">
-            Placeholder — final Terms and Conditions text has not been drafted yet.
+            Placeholder, final Terms and Conditions text has not been drafted yet.
           </p>
           <p>
             By creating an account on Capstone Library, you agree to use this
@@ -191,20 +169,20 @@ export default function RegisterPage() {
       <div className="min-h-screen bg-background flex items-center justify-center px-4 py-10">
         <div className="w-full max-w-md">
 
-          {/* Back arrow */}
-          <a
+          {/* Back link */}
+          <Link
             href="/login"
-            className="inline-flex items-center gap-1.5 text-sm text-slate-600 hover:text-orange transition mb-6 group"
+            className="inline-flex items-center gap-1.5 text-sm text-slate-500 hover:text-foreground mb-6 transition"
           >
-            <ChevronLeftIcon />
+            <ArrowLeft className="w-4 h-4" strokeWidth={1.75} />
             Back to sign in
-          </a>
+          </Link>
 
           {/* Header */}
           <div className="mb-6">
             <h1 className="font-display text-3xl text-navy mb-1">Create an account</h1>
             <p className="text-sm text-slate-600">
-              MIST · Bachelor of Science in Information Systems
+              MIST, Bachelor of Science in Information Systems
             </p>
           </div>
 
@@ -293,7 +271,11 @@ export default function RegisterPage() {
                       className="absolute inset-y-0 right-0 flex items-center px-3 text-slate-400 hover:text-slate-600 transition"
                       tabIndex={-1}
                     >
-                      {showPassword ? <EyeOffIcon /> : <EyeIcon />}
+                      {showPassword ? (
+                        <EyeOff className="w-4 h-4" strokeWidth={1.75} />
+                      ) : (
+                        <Eye className="w-4 h-4" strokeWidth={1.75} />
+                      )}
                     </button>
                   </div>
                 </div>
@@ -318,7 +300,11 @@ export default function RegisterPage() {
                       className="absolute inset-y-0 right-0 flex items-center px-3 text-slate-400 hover:text-slate-600 transition"
                       tabIndex={-1}
                     >
-                      {showConfirmPassword ? <EyeOffIcon /> : <EyeIcon />}
+                      {showConfirmPassword ? (
+                        <EyeOff className="w-4 h-4" strokeWidth={1.75} />
+                      ) : (
+                        <Eye className="w-4 h-4" strokeWidth={1.75} />
+                      )}
                     </button>
                   </div>
                 </div>
@@ -343,7 +329,7 @@ export default function RegisterPage() {
                     <div>
                       <label className="block text-sm font-medium text-foreground mb-1">
                         Capstone Adviser{" "}
-                        <span className="text-slate-600 font-normal">
+                        <span className="text-slate-500 font-normal">
                           (optional, you can set this later)
                         </span>
                       </label>
@@ -407,7 +393,7 @@ export default function RegisterPage() {
 
           {/* Adviser pending note */}
           {role === "capstone_adviser" && (
-            <p className="mt-4 text-center text-xs text-slate-600 px-4">
+            <p className="mt-4 text-center text-xs text-slate-500 px-4">
               Adviser accounts require admin approval before access is granted.
               You will receive an email notification once your application is reviewed.
             </p>
@@ -416,4 +402,4 @@ export default function RegisterPage() {
       </div>
     </>
   );
-}
+}s

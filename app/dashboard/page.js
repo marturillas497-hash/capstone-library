@@ -2,6 +2,7 @@ import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import Navbar from "@/components/shared/Navbar";
 import { RISK_LABELS, RISK_COLORS } from "@/lib/risk";
+import { Plus } from "lucide-react";
 
 export default async function DashboardPage() {
   const supabase = await createClient();
@@ -36,12 +37,12 @@ export default async function DashboardPage() {
 
       <main className="max-w-4xl mx-auto px-4 py-8">
 
-        {/* Welcome */}
-        <div className="mb-8">
-          <h1 className="font-display text-3xl text-navy mb-1">
+        {/* Page header */}
+        <div className="mb-8 border-l-4 border-orange pl-4">
+          <h1 className="font-display text-3xl text-navy">
             Welcome, {profile.full_name.split(" ")[0]}
           </h1>
-          <p className="text-sm text-slate-600">
+          <p className="text-sm text-slate-500 mt-1">
             {meta?.id_number && `${meta.id_number} · `}
             {meta?.year_level && `${meta.year_level} `}
             {meta?.section && `— Section ${meta.section}`}
@@ -52,11 +53,11 @@ export default async function DashboardPage() {
         {/* Stats row */}
         <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mb-8">
           <div className="bg-white rounded-xl border border-slate-200 p-4">
-            <p className="text-xs text-slate-600 mb-1">Total Scans</p>
+            <p className="text-xs text-slate-500 mb-1">Total Scans</p>
             <p className="font-display text-3xl text-navy">{count ?? 0}</p>
           </div>
           <div className="bg-white rounded-xl border border-slate-200 p-4">
-            <p className="text-xs text-slate-600 mb-1">Latest Risk</p>
+            <p className="text-xs text-slate-500 mb-1">Latest Risk</p>
             <p className="font-display text-3xl text-navy">
               {reports?.[0]?.risk_level ?? "—"}
             </p>
@@ -65,8 +66,9 @@ export default async function DashboardPage() {
             <p className="text-xs text-white mb-3">Ready to check your topic?</p>
             <a
               href="/submit"
-              className="inline-block bg-gold text-navy text-sm font-semibold px-4 py-2 rounded-lg hover:bg-gold-light transition text-center"
+              className="inline-flex items-center justify-center gap-2 bg-gold text-navy text-sm font-semibold px-4 py-2 rounded-lg hover:bg-gold-light transition"
             >
+              <Plus className="w-4 h-4" strokeWidth={2} />
               New Similarity Scan
             </a>
           </div>
@@ -80,7 +82,7 @@ export default async function DashboardPage() {
 
           {!reports || reports.length === 0 ? (
             <div className="bg-white rounded-xl border border-slate-200 p-8 text-center">
-              <p className="text-slate-600 text-sm">
+              <p className="text-slate-500 text-sm">
                 No scans yet. Run your first similarity check to get started.
               </p>
             </div>
@@ -97,7 +99,7 @@ export default async function DashboardPage() {
                       <p className="text-sm font-medium text-foreground truncate">
                         {report.input_title}
                       </p>
-                      <p className="text-xs text-slate-600 mt-0.5">
+                      <p className="text-xs text-slate-500 mt-0.5">
                         {new Date(report.created_at).toLocaleDateString("en-PH", {
                           year: "numeric",
                           month: "short",
@@ -116,7 +118,7 @@ export default async function DashboardPage() {
                     )}
                   </div>
                   {report.similarity_score !== null && (
-                    <p className="text-xs text-slate-600 mt-2">
+                    <p className="text-xs text-slate-500 mt-2">
                       Top match: {(report.similarity_score * 100).toFixed(1)}% similarity
                     </p>
                   )}

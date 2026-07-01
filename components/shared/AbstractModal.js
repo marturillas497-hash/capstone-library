@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef } from "react";
 import { useEmbedding } from "@/components/shared/EmbeddingProvider";
+import { X, Pencil, Save, Loader2 } from "lucide-react";
 
 const VIEW_TRACK_DELAY_MS = 5000;
 
@@ -21,9 +22,6 @@ export default function AbstractModal({
   const [form, setForm] = useState({});
   const viewTimerRef = useRef(null);
 
-  // Only count a view once the modal has stayed open for VIEW_TRACK_DELAY_MS.
-  // Closing before then clears the timer, so accidental clicks and rapid
-  // skimming never get recorded.
   useEffect(() => {
     if (isOpen && trackView && abstract?.id) {
       viewTimerRef.current = setTimeout(() => {
@@ -128,11 +126,9 @@ export default function AbstractModal({
             </div>
             <button
               onClick={editing ? closeEdit : onClose}
-              className="shrink-0 p-1.5 rounded-lg text-slate-600 hover:text-foreground hover:bg-slate-100 transition"
+              className="shrink-0 p-1.5 rounded-lg text-slate-400 hover:text-foreground hover:bg-slate-100 transition"
             >
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-              </svg>
+              <X className="w-5 h-5" strokeWidth={1.75} />
             </button>
           </div>
         </div>
@@ -226,8 +222,13 @@ export default function AbstractModal({
               <button
                 onClick={handleSave}
                 disabled={saving || !isReady}
-                className="flex-1 bg-navy text-white text-sm font-medium py-2 rounded-lg hover:bg-navy/90 transition disabled:opacity-50 disabled:cursor-not-allowed"
+                className="flex-1 flex items-center justify-center gap-2 bg-navy text-white text-sm font-medium py-2 rounded-lg hover:bg-navy/90 transition disabled:opacity-50 disabled:cursor-not-allowed"
               >
+                {saving ? (
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                ) : (
+                  <Save className="w-4 h-4" strokeWidth={1.75} />
+                )}
                 {saving ? "Saving…" : "Save Changes"}
               </button>
               <button
@@ -242,8 +243,9 @@ export default function AbstractModal({
               {isAdmin && (
                 <button
                   onClick={openEdit}
-                  className="flex-1 bg-navy text-white text-sm font-medium py-2 rounded-lg hover:bg-navy/90 transition"
+                  className="flex-1 flex items-center justify-center gap-2 bg-navy text-white text-sm font-medium py-2 rounded-lg hover:bg-navy/90 transition"
                 >
+                  <Pencil className="w-4 h-4" strokeWidth={1.75} />
                   Edit Abstract
                 </button>
               )}

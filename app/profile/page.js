@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { createClient } from "@/lib/supabase/client";
 import Navbar from "@/components/shared/Navbar";
+import { UserCog, Save, Lock, Loader2 } from "lucide-react";
 
 const YEAR_LEVELS = ["1st Year", "2nd Year", "3rd Year", "4th Year"];
 const SECTIONS = ["A", "B", "C", "D", "E"];
@@ -112,9 +113,14 @@ export default function ProfilePage() {
       <Navbar role={profile.role} fullName={profile.full_name} />
 
       <main className="max-w-xl mx-auto px-4 py-8">
-        <div className="mb-8">
-          <h1 className="font-display text-3xl text-navy mb-1">My Profile</h1>
-          <p className="text-sm text-slate-600">
+        <div className="mb-8 border-l-4 border-orange pl-4">
+          <div className="flex items-center gap-3">
+            <div className="inline-flex items-center justify-center w-9 h-9 rounded-lg bg-navy">
+              <UserCog className="w-5 h-5 text-white" strokeWidth={1.75} />
+            </div>
+            <h1 className="font-display text-3xl text-navy">My Profile</h1>
+          </div>
+          <p className="text-slate-500 mt-1 text-sm">
             Update your year level, section, and assigned adviser.
           </p>
         </div>
@@ -131,7 +137,8 @@ export default function ProfilePage() {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-slate-600 mb-1">
+              <label className="block text-sm font-medium text-slate-600 mb-1 flex items-center gap-1.5">
+                <Lock className="w-3.5 h-3.5 text-slate-400" strokeWidth={1.75} />
                 Student ID
               </label>
               <div className={readonlyClass}>{meta?.id_number}</div>
@@ -203,7 +210,7 @@ export default function ProfilePage() {
                   <option key={a.id} value={a.id}>{a.full_name}</option>
                 ))}
               </select>
-              <p className="text-xs text-slate-600 mt-1">
+              <p className="text-xs text-slate-500 mt-1">
                 Changing your adviser updates visibility on all your past reports.
               </p>
             </div>
@@ -216,9 +223,19 @@ export default function ProfilePage() {
             <button
               type="submit"
               disabled={saving}
-              className="w-full bg-navy text-white text-sm font-medium py-2.5 rounded-lg hover:bg-navy-light transition disabled:opacity-50 disabled:cursor-not-allowed"
+              className="w-full inline-flex items-center justify-center gap-2 bg-navy text-white text-sm font-medium py-2.5 rounded-lg hover:bg-navy-light transition disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {saving ? "Saving…" : "Save Changes"}
+              {saving ? (
+                <>
+                  <Loader2 className="w-4 h-4 animate-spin" strokeWidth={1.75} />
+                  Saving…
+                </>
+              ) : (
+                <>
+                  <Save className="w-4 h-4" strokeWidth={1.75} />
+                  Save Changes
+                </>
+              )}
             </button>
           </form>
         </div>
