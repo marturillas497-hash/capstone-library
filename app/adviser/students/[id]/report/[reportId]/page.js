@@ -2,8 +2,24 @@ import { createClient } from "@/lib/supabase/server";
 import { redirect, notFound } from "next/navigation";
 import Navbar from "@/components/shared/Navbar";
 import { RISK_LABELS } from "@/lib/risk";
+import { parseAdvisory, getMatchRisk } from "@/lib/advisory";
 import MatchesList from "@/components/shared/MatchesList";
 import Link from "next/link";
+import { ArrowLeft, Sparkles } from "lucide-react";
+
+const riskBadgeColor = {
+  RED: "bg-red-50 border-red-200 text-red-700",
+  ORANGE: "bg-orange-50 border-orange-200 text-orange-700",
+  YELLOW: "bg-yellow-50 border-yellow-200 text-yellow-700",
+  GREEN: "bg-green-50 border-green-200 text-green-700",
+};
+
+const riskBarColor = {
+  RED: "bg-red-500",
+  ORANGE: "bg-orange-500",
+  YELLOW: "bg-yellow-500",
+  GREEN: "bg-green-500",
+};
 
 export default async function AdviserStudentReportPage({ params }) {
   const { id, reportId } = await params;
@@ -20,7 +36,6 @@ export default async function AdviserStudentReportPage({ params }) {
 
   if (!profile || profile.role !== "capstone_adviser") redirect("/login");
 
-  // Confirm this student is assigned to this adviser
   const { data: meta } = await supabase
     .from("student_metadata")
     .select("profile_id, id_number, adviser_id")
@@ -36,7 +51,7 @@ export default async function AdviserStudentReportPage({ params }) {
     .eq("id", id)
     .single();
 
-  // Fetch report — RLS reports_select_adviser ensures adviser can only read where adviser_id = auth.uid()
+  // RLS reports_select_adviser ensures adviser can only read where adviser_id = auth.uid()
   const { data: report } = await supabase
     .from("similarity_reports")
     .select("*")
@@ -47,20 +62,7 @@ export default async function AdviserStudentReportPage({ params }) {
   if (!report) notFound();
 
   const matches = report.results_json ?? [];
-
-  const riskColor = {
-    RED: "bg-red-50 border-red-200 text-red-700",
-    ORANGE: "bg-orange-50 border-orange-200 text-orange-700",
-    YELLOW: "bg-yellow-50 border-yellow-200 text-yellow-700",
-    GREEN: "bg-green-50 border-green-200 text-green-700",
-  };
-
-  const riskBar = {
-    RED: "bg-red-500",
-    ORANGE: "bg-orange-500",
-    YELLOW: "bg-yellow-500",
-    GREEN: "bg-green-500",
-  };
+  const advisory = parseAdvisory(report.ai_recommendations);
 
   return (
     <div className="min-h-screen bg-background">
@@ -69,52 +71,51 @@ export default async function AdviserStudentReportPage({ params }) {
 
         <Link
           href={`/adviser/students/${id}`}
-          className="inline-flex items-center gap-1.5 text-sm text-slate-600 hover:text-foreground mb-6 transition"
+          className="inline-flex items-center gap-1.5 text-sm text-slate-500 hover:text-foreground mb-6 transition"
         >
-          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-          </svg>
+          <ArrowLeft className="w-4 h-4" strokeWidth={1.75} />
           Back to {studentProfile?.full_name ?? "Student"}
         </Link>
 
+        {/* Page header */}
+        <div className="mb-6 border-l-4 border-orange pl-4">
+          <h1 className="font-display text-2xl text-navy leading-snug">
+            {report.input_title}
+          </h1>
+          <p className="text-sm text-slate-500 mt-1">
+            {studentProfile?.full_name} · {meta.id_number} · Submitted on{" "}
+            {new Date(report.created_at).toLocaleDateString("en-PH", {
+              year: "numeric", month: "long", day: "numeric",
+            })}
+          </p>
+        </div>
+
+        {/* Header card */}
         <div className="bg-white rounded-2xl border border-slate-200 p-6 mb-6">
-          <div className="flex items-start justify-between gap-4 flex-wrap">
-            <div>
-              <p className="text-xs font-medium text-slate-600 uppercase tracking-wide mb-1">
-                {studentProfile?.full_name} · {meta.id_number}
-              </p>
-              <h1 className="font-display text-2xl text-navy mb-1">{report.input_title}</h1>
-              <p className="text-sm text-slate-600">
-                Submitted on{" "}
-                {new Date(report.created_at).toLocaleDateString("en-PH", {
-                  year: "numeric", month: "long", day: "numeric",
-                })}
-              </p>
-            </div>
-            {report.risk_level && (
-              <span className={`shrink-0 text-sm font-semibold px-3 py-1.5 rounded-full border ${riskColor[report.risk_level]}`}>
-                {RISK_LABELS[report.risk_level]}
-              </span>
-            )}
-          </div>
+
+          {report.risk_level && (
+            <span className={`inline-block text-sm font-semibold px-3 py-1.5 rounded-full border mb-4 ${riskBadgeColor[report.risk_level]}`}>
+              {RISK_LABELS[report.risk_level]}
+            </span>
+          )}
 
           {report.similarity_score !== null && (
-            <div className="mt-5">
-              <div className="flex justify-between text-xs text-slate-600 mb-1.5">
+            <div className="mb-5">
+              <div className="flex justify-between text-xs text-slate-500 mb-1.5">
                 <span>Similarity Score</span>
                 <span>{(report.similarity_score * 100).toFixed(1)}%</span>
               </div>
               <div className="h-2 bg-slate-100 rounded-full overflow-hidden">
                 <div
-                  className={`h-full rounded-full transition-all ${riskBar[report.risk_level]}`}
+                  className={`h-full rounded-full transition-all ${riskBarColor[report.risk_level]}`}
                   style={{ width: `${(report.similarity_score * 100).toFixed(1)}%` }}
                 />
               </div>
             </div>
           )}
 
-          <div className="mt-5 pt-5 border-t border-slate-100">
-            <p className="text-xs font-medium text-slate-600 mb-2 uppercase tracking-wide">
+          <div className="pt-5 border-t border-slate-100">
+            <p className="text-xs font-medium text-slate-500 uppercase tracking-wide mb-2">
               Submitted Abstract / Problem Statement
             </p>
             <p className="text-sm text-slate-600 leading-relaxed whitespace-pre-wrap">
@@ -123,18 +124,125 @@ export default async function AdviserStudentReportPage({ params }) {
           </div>
 
           <div className="mt-4 pt-4 border-t border-slate-100">
-            <span className="text-xs text-slate-600 italic">Read-only view</span>
+            <span className="text-xs text-slate-400 italic">Read-only view</span>
           </div>
         </div>
 
+        {/* AI Advisory */}
         {report.ai_recommendations && (
-          <div className="bg-white rounded-2xl border border-slate-200 p-6 mb-6">
-            <h2 className="font-sans font-semibold text-foreground mb-4 flex items-center gap-2">
-              <span className="w-2 h-2 rounded-full bg-navy inline-block" />
+          <div className="mb-6">
+            <h2 className="font-sans font-semibold text-foreground mb-3 flex items-center gap-2">
+              <Sparkles className="w-4 h-4 text-navy" strokeWidth={1.75} />
               AI Advisory
             </h2>
-            <div className="text-sm text-slate-600 leading-relaxed whitespace-pre-wrap">
-              {report.ai_recommendations}
+
+            <div className="space-y-3">
+              {advisory ? (
+                <>
+                  {advisory.verdict && (
+                    <div className="bg-white rounded-2xl border border-slate-200 p-5">
+                      <p className="text-xs font-medium text-slate-500 uppercase tracking-wide mb-2">
+                        Verdict
+                      </p>
+                      <p className="text-sm text-slate-700 leading-relaxed">
+                        {advisory.verdict}
+                      </p>
+                    </div>
+                  )}
+
+                  {advisory.criticalAnalysis && (
+                    <div className="bg-white rounded-2xl border border-slate-200 p-5">
+                      <p className="text-xs font-medium text-slate-500 uppercase tracking-wide mb-2">
+                        Critical Analysis of Overlap
+                      </p>
+                      <p className="text-sm text-slate-600 leading-relaxed">
+                        {advisory.criticalAnalysis}
+                      </p>
+
+                      {matches.length >= 1 && (
+                        <div className="mt-4 rounded-xl overflow-hidden border border-slate-100">
+                          <table className="w-full">
+                            <thead>
+                              <tr className="bg-slate-50 border-b border-slate-100">
+                                <th className="text-left text-xs font-medium text-slate-500 uppercase tracking-wide px-4 py-2.5">
+                                  Matched Study
+                                </th>
+                                <th className="text-right text-xs font-medium text-slate-500 uppercase tracking-wide px-4 py-2.5 whitespace-nowrap">
+                                  Similarity
+                                </th>
+                              </tr>
+                            </thead>
+                            <tbody suppressHydrationWarning>
+                              {matches.map((m, i) => (
+                                <tr key={i} className="border-b border-slate-100 last:border-0">
+                                  <td className="px-4 py-3">
+                                    <p className="text-sm text-slate-700 leading-snug">{m.title}</p>
+                                    <p className="text-xs text-slate-500 mt-0.5">
+                                      {m.accession_id ?? ""}
+                                      {m.year ? ` · ${m.year}` : ""}
+                                    </p>
+                                  </td>
+                                  <td className="px-4 py-3 text-right">
+                                    <span className={`inline-block text-xs font-medium px-2 py-0.5 rounded-full border ${riskBadgeColor[getMatchRisk(m.similarity)]}`}>
+                                      {(m.similarity * 100).toFixed(1)}%
+                                    </span>
+                                  </td>
+                                </tr>
+                              ))}
+                            </tbody>
+                          </table>
+                        </div>
+                      )}
+                    </div>
+                  )}
+
+                  {advisory.proposedTitles.length >= 1 && (
+                    <div className="bg-white rounded-2xl border border-slate-200 p-5">
+                      <p className="text-xs font-medium text-slate-500 uppercase tracking-wide mb-3">
+                        Proposed Unique Titles
+                      </p>
+                      <div className="divide-y divide-slate-100">
+                        {advisory.proposedTitles.map((title, i) => (
+                          <div key={i} className="flex gap-3 py-3 first:pt-0 last:pb-0">
+                            <span className="text-xs font-medium text-slate-400 mt-0.5 min-w-[16px] shrink-0">
+                              {i + 1}
+                            </span>
+                            <div>
+                              <p className="text-sm text-slate-700 leading-snug">{title}</p>
+                              {i === 2 && (
+                                <span className="inline-flex items-center gap-1 mt-1.5 text-xs bg-blue-50 text-blue-600 px-2 py-0.5 rounded">
+                                  includes AI integration
+                                </span>
+                              )}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {advisory.alternativeDirections.length >= 1 && (
+                    <div className="bg-white rounded-2xl border border-slate-200 p-5">
+                      <p className="text-xs font-medium text-slate-500 uppercase tracking-wide mb-3">
+                        Alternative Research Directions
+                      </p>
+                      <div className="space-y-3">
+                        {advisory.alternativeDirections.map((direction, i) => (
+                          <p key={i} className="text-sm text-slate-600 leading-relaxed">
+                            {direction}
+                          </p>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </>
+              ) : (
+                <div className="bg-white rounded-2xl border border-slate-200 p-5">
+                  <p className="text-sm text-slate-600 leading-relaxed whitespace-pre-wrap">
+                    {report.ai_recommendations}
+                  </p>
+                </div>
+              )}
             </div>
           </div>
         )}
