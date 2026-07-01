@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { useEmbedding } from "@/components/shared/EmbeddingProvider";
 import Navbar from "@/components/shared/Navbar";
+import { ScanLine, Loader2 } from "lucide-react";
 
 const DAILY_LIMIT = 5;
 
@@ -22,7 +23,8 @@ async function fetchScansUsedToday(supabase, userId, role) {
   if (role === "student") {
     query = query.eq("student_id", userId);
   } else {
-    query = query.eq("adviser_id", userId).is("student_id", null);
+    // .is() silently fails through PostgREST on this project — always use .filter()
+    query = query.eq("adviser_id", userId).filter("student_id", "is", null);
   }
 
   const { count } = await query;
@@ -107,7 +109,6 @@ export default function SubmitPage() {
         return;
       }
 
-      // Decrement locally — server already enforced the real limit
       setScansLeft((prev) => Math.max(0, (prev ?? 1) - 1));
 
       const reportPath =
@@ -129,9 +130,11 @@ export default function SubmitPage() {
       {profile && <Navbar role={profile.role} fullName={profile.full_name} />}
 
       <main className="max-w-2xl mx-auto px-4 py-8">
-        <div className="mb-8">
+
+        {/* Page header */}
+        <div className="mb-8 border-l-4 border-orange pl-4">
           <h1 className="font-display text-3xl text-navy mb-1">New Similarity Scan</h1>
-          <p className="text-sm text-slate-600">
+          <p className="text-sm text-slate-500">
             Enter your proposed capstone title and abstract to check for conceptual overlap
             with existing BSIS studies.
           </p>
@@ -139,21 +142,21 @@ export default function SubmitPage() {
 
         {/* Model status */}
         {modelLoading && (
-          <div className="mb-5 flex items-center gap-2 text-sm text-slate-600 bg-white border border-slate-200 rounded-lg px-4 py-3">
-            <span className="inline-block w-2 h-2 rounded-full bg-amber-400 animate-pulse" />
+          <div className="mb-5 flex items-center gap-2 text-sm text-slate-500 bg-white border border-slate-200 rounded-lg px-4 py-3">
+            <span className="inline-block w-2 h-2 rounded-full bg-amber-400 animate-pulse shrink-0" />
             Initializing embedding model in the background…
           </div>
         )}
         {isReady && (
           <div className="mb-5 flex items-center gap-2 text-sm text-green-700 bg-green-50 border border-green-200 rounded-lg px-4 py-3">
-            <span className="inline-block w-2 h-2 rounded-full bg-green-500" />
+            <span className="inline-block w-2 h-2 rounded-full bg-green-500 shrink-0" />
             Embedding model ready
           </div>
         )}
 
         {/* Scans remaining */}
         {scansLeft !== null && (
-          <div className="mb-5 text-sm text-slate-600">
+          <div className="mb-5 text-sm text-slate-500">
             {scansLeft > 0
               ? `${scansLeft} of ${DAILY_LIMIT} scans remaining today`
               : "Daily scan limit reached. Resets at 12:00 AM Philippine Standard Time."}
@@ -193,8 +196,8 @@ export default function SubmitPage() {
             {error && <p className="text-sm text-red-600">{error}</p>}
 
             {loading && status && (
-              <div className="flex items-center gap-2 text-sm text-slate-600">
-                <span className="inline-block w-2 h-2 rounded-full bg-navy animate-pulse" />
+              <div className="flex items-center gap-2 text-sm text-slate-500">
+                <span className="inline-block w-2 h-2 rounded-full bg-navy animate-pulse shrink-0" />
                 {status}
               </div>
             )}
@@ -202,14 +205,19 @@ export default function SubmitPage() {
             <button
               type="submit"
               disabled={loading || !isReady || scansLeft === 0}
-              className="w-full bg-navy text-white text-sm font-medium py-2.5 rounded-lg hover:bg-navy-light transition disabled:opacity-50 disabled:cursor-not-allowed"
+              className="w-full flex items-center justify-center gap-2 bg-navy text-white text-sm font-medium py-2.5 rounded-lg hover:bg-navy-light transition disabled:opacity-50 disabled:cursor-not-allowed"
             >
+              {loading ? (
+                <Loader2 className="w-4 h-4 animate-spin" />
+              ) : (
+                <ScanLine className="w-4 h-4" strokeWidth={1.75} />
+              )}
               {loading ? "Running scan…" : "Run Semantic Scan"}
             </button>
           </form>
         </div>
 
-        <p className="mt-4 text-xs text-slate-600 text-center px-4">
+        <p className="mt-4 text-xs text-slate-400 text-center px-4">
           Scans are limited to {DAILY_LIMIT} per calendar day and reset at 12:00 AM
           Philippine Standard Time. This tool performs semantic similarity detection,
           not plagiarism checking.
