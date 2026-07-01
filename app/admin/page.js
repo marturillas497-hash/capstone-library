@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { createClient } from "@/lib/supabase/client";
 import Navbar from "@/components/shared/Navbar";
 import Link from "next/link";
+import { Users, BookOpen, Clock, BarChart3, Plus, CheckCircle, TrendingUp, ShieldCheck, Search } from "lucide-react";
 
 export default function AdminPage() {
   const supabase = createClient();
@@ -45,75 +46,149 @@ export default function AdminPage() {
     fetchAll();
   }, []);
 
+  const hasAlert = stats.pendingAdvisers > 0;
+
   const statCards = [
-    { label: "Registered Students", value: stats.students, icon: "👤" },
-    { label: "Library Abstracts", value: stats.abstracts, icon: "📚" },
-    { label: "Pending Adviser Applications", value: stats.pendingAdvisers, icon: "⏳", alert: stats.pendingAdvisers > 0 },
-    { label: "Total Similarity Reports", value: stats.reports, icon: "📊" },
+    {
+      label: "Registered Students",
+      value: stats.students,
+      Icon: Users,
+      iconBg: "bg-navy",
+      iconColor: "text-white",
+    },
+    {
+      label: "Library Abstracts",
+      value: stats.abstracts,
+      Icon: BookOpen,
+      iconBg: "bg-gold",
+      iconColor: "text-navy",
+    },
+    {
+      label: "Pending Adviser Applications",
+      value: stats.pendingAdvisers,
+      Icon: Clock,
+      iconBg: hasAlert ? "bg-orange" : "bg-slate-100",
+      iconColor: hasAlert ? "text-white" : "text-slate-400",
+      alert: hasAlert,
+    },
+    {
+      label: "Total Similarity Reports",
+      value: stats.reports,
+      Icon: BarChart3,
+      iconBg: "bg-navy",
+      iconColor: "text-white",
+    },
   ];
 
   const quickActions = [
-    { label: "Add Abstract", href: "/admin/archive", description: "Add a new capstone study to the library", icon: "➕" },
-    { label: "Review Applications", href: "/admin/approvals", description: "Approve or reject pending adviser accounts", icon: "✅", badge: stats.pendingAdvisers > 0 ? stats.pendingAdvisers : null },
-    { label: "View Analytics", href: "/admin/analytics", description: "Abstract views, trending studies, view history", icon: "📈" },
-    { label: "Manage Whitelist", href: "/admin/whitelist", description: "Upload student IDs from registrar CSV", icon: "📋" },
-    { label: "Browse Library", href: "/library", description: "View and edit the capstone catalog", icon: "🔍" },
+    {
+      label: "Add Abstract",
+      href: "/admin/archive",
+      description: "Add a new capstone study to the library",
+      Icon: Plus,
+      iconBg: "bg-navy",
+      iconColor: "text-white",
+    },
+    {
+      label: "Review Applications",
+      href: "/admin/approvals",
+      description: "Approve or reject pending adviser accounts",
+      Icon: CheckCircle,
+      iconBg: hasAlert ? "bg-orange" : "bg-navy",
+      iconColor: "text-white",
+      badge: hasAlert ? stats.pendingAdvisers : null,
+    },
+    {
+      label: "View Analytics",
+      href: "/admin/analytics",
+      description: "Abstract views, trending studies, view history",
+      Icon: TrendingUp,
+      iconBg: "bg-navy",
+      iconColor: "text-white",
+    },
+    {
+      label: "Manage Whitelist",
+      href: "/admin/whitelist",
+      description: "Upload student IDs from registrar CSV",
+      Icon: ShieldCheck,
+      iconBg: "bg-gold",
+      iconColor: "text-navy",
+    },
+    {
+      label: "Browse Library",
+      href: "/library",
+      description: "View and edit the capstone catalog",
+      Icon: Search,
+      iconBg: "bg-gold",
+      iconColor: "text-navy",
+    },
   ];
 
   return (
     <div className="min-h-screen bg-background">
       <Navbar role={profile.role} fullName={profile.fullName} />
       <main className="max-w-6xl mx-auto px-4 py-10">
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-foreground" style={{ fontFamily: "'DM Serif Display', serif" }}>
-            Admin Dashboard
-          </h1>
-          <p className="text-gray-500 mt-1 text-sm">System overview and quick actions.</p>
+
+        <div className="mb-8 border-l-4 border-orange pl-4">
+          <h1 className="text-3xl font-bold text-foreground font-display">Admin Dashboard</h1>
+          <p className="text-slate-500 mt-1 text-sm">System overview and quick actions.</p>
         </div>
 
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-10">
-          {statCards.map((card) => (
-            <div
-              key={card.label}
-              className={`bg-white rounded-xl border shadow-sm p-5 ${card.alert ? "border-amber-300" : "border-gray-100"}`}
-            >
-              <div className="text-2xl mb-2">{card.icon}</div>
-              {loading ? (
-                <div className="h-7 bg-gray-100 rounded w-12 mb-1 animate-pulse" />
-              ) : (
-                <div className={`text-3xl font-bold mb-1 ${card.alert ? "text-amber-600" : "text-foreground"}`}>
-                  {card.value}
+          {statCards.map((card) => {
+            const { Icon } = card;
+            return (
+              <div
+                key={card.label}
+                className={`bg-white rounded-xl border shadow-sm p-5 transition-colors ${
+                  card.alert ? "border-orange/30" : "border-gray-100"
+                }`}
+              >
+                <div className={`inline-flex items-center justify-center w-9 h-9 rounded-lg mb-3 ${card.iconBg}`}>
+                  <Icon className={`w-5 h-5 ${card.iconColor}`} strokeWidth={1.75} />
                 </div>
-              )}
-              <p className="text-xs text-gray-500 leading-snug">{card.label}</p>
-            </div>
-          ))}
+                {loading ? (
+                  <div className="h-8 bg-gray-100 rounded w-14 mb-1 animate-pulse" />
+                ) : (
+                  <div className={`text-3xl font-bold mb-1 ${card.alert ? "text-orange" : "text-foreground"}`}>
+                    {card.value}
+                  </div>
+                )}
+                <p className="text-xs text-slate-500 leading-snug">{card.label}</p>
+              </div>
+            );
+          })}
         </div>
 
-        <h2 className="text-lg font-semibold text-foreground mb-4">Quick Actions</h2>
+        <h2 className="text-sm font-semibold text-slate-600 mb-3 uppercase tracking-wide">Quick Actions</h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          {quickActions.map((action) => (
-            <Link
-              key={action.href}
-              href={action.href}
-              className="bg-white rounded-xl border border-gray-100 shadow-sm p-5 hover:shadow-md hover:border-navy/20 transition-all group flex items-start gap-4"
-            >
-              <span className="text-2xl shrink-0">{action.icon}</span>
-              <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-2">
-                  <span className="font-semibold text-sm text-foreground group-hover:text-navy transition-colors">
-                    {action.label}
-                  </span>
-                  {action.badge && (
-                    <span className="bg-amber-100 text-amber-700 text-xs font-semibold px-2 py-0.5 rounded-full">
-                      {action.badge}
-                    </span>
-                  )}
+          {quickActions.map((action) => {
+            const { Icon } = action;
+            return (
+              <Link
+                key={action.href}
+                href={action.href}
+                className="bg-white rounded-xl border border-gray-100 shadow-sm p-5 hover:shadow-md hover:border-navy/20 transition-all group flex items-start gap-4"
+              >
+                <div className={`inline-flex items-center justify-center w-10 h-10 rounded-lg shrink-0 ${action.iconBg}`}>
+                  <Icon className={`w-5 h-5 ${action.iconColor}`} strokeWidth={1.75} />
                 </div>
-                <p className="text-xs text-gray-400 mt-0.5 leading-snug">{action.description}</p>
-              </div>
-            </Link>
-          ))}
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2">
+                    <span className="font-semibold text-sm text-foreground group-hover:text-navy transition-colors">
+                      {action.label}
+                    </span>
+                    {action.badge && (
+                      <span className="bg-orange/10 text-orange text-xs font-semibold px-2 py-0.5 rounded-full">
+                        {action.badge}
+                      </span>
+                    )}
+                  </div>
+                  <p className="text-xs text-slate-400 mt-0.5 leading-snug">{action.description}</p>
+                </div>
+              </Link>
+            );
+          })}
         </div>
       </main>
     </div>

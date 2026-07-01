@@ -5,6 +5,7 @@ import { createClient } from "@/lib/supabase/client";
 import Navbar from "@/components/shared/Navbar";
 import { useEmbedding } from "@/components/shared/EmbeddingProvider";
 import Link from "next/link";
+import { ArrowLeft, Pencil, Save, Loader2 } from "lucide-react";
 
 export default function EditAbstractPage({ params }) {
   const { id } = use(params);
@@ -115,9 +116,9 @@ export default function EditAbstractPage({ params }) {
         <Navbar role={profile.role} fullName={profile.fullName} />
         <main className="max-w-4xl mx-auto px-4 py-10">
           <div className="animate-pulse space-y-4">
-            <div className="h-8 bg-gray-100 rounded w-64" />
-            <div className="bg-white rounded-xl border border-gray-100 p-6 space-y-4">
-              {[1, 2, 3, 4].map((i) => <div key={i} className="h-10 bg-gray-100 rounded" />)}
+            <div className="h-8 bg-slate-100 rounded w-64" />
+            <div className="bg-white rounded-xl border border-slate-100 p-6 space-y-4">
+              {[1, 2, 3, 4].map((i) => <div key={i} className="h-10 bg-slate-100 rounded" />)}
             </div>
           </div>
         </main>
@@ -129,17 +130,22 @@ export default function EditAbstractPage({ params }) {
     <div className="min-h-screen bg-background">
       <Navbar role={profile.role} fullName={profile.fullName} />
       <main className="max-w-4xl mx-auto px-4 py-10">
-        <div className="mb-6">
-          <Link href="/admin/archive" className="text-sm text-navy hover:underline">
-            ← Back to Archive
-          </Link>
-        </div>
+        <Link
+          href="/admin/archive"
+          className="inline-flex items-center gap-1.5 text-sm text-slate-500 hover:text-foreground mb-6 transition"
+        >
+          <ArrowLeft className="w-4 h-4" strokeWidth={1.75} />
+          Back to Archive
+        </Link>
 
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-foreground" style={{ fontFamily: "'DM Serif Display', serif" }}>
-            Edit Abstract
-          </h1>
-          <p className="text-gray-500 mt-1 text-sm">
+        <div className="mb-8 border-l-4 border-orange pl-4">
+          <div className="flex items-center gap-3">
+            <div className="inline-flex items-center justify-center w-9 h-9 rounded-lg bg-navy">
+              <Pencil className="w-5 h-5 text-white" strokeWidth={1.75} />
+            </div>
+            <h1 className="font-display text-3xl text-navy">Edit Abstract</h1>
+          </div>
+          <p className="text-slate-500 mt-1 text-sm">
             Changes will regenerate the embedding from the updated title and abstract text.
           </p>
         </div>
@@ -162,32 +168,32 @@ export default function EditAbstractPage({ params }) {
           </div>
         )}
 
-        <form onSubmit={handleSubmit} className="bg-white rounded-xl border border-gray-100 shadow-sm p-6 space-y-5">
+        <form onSubmit={handleSubmit} className="bg-white rounded-xl border border-slate-100 shadow-sm p-6 space-y-5">
           <div>
-            <label className="block text-sm font-medium text-foreground mb-1.5">
+            <label className="block text-sm font-medium text-slate-700 mb-1.5">
               Capstone Title <span className="text-red-500">*</span>
             </label>
             <input
               name="title"
               value={form.title}
               onChange={handleChange}
-              className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-navy/30"
+              className="w-full border border-slate-200 rounded-lg px-4 py-2.5 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-navy/30"
               required
             />
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             <div>
-              <label className="block text-sm font-medium text-foreground mb-1.5">Accession ID</label>
+              <label className="block text-sm font-medium text-slate-700 mb-1.5">Accession ID</label>
               <input
                 name="accession_id"
                 value={form.accession_id}
                 onChange={handleChange}
-                className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-navy/30"
+                className="w-full border border-slate-200 rounded-lg px-4 py-2.5 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-navy/30"
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-foreground mb-1.5">Year Published</label>
+              <label className="block text-sm font-medium text-slate-700 mb-1.5">Year Published</label>
               <input
                 name="year"
                 type="number"
@@ -195,22 +201,22 @@ export default function EditAbstractPage({ params }) {
                 onChange={handleChange}
                 min="2000"
                 max={new Date().getFullYear()}
-                className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-navy/30"
+                className="w-full border border-slate-200 rounded-lg px-4 py-2.5 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-navy/30"
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-foreground mb-1.5">Authors</label>
+              <label className="block text-sm font-medium text-slate-700 mb-1.5">Authors</label>
               <input
                 name="authors"
                 value={form.authors}
                 onChange={handleChange}
-                className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-navy/30"
+                className="w-full border border-slate-200 rounded-lg px-4 py-2.5 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-navy/30"
               />
             </div>
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-foreground mb-1.5">
+            <label className="block text-sm font-medium text-slate-700 mb-1.5">
               Abstract Text <span className="text-red-500">*</span>
             </label>
             <textarea
@@ -218,19 +224,31 @@ export default function EditAbstractPage({ params }) {
               value={form.abstract_text}
               onChange={handleChange}
               rows={10}
-              className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-navy/30 resize-none"
+              className="w-full border border-slate-200 rounded-lg px-4 py-2.5 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-navy/30 resize-none"
               required
             />
           </div>
 
           <div className="flex justify-between items-center pt-2">
-            <p className="text-xs text-gray-400">Abstract deletion is not permitted.</p>
+            <p className="text-xs text-slate-400">Abstract deletion is not permitted.</p>
             <button
               type="submit"
               disabled={submitting || !isReady}
-              className="bg-navy text-white text-sm font-medium px-6 py-2.5 rounded-lg hover:bg-navy-dark transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              className="inline-flex items-center gap-2 bg-navy text-white text-sm font-medium px-6 py-2.5 rounded-lg hover:bg-navy-dark transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {submitting ? "Saving..." : !isReady ? "Model loading..." : "Save Changes"}
+              {submitting ? (
+                <>
+                  <Loader2 className="w-4 h-4 animate-spin" strokeWidth={1.75} />
+                  Saving...
+                </>
+              ) : !isReady ? (
+                "Model loading..."
+              ) : (
+                <>
+                  <Save className="w-4 h-4" strokeWidth={1.75} />
+                  Save Changes
+                </>
+              )}
             </button>
           </div>
         </form>

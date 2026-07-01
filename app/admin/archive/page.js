@@ -5,6 +5,7 @@ import { createClient } from "@/lib/supabase/client";
 import Navbar from "@/components/shared/Navbar";
 import { useEmbedding } from "@/components/shared/EmbeddingProvider";
 import Link from "next/link";
+import { Plus, Pencil, BookOpen } from "lucide-react";
 
 export default function AdminArchivePage() {
   const supabase = createClient();
@@ -106,18 +107,21 @@ export default function AdminArchivePage() {
     <div className="min-h-screen bg-background">
       <Navbar role={profile.role} fullName={profile.fullName} />
       <main className="max-w-4xl mx-auto px-4 py-10">
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-foreground" style={{ fontFamily: "'DM Serif Display', serif" }}>
-            Add to Archive
-          </h1>
-          <p className="text-gray-500 mt-1 text-sm">
+        <div className="mb-8 border-l-4 border-orange pl-4">
+          <div className="flex items-center gap-3">
+            <div className="inline-flex items-center justify-center w-9 h-9 rounded-lg bg-navy">
+              <Plus className="w-5 h-5 text-white" strokeWidth={1.75} />
+            </div>
+            <h1 className="font-display text-3xl text-navy">Add to Archive</h1>
+          </div>
+          <p className="text-slate-500 mt-1 text-sm">
             Add a completed BSIS capstone study to the institutional library.
           </p>
         </div>
 
         {lastAccession && (
           <div className="bg-blue-50 border border-blue-100 rounded-xl px-4 py-3 text-sm text-blue-700 mb-6">
-            Last accession ID on record: <span className="font-mono font-semibold">{lastAccession}</span>
+            Last accession ID on record, <span className="font-mono font-semibold">{lastAccession}</span>
           </div>
         )}
 
@@ -139,9 +143,9 @@ export default function AdminArchivePage() {
           </div>
         )}
 
-        <form onSubmit={handleSubmit} className="bg-white rounded-xl border border-gray-100 shadow-sm p-6 space-y-5 mb-10">
+        <form onSubmit={handleSubmit} className="bg-white rounded-xl border border-slate-100 shadow-sm p-6 space-y-5 mb-10">
           <div>
-            <label className="block text-sm font-medium text-foreground mb-1.5">
+            <label className="block text-sm font-medium text-slate-700 mb-1.5">
               Capstone Title <span className="text-red-500">*</span>
             </label>
             <input
@@ -149,24 +153,24 @@ export default function AdminArchivePage() {
               value={form.title}
               onChange={handleChange}
               placeholder="Full capstone project title"
-              className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-navy/30"
+              className="w-full border border-slate-200 rounded-lg px-4 py-2.5 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-navy/30"
               required
             />
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             <div>
-              <label className="block text-sm font-medium text-foreground mb-1.5">Accession ID</label>
+              <label className="block text-sm font-medium text-slate-700 mb-1.5">Accession ID</label>
               <input
                 name="accession_id"
                 value={form.accession_id}
                 onChange={handleChange}
                 placeholder="e.g. BSIS-042"
-                className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-navy/30"
+                className="w-full border border-slate-200 rounded-lg px-4 py-2.5 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-navy/30"
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-foreground mb-1.5">Year Published</label>
+              <label className="block text-sm font-medium text-slate-700 mb-1.5">Year Published</label>
               <input
                 name="year"
                 type="number"
@@ -175,23 +179,23 @@ export default function AdminArchivePage() {
                 placeholder="e.g. 2024"
                 min="2000"
                 max={new Date().getFullYear()}
-                className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-navy/30"
+                className="w-full border border-slate-200 rounded-lg px-4 py-2.5 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-navy/30"
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-foreground mb-1.5">Authors</label>
+              <label className="block text-sm font-medium text-slate-700 mb-1.5">Authors</label>
               <input
                 name="authors"
                 value={form.authors}
                 onChange={handleChange}
                 placeholder="Comma-separated names"
-                className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-navy/30"
+                className="w-full border border-slate-200 rounded-lg px-4 py-2.5 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-navy/30"
               />
             </div>
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-foreground mb-1.5">
+            <label className="block text-sm font-medium text-slate-700 mb-1.5">
               Abstract Text <span className="text-red-500">*</span>
             </label>
             <textarea
@@ -200,7 +204,7 @@ export default function AdminArchivePage() {
               onChange={handleChange}
               placeholder="Paste the full abstract here..."
               rows={8}
-              className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-navy/30 resize-none"
+              className="w-full border border-slate-200 rounded-lg px-4 py-2.5 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-navy/30 resize-none"
               required
             />
           </div>
@@ -218,23 +222,29 @@ export default function AdminArchivePage() {
 
         {recentAbstracts.length > 0 && (
           <div>
-            <h2 className="text-base font-semibold text-foreground mb-3">Recently Added</h2>
+            <h2 className="text-base font-semibold text-slate-700 mb-3 flex items-center gap-2">
+              <BookOpen className="w-4 h-4 text-gold-dark" strokeWidth={1.75} />
+              Recently Added
+            </h2>
             <div className="space-y-2">
               {recentAbstracts.map((a) => (
                 <Link
                   key={a.id}
                   href={`/admin/archive/${a.id}`}
-                  className="flex items-center justify-between bg-white border border-gray-100 rounded-lg px-4 py-3 hover:border-navy/20 transition-colors group"
+                  className="flex items-center justify-between bg-white border border-slate-100 rounded-lg px-4 py-3 hover:border-navy/20 transition-colors group"
                 >
                   <div className="min-w-0">
-                    <p className="text-sm font-medium text-foreground truncate group-hover:text-navy transition-colors">
+                    <p className="text-sm font-medium text-slate-700 truncate group-hover:text-navy transition-colors">
                       {a.title}
                     </p>
-                    <p className="text-xs text-gray-400 mt-0.5">
-                      {[a.accession_id, a.year, a.authors].filter(Boolean).join(" · ")}
+                    <p className="text-xs text-slate-400 mt-0.5">
+                      {[a.accession_id, a.year, a.authors].filter(Boolean).join(", ")}
                     </p>
                   </div>
-                  <span className="text-xs text-navy shrink-0 ml-4">Edit →</span>
+                  <span className="inline-flex items-center gap-1 text-xs text-navy shrink-0 ml-4">
+                    <Pencil className="w-3.5 h-3.5" strokeWidth={1.75} />
+                    Edit
+                  </span>
                 </Link>
               ))}
             </div>

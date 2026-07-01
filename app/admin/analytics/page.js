@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { createClient } from "@/lib/supabase/client";
 import Navbar from "@/components/shared/Navbar";
+import { TrendingUp, Eye, Star, History } from "lucide-react";
 
 export default function AnalyticsPage() {
   const supabase = createClient();
@@ -97,44 +98,53 @@ export default function AnalyticsPage() {
     <div className="min-h-screen bg-background">
       <Navbar role={profile.role} fullName={profile.fullName} />
       <main className="max-w-6xl mx-auto px-4 py-10">
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-foreground" style={{ fontFamily: "'DM Serif Display', serif" }}>
-            Analytics
-          </h1>
-          <p className="text-gray-500 mt-1 text-sm">Abstract view activity across the capstone library.</p>
+        <div className="mb-8 border-l-4 border-orange pl-4">
+          <div className="flex items-center gap-3">
+            <div className="inline-flex items-center justify-center w-9 h-9 rounded-lg bg-navy">
+              <TrendingUp className="w-5 h-5 text-white" strokeWidth={1.75} />
+            </div>
+            <h1 className="font-display text-3xl text-navy">Analytics</h1>
+          </div>
+          <p className="text-slate-500 mt-1 text-sm">Abstract view activity across the capstone library.</p>
         </div>
 
         <div className="grid grid-cols-2 gap-4 mb-10">
           {[
-            { label: "Total Abstract Views", value: stats.totalViews },
-            { label: "Views This Week", value: stats.viewsThisWeek },
+            { label: "Total Abstract Views", value: stats.totalViews, icon: Eye },
+            { label: "Views This Week", value: stats.viewsThisWeek, icon: TrendingUp },
           ].map((card) => (
-            <div key={card.label} className="bg-white rounded-xl border border-gray-100 shadow-sm p-5">
+            <div key={card.label} className="bg-white rounded-xl border border-slate-100 shadow-sm p-5">
+              <div className="inline-flex items-center justify-center w-9 h-9 rounded-lg bg-navy mb-3">
+                <card.icon className="w-5 h-5 text-white" strokeWidth={1.75} />
+              </div>
               {loading ? (
-                <div className="h-8 bg-gray-100 rounded w-16 animate-pulse mb-1" />
+                <div className="h-8 bg-slate-100 rounded w-16 animate-pulse mb-1" />
               ) : (
-                <div className="text-3xl font-bold text-foreground mb-1">{card.value}</div>
+                <div className="text-3xl font-bold text-slate-700 mb-1">{card.value}</div>
               )}
-              <p className="text-xs text-gray-500">{card.label}</p>
+              <p className="text-xs text-slate-500">{card.label}</p>
             </div>
           ))}
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-10">
-          <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-6">
-            <h2 className="text-base font-semibold text-foreground mb-4">Top 10 Most Viewed (All Time)</h2>
+          <div className="bg-white rounded-xl border border-slate-100 shadow-sm p-6">
+            <h2 className="text-base font-semibold text-slate-700 mb-4 flex items-center gap-2">
+              <Star className="w-4 h-4 text-gold-dark" strokeWidth={1.75} />
+              Top 10 Most Viewed, All Time
+            </h2>
             {loading ? (
               <div className="space-y-2">
-                {[...Array(5)].map((_, i) => <div key={i} className="h-8 bg-gray-100 rounded animate-pulse" />)}
+                {[...Array(5)].map((_, i) => <div key={i} className="h-8 bg-slate-100 rounded animate-pulse" />)}
               </div>
             ) : topAll.length === 0 ? (
-              <p className="text-sm text-gray-400">No view data yet.</p>
+              <p className="text-sm text-slate-400">No view data yet.</p>
             ) : (
               <ol className="space-y-2">
                 {topAll.map((item, i) => (
                   <li key={item.abstract_id} className="flex items-start gap-3 text-sm">
-                    <span className="text-xs font-bold text-gray-400 w-5 shrink-0 pt-0.5">{i + 1}</span>
-                    <span className="flex-1 text-foreground leading-snug line-clamp-2">{item.title}</span>
+                    <span className="text-xs font-bold text-slate-400 w-5 shrink-0 pt-0.5">{i + 1}</span>
+                    <span className="flex-1 text-slate-700 leading-snug line-clamp-2">{item.title}</span>
                     <span className="text-xs font-semibold text-navy shrink-0">{item.count}</span>
                   </li>
                 ))}
@@ -142,20 +152,23 @@ export default function AnalyticsPage() {
             )}
           </div>
 
-          <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-6">
-            <h2 className="text-base font-semibold text-foreground mb-4">Top 5 Trending This Week</h2>
+          <div className="bg-white rounded-xl border border-slate-100 shadow-sm p-6">
+            <h2 className="text-base font-semibold text-slate-700 mb-4 flex items-center gap-2">
+              <TrendingUp className="w-4 h-4 text-orange" strokeWidth={1.75} />
+              Top 5 Trending This Week
+            </h2>
             {loading ? (
               <div className="space-y-2">
-                {[...Array(5)].map((_, i) => <div key={i} className="h-8 bg-gray-100 rounded animate-pulse" />)}
+                {[...Array(5)].map((_, i) => <div key={i} className="h-8 bg-slate-100 rounded animate-pulse" />)}
               </div>
             ) : topWeek.length === 0 ? (
-              <p className="text-sm text-gray-400">No views recorded this week.</p>
+              <p className="text-sm text-slate-400">No views recorded this week.</p>
             ) : (
               <ol className="space-y-2">
                 {topWeek.map((item, i) => (
                   <li key={item.abstract_id} className="flex items-start gap-3 text-sm">
-                    <span className="text-xs font-bold text-gold w-5 shrink-0 pt-0.5">{i + 1}</span>
-                    <span className="flex-1 text-foreground leading-snug line-clamp-2">{item.title}</span>
+                    <span className="text-xs font-bold text-gold-dark w-5 shrink-0 pt-0.5">{i + 1}</span>
+                    <span className="flex-1 text-slate-700 leading-snug line-clamp-2">{item.title}</span>
                     <span className="text-xs font-semibold text-navy shrink-0">{item.count}</span>
                   </li>
                 ))}
@@ -164,34 +177,35 @@ export default function AnalyticsPage() {
           </div>
         </div>
 
-        <div className="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
-          <div className="px-6 py-4 border-b border-gray-100">
-            <h2 className="text-base font-semibold text-foreground">View History (Last 50)</h2>
+        <div className="bg-white rounded-xl border border-slate-100 shadow-sm overflow-hidden">
+          <div className="px-6 py-4 border-b border-slate-100 flex items-center gap-2">
+            <History className="w-4 h-4 text-slate-500" strokeWidth={1.75} />
+            <h2 className="text-base font-semibold text-slate-700">View History, Last 50</h2>
           </div>
           {loading ? (
             <div className="p-6 space-y-2">
-              {[...Array(6)].map((_, i) => <div key={i} className="h-10 bg-gray-100 rounded animate-pulse" />)}
+              {[...Array(6)].map((_, i) => <div key={i} className="h-10 bg-slate-100 rounded animate-pulse" />)}
             </div>
           ) : history.length === 0 ? (
-            <div className="px-6 py-10 text-sm text-gray-400">No view history yet.</div>
+            <div className="px-6 py-10 text-sm text-slate-400">No view history yet.</div>
           ) : (
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>
-                  <tr className="bg-gray-50 text-xs text-gray-500 uppercase tracking-wide">
+                  <tr className="bg-slate-50 text-xs text-slate-500 uppercase tracking-wide">
                     <th className="text-left px-6 py-3 font-medium">Student</th>
                     <th className="text-left px-6 py-3 font-medium">ID Number</th>
                     <th className="text-left px-6 py-3 font-medium">Abstract</th>
                     <th className="text-right px-6 py-3 font-medium">Viewed At</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-gray-50">
+                <tbody className="divide-y divide-slate-50" suppressHydrationWarning>
                   {history.map((row, i) => (
-                    <tr key={`${row.abstract_id}-${row.viewed_at}-${i}`} className="hover:bg-gray-50/50">
-                      <td className="px-6 py-3 text-foreground">{row.profiles?.full_name || "Unknown"}</td>
-                      <td className="px-6 py-3 font-mono text-gray-500 text-xs">{row.student_metadata?.id_number || ""}</td>
-                      <td className="px-6 py-3 text-gray-600 max-w-xs truncate">{row.abstracts?.title || "Unknown"}</td>
-                      <td className="px-6 py-3 text-gray-400 text-xs text-right whitespace-nowrap">{formatDate(row.viewed_at)}</td>
+                    <tr key={`${row.abstract_id}-${row.viewed_at}-${i}`} className="hover:bg-slate-50/50">
+                      <td className="px-6 py-3 text-slate-700">{row.profiles?.full_name || "Unknown"}</td>
+                      <td className="px-6 py-3 font-mono text-slate-500 text-xs">{row.student_metadata?.id_number || ""}</td>
+                      <td className="px-6 py-3 text-slate-600 max-w-xs truncate">{row.abstracts?.title || "Unknown"}</td>
+                      <td className="px-6 py-3 text-slate-400 text-xs text-right whitespace-nowrap">{formatDate(row.viewed_at)}</td>
                     </tr>
                   ))}
                 </tbody>

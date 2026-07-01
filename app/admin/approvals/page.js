@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { createClient } from "@/lib/supabase/client";
 import Navbar from "@/components/shared/Navbar";
+import { CheckCircle, XCircle, Clock } from "lucide-react";
 
 export default function ApprovalsPage() {
   const supabase = createClient();
@@ -74,11 +75,14 @@ export default function ApprovalsPage() {
     <div className="min-h-screen bg-background">
       <Navbar role={profile.role} fullName={profile.fullName} />
       <main className="max-w-4xl mx-auto px-4 py-10">
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-foreground" style={{ fontFamily: "'DM Serif Display', serif" }}>
-            Adviser Applications
-          </h1>
-          <p className="text-gray-500 mt-1 text-sm">
+        <div className="mb-8 border-l-4 border-orange pl-4">
+          <div className="flex items-center gap-3">
+            <div className="inline-flex items-center justify-center w-9 h-9 rounded-lg bg-orange">
+              <Clock className="w-5 h-5 text-white" strokeWidth={1.75} />
+            </div>
+            <h1 className="font-display text-3xl text-navy">Adviser Applications</h1>
+          </div>
+          <p className="text-slate-500 mt-1 text-sm">
             Review and act on pending capstone adviser registrations.
           </p>
         </div>
@@ -86,14 +90,14 @@ export default function ApprovalsPage() {
         {loading ? (
           <div className="space-y-3">
             {[1, 2, 3].map((i) => (
-              <div key={i} className="bg-white border border-gray-100 rounded-xl p-5 animate-pulse shadow-sm">
-                <div className="h-4 bg-gray-100 rounded w-48 mb-2" />
-                <div className="h-3 bg-gray-100 rounded w-32" />
+              <div key={i} className="bg-white border border-slate-100 rounded-xl p-5 animate-pulse shadow-sm">
+                <div className="h-4 bg-slate-100 rounded w-48 mb-2" />
+                <div className="h-3 bg-slate-100 rounded w-32" />
               </div>
             ))}
           </div>
         ) : advisers.length === 0 ? (
-          <div className="text-center py-20 text-gray-400">
+          <div className="text-center py-20 text-slate-400">
             <p className="text-lg font-medium">No pending applications</p>
             <p className="text-sm mt-1">All adviser applications have been reviewed.</p>
           </div>
@@ -102,11 +106,11 @@ export default function ApprovalsPage() {
             {advisers.map((adviser) => (
               <div
                 key={adviser.id}
-                className="bg-white border border-gray-100 rounded-xl p-5 shadow-sm flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4"
+                className="bg-white border border-slate-100 rounded-xl p-5 shadow-sm flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4"
               >
                 <div>
-                  <p className="font-semibold text-foreground">{adviser.full_name}</p>
-                  <p className="text-xs text-gray-400 mt-0.5">
+                  <p className="font-semibold text-slate-700">{adviser.full_name}</p>
+                  <p className="text-xs text-slate-400 mt-0.5">
                     Registered {formatDate(adviser.created_at)}
                   </p>
                 </div>
@@ -114,15 +118,17 @@ export default function ApprovalsPage() {
                   <button
                     onClick={() => handleAction(adviser.id, "approved")}
                     disabled={!!processing[adviser.id]}
-                    className="bg-navy text-white text-sm font-medium px-4 py-2 rounded-lg hover:bg-navy-dark transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="inline-flex items-center gap-1.5 bg-navy text-white text-sm font-medium px-4 py-2 rounded-lg hover:bg-navy-dark transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                   >
+                    <CheckCircle className="w-4 h-4" strokeWidth={1.75} />
                     {processing[adviser.id] === "approved" ? "Approving..." : "Approve"}
                   </button>
                   <button
                     onClick={() => handleAction(adviser.id, "rejected")}
                     disabled={!!processing[adviser.id]}
-                    className="bg-white text-red-600 border border-red-200 text-sm font-medium px-4 py-2 rounded-lg hover:bg-red-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="inline-flex items-center gap-1.5 bg-white text-red-600 border border-red-200 text-sm font-medium px-4 py-2 rounded-lg hover:bg-red-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                   >
+                    <XCircle className="w-4 h-4" strokeWidth={1.75} />
                     {processing[adviser.id] === "rejected" ? "Rejecting..." : "Reject"}
                   </button>
                 </div>
