@@ -2,42 +2,14 @@
 
 import { useState, useMemo } from "react";
 import Link from "next/link";
-
-const riskBadge = {
-  RED: "bg-red-50 text-red-700 border-red-200",
-  ORANGE: "bg-orange-50 text-orange-700 border-orange-200",
-  YELLOW: "bg-yellow-50 text-yellow-700 border-yellow-200",
-  GREEN: "bg-green-50 text-green-700 border-green-200",
-};
-
-const riskLabel = {
-  RED: "Critical",
-  ORANGE: "High",
-  YELLOW: "Moderate",
-  GREEN: "Low",
-};
+import { Search, X, ChevronRight } from "lucide-react";
+import { RISK_BADGE as riskBadge, RISK_LABELS_SHORT as riskLabel } from "@/lib/risk";
 
 function formatDate(iso) {
   if (!iso) return null;
   return new Date(iso).toLocaleDateString("en-PH", {
     year: "numeric", month: "short", day: "numeric",
   });
-}
-
-function SearchIcon() {
-  return (
-    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-4.35-4.35M17 11A6 6 0 115 11a6 6 0 0112 0z" />
-    </svg>
-  );
-}
-
-function ClearIcon() {
-  return (
-    <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-    </svg>
-  );
 }
 
 export default function StudentList({ students }) {
@@ -59,7 +31,7 @@ export default function StudentList({ students }) {
       {/* Search box */}
       <div className="relative max-w-sm">
         <span className="absolute inset-y-0 left-3 flex items-center text-slate-600 pointer-events-none">
-          <SearchIcon />
+          <Search className="w-4 h-4" strokeWidth={1.75} />
         </span>
         <input
           type="text"
@@ -73,7 +45,7 @@ export default function StudentList({ students }) {
             onClick={() => setQuery("")}
             className="absolute inset-y-0 right-3 flex items-center text-slate-600 hover:text-slate-600 transition"
           >
-            <ClearIcon />
+            <X className="w-3.5 h-3.5" strokeWidth={1.75} />
           </button>
         )}
       </div>
@@ -115,9 +87,7 @@ export default function StudentList({ students }) {
                       </span>
                     )}
                   </div>
-                  <svg className="w-4 h-4 text-slate-400 group-hover:text-navy transition-colors shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                  </svg>
+                  <ChevronRight className="w-4 h-4 text-slate-400 group-hover:text-navy transition-colors shrink-0 mt-0.5" strokeWidth={1.75} />
                 </div>
 
                 {/* Student ID / year / section */}
@@ -194,9 +164,7 @@ export default function StudentList({ students }) {
                         className="inline-flex items-center gap-1 text-xs font-medium text-navy hover:text-orange transition-colors"
                       >
                         View
-                        <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                        </svg>
+                        <ChevronRight className="w-3.5 h-3.5" strokeWidth={1.75} />
                       </Link>
                     </td>
                   </tr>
