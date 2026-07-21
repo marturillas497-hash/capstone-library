@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import Image from "next/image";
-import { Menu, X } from "lucide-react";
+import { Menu, X, LogOut } from "lucide-react";
 
 const NAV_LINKS = {
   student: [
@@ -32,10 +32,23 @@ export default function Navbar({ role, fullName }) {
   const router = useRouter();
   const pathname = usePathname();
   const [menuOpen, setMenuOpen] = useState(false);
+  const [signOutModalOpen, setSignOutModalOpen] = useState(false);
+  const [signingOut, setSigningOut] = useState(false);
 
   const links = NAV_LINKS[role] ?? [];
 
-  async function handleSignOut() {
+  function openSignOutModal() {
+    setMenuOpen(false);
+    setSignOutModalOpen(true);
+  }
+
+  function closeSignOutModal() {
+    if (signingOut) return;
+    setSignOutModalOpen(false);
+  }
+
+  async function confirmSignOut() {
+    setSigningOut(true);
     const supabase = createClient();
     await supabase.auth.signOut();
     router.push("/login");
@@ -100,7 +113,7 @@ export default function Navbar({ role, fullName }) {
               </span>
             </div>
             <button
-              onClick={handleSignOut}
+              onClick={openSignOutModal}
               className="text-sm font-medium text-red-400 hover:text-red-300 transition"
             >
               Sign out
@@ -152,11 +165,48 @@ export default function Navbar({ role, fullName }) {
               <p className="text-xs text-white/60 truncate">{fullName}</p>
             </div>
             <button
-              onClick={handleSignOut}
+              onClick={openSignOutModal}
               className="w-full text-left px-3 py-2 rounded-lg text-sm font-medium text-red-400 hover:text-red-300 hover:bg-white/5 transition"
             >
               Sign out
             </button>
+          </div>
+        </div>
+      )}
+
+      {/* Sign out confirmation modal */}
+      {signOutModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center px-4">
+          <div
+            className="absolute inset-0 bg-black/40 backdrop-blur-sm"
+            onClick={closeSignOutModal}
+          />
+          <div className="relative bg-white rounded-2xl shadow-xl w-full max-w-sm p-6">
+            <div className="flex items-center gap-3 mb-2">
+              <div className="shrink-0 w-10 h-10 rounded-full bg-red-50 flex items-center justify-center">
+                <LogOut className="w-5 h-5 text-red-500" strokeWidth={1.75} />
+              </div>
+              <h2 className="font-display text-xl text-navy">Sign Out</h2>
+            </div>
+            <p className="text-sm text-slate-600 mb-6">
+              Are you sure you want to sign out of Capstone Library?
+            </p>
+            <div className="flex gap-3">
+              <button
+                onClick={confirmSignOut}
+                disabled={signingOut}
+                className="flex-1 bg-red-500 text-white text-sm font-medium py-2 rounded-lg hover:bg-red-600 transition disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {signingOut ? "Signing out…" : "Sign Out"}
+              </button>
+              <button
+                onClick={closeSignOutModal}
+                disabled={signingOut}
+                className="flex-1 bg-slate-100 text-slate-600 text-sm font-medium py-2 rounded-lg hover:bg-slate-200 transition disabled:opacity-50"
+              >
+                Cancel
+              </button>
+            </div>
           </div>
         </div>
       )}
