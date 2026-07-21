@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useMemo } from "react";
 import { useEmbedding } from "@/components/shared/EmbeddingProvider";
 import { X, Pencil, Save, Loader2 } from "lucide-react";
 
@@ -14,6 +14,7 @@ export default function AbstractModal({
   isAdmin = false,
   onUpdated,
   trackView = false,
+  allTags = [],
 }) {
   const { getEmbedding, isReady } = useEmbedding();
   const [editing, setEditing] = useState(false);
@@ -21,6 +22,11 @@ export default function AbstractModal({
   const [saveError, setSaveError] = useState("");
   const [form, setForm] = useState({});
   const viewTimerRef = useRef(null);
+
+  // Tag input state (edit mode only). allTags comes from the parent page,
+  // which already has the full distinct keyword list in memory.
+  const [tagInput, setTagInput] = useState("");
+  const [tagDropdownOpen, setTagDropdownOpen] = useState(false);
 
   useEffect(() => {
     if (isOpen && trackView && abstract?.id) {
@@ -55,6 +61,41 @@ export default function AbstractModal({
   function closeEdit() {
     setEditing(false);
     setSaveError("");
+    setTagInput("");
+    setTagDropdownOpen(false);
+  }
+
+  const tagSuggestions = useMemo(() => {
+    const trimmed = tagInput.trim().toLowerCase();
+    if (!trimmed || !form.keywords) return [];
+    return allTags.filter(
+      (kw) => kw.toLowerCase().includes(trimmed) && !form.keywords.includes(kw)
+    );
+  }, [tagInput, allTags, form.keywords]);
+
+  function commitTag(tag) {
+    const clean = tag.trim();
+    if (!clean) return;
+    setForm((f) =>
+      (f.keywords || []).includes(clean) ? f : { ...f, keywords: [...(f.keywords || []), clean] }
+    );
+    setTagInput("");
+    setTagDropdownOpen(false);
+  }
+
+  function removeTag(tag) {
+    setForm((f) => ({ ...f, keywords: (f.keywords || []).filter((t) => t !== tag) }));
+  }
+
+  function onTagInputKeyDown(e) {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      if (tagInput.trim()) commitTag(tagInput);
+    } else if (e.key === "Backspace" && !tagInput && (form.keywords || []).length > 0) {
+      removeTag(form.keywords[form.keywords.length - 1]);
+    } else if (e.key === "Escape") {
+      setTagDropdownOpen(false);
+    }
   }
 
   async function handleSave() {
@@ -74,6 +115,7 @@ export default function AbstractModal({
         body: JSON.stringify({
           ...form,
           year: form.year ? parseInt(form.year) : null,
+          keywords: form.keywords || [],
           embedding,
         }),
       });
@@ -180,6 +222,58 @@ export default function AbstractModal({
                   onChange={(e) => setForm((f) => ({ ...f, accession_id: e.target.value }))}
                   className="w-full px-3 py-2 rounded-lg border border-slate-200 bg-slate-50 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-navy/20 focus:border-navy transition"
                 />
+              </div>
+              <div>
+                <label className="block text-xs font-medium text-slate-600 mb-1 uppercase tracking-wide">Keywords</label>
+                <div className="relative">
+                  <div className="flex flex-wrap items-center gap-2 border border-slate-200 rounded-lg px-3 py-2 bg-slate-50 focus-within:ring-2 focus-within:ring-navy/20 focus-within:border-navy transition">
+                    {(form.keywords || []).map((tag) => (
+                      <span
+                        key={tag}
+                        className="flex items-center gap-1.5 bg-navy text-white text-xs font-medium px-2.5 py-1 rounded-full"
+                      >
+                        {tag}
+                        <button
+                          type="button"
+                          onClick={() => removeTag(tag)}
+                          aria-label={`Remove ${tag}`}
+                          className="text-white/70 hover:text-white transition-colors"
+                        >
+                          <X className="w-3 h-3" strokeWidth={2.5} />
+                        </button>
+                      </span>
+                    ))}
+                    <input
+                      type="text"
+                      value={tagInput}
+                      onChange={(e) => {
+                        setTagInput(e.target.value);
+                        setTagDropdownOpen(true);
+                      }}
+                      onFocus={() => setTagDropdownOpen(true)}
+                      onBlur={() => setTimeout(() => setTagDropdownOpen(false), 150)}
+                      onKeyDown={onTagInputKeyDown}
+                      placeholder={(form.keywords || []).length === 0 ? "Type a keyword, press Enter…" : ""}
+                      className="flex-1 min-w-[120px] text-sm text-foreground bg-transparent focus:outline-none placeholder:text-slate-400 py-0.5"
+                    />
+                  </div>
+                  {tagDropdownOpen && tagSuggestions.length > 0 && (
+                    <ul className="absolute z-10 mt-1 w-full bg-white border border-slate-200 rounded-lg shadow-md max-h-40 overflow-y-auto">
+                      {tagSuggestions.map((kw) => (
+                        <li key={kw}>
+                          <button
+                            type="button"
+                            onMouseDown={(e) => e.preventDefault()}
+                            onClick={() => commitTag(kw)}
+                            className="w-full text-left px-3 py-2 text-sm text-slate-600 hover:bg-navy/5 hover:text-navy transition-colors"
+                          >
+                            {kw}
+                          </button>
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                </div>
               </div>
               {saveError && <p className="text-sm text-red-600">{saveError}</p>}
             </div>

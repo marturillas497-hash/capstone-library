@@ -1,11 +1,11 @@
 "use client";
 
-import { useState, useEffect, use } from "react";
+import { useState, useEffect, useMemo, use } from "react";
 import { createClient } from "@/lib/supabase/client";
 import Navbar from "@/components/shared/Navbar";
 import { useEmbedding } from "@/components/shared/EmbeddingProvider";
 import Link from "next/link";
-import { ArrowLeft, Pencil, Save, Loader2 } from "lucide-react";
+import { ArrowLeft, Pencil, Save, Loader2, X } from "lucide-react";
 
 export default function EditAbstractPage({ params }) {
   const { id } = use(params);
@@ -18,12 +18,18 @@ export default function EditAbstractPage({ params }) {
     authors: "",
     year: "",
     accession_id: "",
+    keywords: [],
   });
   const [loadingAbstract, setLoadingAbstract] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState(false);
   const [profile, setProfile] = useState({ role: "admin", fullName: "" });
+
+  // Tag input state
+  const [allTags, setAllTags] = useState([]);
+  const [tagInput, setTagInput] = useState("");
+  const [tagDropdownOpen, setTagDropdownOpen] = useState(false);
 
   useEffect(() => {
     async function init() {
@@ -39,7 +45,7 @@ export default function EditAbstractPage({ params }) {
 
       const { data, error } = await supabase
         .from("abstracts")
-        .select("id, title, abstract_text, authors, year, accession_id")
+        .select("id, title, abstract_text, authors, year, accession_id, keywords")
         .eq("id", id)
         .single();
 
@@ -55,8 +61,16 @@ export default function EditAbstractPage({ params }) {
         authors: data.authors || "",
         year: data.year ? String(data.year) : "",
         accession_id: data.accession_id || "",
+        keywords: data.keywords || [],
       });
       setLoadingAbstract(false);
+
+      const { data: allRows } = await supabase.from("abstracts").select("keywords");
+      if (allRows) {
+        const set = new Set();
+        allRows.forEach((row) => (row.keywords || []).forEach((kw) => set.add(kw)));
+        setAllTags(Array.from(set).sort());
+      }
     }
     init();
   }, [id]);
@@ -65,6 +79,39 @@ export default function EditAbstractPage({ params }) {
     setForm((f) => ({ ...f, [e.target.name]: e.target.value }));
     setError(null);
     setSuccess(false);
+  }
+
+  const tagSuggestions = useMemo(() => {
+    const trimmed = tagInput.trim().toLowerCase();
+    if (!trimmed) return [];
+    return allTags.filter(
+      (kw) => kw.toLowerCase().includes(trimmed) && !form.keywords.includes(kw)
+    );
+  }, [tagInput, allTags, form.keywords]);
+
+  function commitTag(tag) {
+    const clean = tag.trim();
+    if (!clean) return;
+    setForm((f) =>
+      f.keywords.includes(clean) ? f : { ...f, keywords: [...f.keywords, clean] }
+    );
+    setTagInput("");
+    setTagDropdownOpen(false);
+  }
+
+  function removeTag(tag) {
+    setForm((f) => ({ ...f, keywords: f.keywords.filter((t) => t !== tag) }));
+  }
+
+  function onTagInputKeyDown(e) {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      if (tagInput.trim()) commitTag(tagInput);
+    } else if (e.key === "Backspace" && !tagInput && form.keywords.length > 0) {
+      removeTag(form.keywords[form.keywords.length - 1]);
+    } else if (e.key === "Escape") {
+      setTagDropdownOpen(false);
+    }
   }
 
   async function handleSubmit(e) {
@@ -94,6 +141,7 @@ export default function EditAbstractPage({ params }) {
           authors: form.authors.trim() || null,
           year: form.year ? parseInt(form.year) : null,
           accession_id: form.accession_id.trim() || null,
+          keywords: form.keywords,
           embedding,
         }),
       });
@@ -227,6 +275,62 @@ export default function EditAbstractPage({ params }) {
               className="w-full border border-slate-200 rounded-lg px-4 py-2.5 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-navy/30 resize-none"
               required
             />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-slate-700 mb-1.5">Keywords</label>
+            <div className="relative">
+              <div className="flex flex-wrap items-center gap-2 border border-slate-200 rounded-lg px-3 py-2 focus-within:ring-2 focus-within:ring-navy/30">
+                {form.keywords.map((tag) => (
+                  <span
+                    key={tag}
+                    className="flex items-center gap-1.5 bg-navy text-white text-xs font-medium px-2.5 py-1 rounded-full"
+                  >
+                    {tag}
+                    <button
+                      type="button"
+                      onClick={() => removeTag(tag)}
+                      aria-label={`Remove ${tag}`}
+                      className="text-white/70 hover:text-white transition-colors"
+                    >
+                      <X className="w-3 h-3" strokeWidth={2.5} />
+                    </button>
+                  </span>
+                ))}
+                <input
+                  type="text"
+                  value={tagInput}
+                  onChange={(e) => {
+                    setTagInput(e.target.value);
+                    setTagDropdownOpen(true);
+                  }}
+                  onFocus={() => setTagDropdownOpen(true)}
+                  onBlur={() => setTimeout(() => setTagDropdownOpen(false), 150)}
+                  onKeyDown={onTagInputKeyDown}
+                  placeholder={form.keywords.length === 0 ? "Type a keyword, press Enter…" : ""}
+                  className="flex-1 min-w-[120px] text-sm text-slate-700 bg-transparent focus:outline-none placeholder:text-slate-400 py-0.5"
+                />
+              </div>
+              {tagDropdownOpen && tagSuggestions.length > 0 && (
+                <ul className="absolute z-10 mt-1 w-full bg-white border border-slate-200 rounded-lg shadow-md max-h-48 overflow-y-auto">
+                  {tagSuggestions.map((kw) => (
+                    <li key={kw}>
+                      <button
+                        type="button"
+                        onMouseDown={(e) => e.preventDefault()}
+                        onClick={() => commitTag(kw)}
+                        className="w-full text-left px-3 py-2 text-sm text-slate-600 hover:bg-navy/5 hover:text-navy transition-colors"
+                      >
+                        {kw}
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
+            <p className="text-xs text-slate-400 mt-1.5">
+              Press Enter to add a keyword. Existing keywords will autocomplete as you type.
+            </p>
           </div>
 
           <div className="flex justify-between items-center pt-2">
