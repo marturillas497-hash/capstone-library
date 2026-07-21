@@ -4,13 +4,7 @@ import { useState } from "react";
 import { ChevronDown, ChevronUp } from "lucide-react";
 import AbstractModal from "@/components/shared/AbstractModal";
 import { getMatchRisk } from "@/lib/advisory";
-
-const RISK_BADGE_STYLES = {
-  RED: "text-orange-dark bg-orange/15",
-  ORANGE: "text-orange bg-orange/10",
-  YELLOW: "text-gold-dark bg-gold/15",
-  GREEN: "text-navy bg-navy/5",
-};
+import { RISK_PILL as RISK_BADGE_STYLES } from "@/lib/risk";
 
 const PREVIEW_COUNT = 3;
 

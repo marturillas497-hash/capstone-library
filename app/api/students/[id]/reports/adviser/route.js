@@ -19,6 +19,21 @@ export async function PATCH(request, { params }) {
 
   const admin = createAdminClient();
 
+  if (adviserId) {
+    const { data: adviserProfile } = await admin
+      .from("profiles")
+      .select("role, status")
+      .eq("id", adviserId)
+      .single();
+
+    const isValidAdviser =
+      adviserProfile?.role === "capstone_adviser" && adviserProfile?.status === "active";
+
+    if (!isValidAdviser) {
+      return NextResponse.json({ error: "Invalid adviser selected." }, { status: 400 });
+    }
+  }
+
   const { error } = await admin
     .from("similarity_reports")
     .update({ adviser_id: adviserId ?? null })

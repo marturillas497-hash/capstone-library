@@ -1,11 +1,11 @@
 "use client";
 
-import { useState, useEffect, useCallback, useRef } from "react";
+import { useState, useEffect, useCallback, useRef, useMemo } from "react";
 import { createClient } from "@/lib/supabase/client";
 import Navbar from "@/components/shared/Navbar";
 import AbstractModal from "@/components/shared/AbstractModal";
 import { useEmbedding } from "@/components/shared/EmbeddingProvider";
-import { Search } from "lucide-react";
+import { Search, X, ChevronDown } from "lucide-react";
 
 const YEAR_OPTIONS = Array.from({ length: 20 }, (_, i) => new Date().getFullYear() - i);
 
@@ -24,6 +24,14 @@ export default function LibraryPage() {
   const searchTimeout = useRef(null);
   const lastSemanticQuery = useRef("");
 
+  // Tag filter state
+  const [selectedTags, setSelectedTags] = useState([]);
+  const [tagInput, setTagInput] = useState("");
+  const [tagDropdownOpen, setTagDropdownOpen] = useState(false);
+  const [browseTagsOpen, setBrowseTagsOpen] = useState(false);
+  const tagInputRef = useRef(null);
+  const tagFilterWrapRef = useRef(null);
+
   useEffect(() => {
     async function init() {
       const { data: { user } } = await supabase.auth.getUser();
@@ -40,11 +48,21 @@ export default function LibraryPage() {
     init();
   }, []);
 
+  useEffect(() => {
+    function handleClickOutside(e) {
+      if (tagFilterWrapRef.current && !tagFilterWrapRef.current.contains(e.target)) {
+        setBrowseTagsOpen(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
   async function fetchAll() {
     setLoading(true);
     const { data, error } = await supabase
       .from("abstracts")
-      .select("id, title, abstract_text, authors, year, accession_id")
+      .select("id, title, abstract_text, authors, year, accession_id, keywords")
       .order("created_at", { ascending: false });
     if (!error) setAbstracts(data || []);
     setLoading(false);
@@ -64,7 +82,7 @@ export default function LibraryPage() {
       setLoading(true);
       let q = supabase
         .from("abstracts")
-        .select("id, title, abstract_text, authors, year, accession_id")
+        .select("id, title, abstract_text, authors, year, accession_id, keywords")
         .or(`title.ilike.%${trimmed}%,authors.ilike.%${trimmed}%,abstract_text.ilike.%${trimmed}%`);
       if (year) q = q.eq("year", year);
       const { data } = await q.order("created_at", { ascending: false });
@@ -131,8 +149,69 @@ export default function LibraryPage() {
     setSelectedAbstract((prev) => (prev?.id === updated.id ? { ...prev, ...updated } : prev));
   }
 
+  // Distinct tags across the currently loaded abstracts, used to populate the autocomplete dropdown
+  const allTags = useMemo(() => {
+    const set = new Set();
+    abstracts.forEach((a) => {
+      (a.keywords || []).forEach((kw) => set.add(kw));
+    });
+    return Array.from(set).sort();
+  }, [abstracts]);
+
+  const tagSuggestions = useMemo(() => {
+    const trimmed = tagInput.trim().toLowerCase();
+    if (!trimmed) return [];
+    return allTags.filter(
+      (kw) => kw.toLowerCase().includes(trimmed) && !selectedTags.includes(kw)
+    );
+  }, [tagInput, allTags, selectedTags]);
+
+  function commitTag(tag) {
+    if (!tag) return;
+    if (!selectedTags.includes(tag)) {
+      setSelectedTags((prev) => [...prev, tag]);
+    }
+    setTagInput("");
+    setTagDropdownOpen(false);
+  }
+
+  function toggleTag(tag) {
+    setSelectedTags((prev) =>
+      prev.includes(tag) ? prev.filter((t) => t !== tag) : [...prev, tag]
+    );
+  }
+
+  function removeTag(tag) {
+    setSelectedTags((prev) => prev.filter((t) => t !== tag));
+  }
+
+  function onTagInputKeyDown(e) {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      const trimmed = tagInput.trim();
+      if (!trimmed) return;
+      // Only commit on an exact case-insensitive match against known tags
+      const exact = allTags.find((kw) => kw.toLowerCase() === trimmed.toLowerCase());
+      if (exact) {
+        commitTag(exact);
+      } else if (tagSuggestions.length > 0) {
+        commitTag(tagSuggestions[0]);
+      }
+    } else if (e.key === "Backspace" && !tagInput && selectedTags.length > 0) {
+      // Quick-remove the last pill when backspacing on an empty input
+      removeTag(selectedTags[selectedTags.length - 1]);
+    } else if (e.key === "Escape") {
+      setTagDropdownOpen(false);
+    }
+  }
+
   const displayedAbstracts = abstracts.filter((a) => {
     if (yearFilter && a.year !== parseInt(yearFilter)) return false;
+    if (selectedTags.length > 0) {
+      const kws = a.keywords || [];
+      const hasMatch = selectedTags.some((t) => kws.includes(t));
+      if (!hasMatch) return false;
+    }
     return true;
   });
 
@@ -149,7 +228,7 @@ export default function LibraryPage() {
           </p>
         </div>
 
-        <form onSubmit={onSearchSubmit} className="flex flex-col sm:flex-row gap-3 mb-8">
+        <form onSubmit={onSearchSubmit} className="flex flex-col sm:flex-row gap-3 mb-4">
           <input
             type="text"
             value={searchQuery}
@@ -177,6 +256,105 @@ export default function LibraryPage() {
           </button>
         </form>
 
+        {/* Tag filter */}
+        <div className="mb-8">
+          <div className="relative max-w-md" ref={tagFilterWrapRef}>
+            <div className="flex flex-wrap items-center gap-2 border border-slate-200 rounded-lg pl-3 pr-2 py-2 bg-white shadow-sm focus-within:ring-2 focus-within:ring-navy/30">
+              {selectedTags.map((tag) => (
+                <span
+                  key={tag}
+                  className="flex items-center gap-1.5 bg-navy text-white text-xs font-medium px-2.5 py-1 rounded-full"
+                >
+                  {tag}
+                  <button
+                    type="button"
+                    onClick={() => removeTag(tag)}
+                    aria-label={`Remove ${tag}`}
+                    className="text-white/70 hover:text-white transition-colors"
+                  >
+                    <X className="w-3 h-3" strokeWidth={2.5} />
+                  </button>
+                </span>
+              ))}
+              <input
+                ref={tagInputRef}
+                type="text"
+                value={tagInput}
+                onChange={(e) => {
+                  setTagInput(e.target.value);
+                  setTagDropdownOpen(true);
+                  setBrowseTagsOpen(false);
+                }}
+                onFocus={() => {
+                  setTagDropdownOpen(true);
+                  setBrowseTagsOpen(false);
+                }}
+                onBlur={() => setTimeout(() => setTagDropdownOpen(false), 150)}
+                onKeyDown={onTagInputKeyDown}
+                placeholder={selectedTags.length === 0 ? "Filter by tag…" : ""}
+                className="flex-1 min-w-[100px] text-sm text-foreground bg-transparent focus:outline-none placeholder:text-slate-400 py-0.5"
+              />
+              <button
+                type="button"
+                onClick={() => {
+                  setBrowseTagsOpen((v) => !v);
+                  setTagDropdownOpen(false);
+                }}
+                aria-label="Browse all tags"
+                className="shrink-0 p-1 rounded text-slate-400 hover:text-navy hover:bg-navy/5 transition-colors"
+              >
+                <ChevronDown
+                  className={`w-4 h-4 transition-transform ${browseTagsOpen ? "rotate-180" : ""}`}
+                  strokeWidth={2}
+                />
+              </button>
+            </div>
+
+            {tagDropdownOpen && tagSuggestions.length > 0 && (
+              <ul className="absolute z-10 mt-1 w-full bg-white border border-slate-200 rounded-lg shadow-md max-h-48 overflow-y-auto">
+                {tagSuggestions.map((kw) => (
+                  <li key={kw}>
+                    <button
+                      type="button"
+                      onMouseDown={(e) => e.preventDefault()}
+                      onClick={() => commitTag(kw)}
+                      className="w-full text-left px-3 py-2 text-sm text-slate-600 hover:bg-navy/5 hover:text-navy transition-colors"
+                    >
+                      {kw}
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            )}
+
+            {browseTagsOpen && (
+              <ul className="absolute z-10 mt-1 w-full bg-white border border-slate-200 rounded-lg shadow-md max-h-56 overflow-y-auto">
+                {allTags.length === 0 ? (
+                  <li className="px-3 py-2 text-sm text-slate-400">No tags in the library yet.</li>
+                ) : (
+                  allTags.map((kw) => {
+                    const active = selectedTags.includes(kw);
+                    return (
+                      <li key={kw}>
+                        <button
+                          type="button"
+                          onClick={() => toggleTag(kw)}
+                          className={`w-full flex items-center justify-between text-left px-3 py-2 text-sm transition-colors ${
+                            active ? "bg-navy/5 text-navy font-medium" : "text-slate-600 hover:bg-navy/5 hover:text-navy"
+                          }`}
+                        >
+                          {kw}
+                          {active && <span className="text-navy text-xs">✓</span>}
+                        </button>
+                      </li>
+                    );
+                  })
+                )}
+              </ul>
+            )}
+          </div>
+        </div>
+
         {searchQuery.trim().split(/\s+/).length >= 3 && !isReady && (
           <p className="text-sm text-amber-600 mb-4">
             Semantic search model is loading. Keyword search is active in the meantime.
@@ -197,7 +375,7 @@ export default function LibraryPage() {
         ) : displayedAbstracts.length === 0 ? (
           <div className="text-center py-20 text-slate-400">
             <p className="text-lg font-medium">No abstracts found</p>
-            <p className="text-sm mt-1">Try adjusting your search or year filter.</p>
+            <p className="text-sm mt-1">Try adjusting your search, year, or tag filter.</p>
           </div>
         ) : (
           <>
@@ -227,9 +405,12 @@ export default function LibraryPage() {
                   {abstract.authors && (
                     <p className="text-xs text-slate-500 mb-2 truncate">{abstract.authors}</p>
                   )}
-                  <p className="text-xs text-slate-400 line-clamp-3 leading-relaxed">
+                  <p className="text-xs text-slate-400 line-clamp-3 leading-relaxed mb-2">
                     {abstract.abstract_text}
                   </p>
+                  {(!abstract.keywords || abstract.keywords.length === 0) && (
+                    <span className="text-[11px] text-slate-300 italic">No tags</span>
+                  )}
                 </button>
               ))}
             </div>
@@ -245,6 +426,7 @@ export default function LibraryPage() {
           isAdmin={profile.role === "admin"}
           onUpdated={handleAbstractUpdated}
           trackView={profile.role === "student"}
+          allTags={allTags}
         />
       )}
     </div>

@@ -22,7 +22,7 @@ export async function PATCH(request, { params }) {
 
     const { id } = await params;
     const body = await request.json();
-    const { title, abstract_text, authors, year, accession_id, embedding } = body;
+    const { title, abstract_text, authors, year, accession_id, embedding, keywords } = body;
 
     if (!title || !abstract_text) {
       return NextResponse.json({ error: "Title and abstract text are required" }, { status: 400 });
@@ -42,6 +42,7 @@ export async function PATCH(request, { params }) {
         year: year || null,
         accession_id: accession_id || null,
         embedding: `[${embedding.join(",")}]`,
+        keywords: Array.isArray(keywords) ? keywords : [],
       })
       .eq("id", id)
       .select()

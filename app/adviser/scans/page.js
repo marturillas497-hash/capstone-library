@@ -1,7 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import Navbar from "@/components/shared/Navbar";
-import { RISK_LABELS } from "@/lib/risk";
+import { RISK_LABELS, RISK_BADGE as riskColor } from "@/lib/risk";
 import Link from "next/link";
 import { ScanLine, ChevronRight } from "lucide-react";
 
@@ -25,13 +25,6 @@ export default async function AdviserScansPage() {
     .eq("adviser_id", user.id)
     .filter("student_id", "is", null)
     .order("created_at", { ascending: false });
-
-  const riskColor = {
-    RED: "bg-red-50 text-red-700 border-red-200",
-    ORANGE: "bg-orange-50 text-orange-700 border-orange-200",
-    YELLOW: "bg-yellow-50 text-yellow-700 border-yellow-200",
-    GREEN: "bg-green-50 text-green-700 border-green-200",
-  };
 
   function formatDate(iso) {
     return new Date(iso).toLocaleDateString("en-PH", {

@@ -2,24 +2,10 @@ import { createClient } from "@/lib/supabase/server";
 import { redirect, notFound } from "next/navigation";
 import Link from "next/link";
 import Navbar from "@/components/shared/Navbar";
-import { RISK_LABELS } from "@/lib/risk";
+import { RISK_LABELS, RISK_BADGE as riskBadgeColor, RISK_BAR as riskBarColor } from "@/lib/risk";
 import { parseAdvisory, getMatchRisk } from "@/lib/advisory";
 import MatchesList from "@/components/shared/MatchesList";
 import { ArrowLeft, Sparkles } from "lucide-react";
-
-const riskBadgeColor = {
-  RED: "bg-red-50 border-red-200 text-red-700",
-  ORANGE: "bg-orange-50 border-orange-200 text-orange-700",
-  YELLOW: "bg-yellow-50 border-yellow-200 text-yellow-700",
-  GREEN: "bg-green-50 border-green-200 text-green-700",
-};
-
-const riskBarColor = {
-  RED: "bg-red-500",
-  ORANGE: "bg-orange-500",
-  YELLOW: "bg-yellow-500",
-  GREEN: "bg-green-500",
-};
 
 export default async function AdviserReportPage({ params }) {
   const { id } = await params;
