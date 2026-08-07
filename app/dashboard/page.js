@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import Navbar from "@/components/shared/Navbar";
 import { RISK_LABELS, RISK_BADGE as RISK_COLORS } from "@/lib/risk";
 import { Plus } from "lucide-react";
+import PageHeader from "@/components/shared/PageHeader";
 
 export default async function DashboardPage() {
   const supabase = await createClient();
@@ -38,17 +39,17 @@ export default async function DashboardPage() {
       <main className="max-w-4xl mx-auto px-4 py-8">
 
         {/* Page header */}
-        <div className="mb-8 border-l-4 border-orange pl-4">
-          <h1 className="font-display text-3xl text-navy">
-            Welcome, {profile.full_name.split(" ")[0]}
-          </h1>
-          <p className="text-sm text-slate-500 mt-1">
-            {meta?.id_number && `${meta.id_number} · `}
-            {meta?.year_level && `${meta.year_level} `}
-            {meta?.section && `— Section ${meta.section}`}
-            {!meta?.year_level && !meta?.section && "BSIS Student"}
-          </p>
-        </div>
+        <PageHeader
+          title={`Welcome, ${profile.full_name.split(" ")[0]}`}
+          subtitle={
+            <>
+              {meta?.id_number && `${meta.id_number} · `}
+              {meta?.year_level && `${meta.year_level} `}
+              {meta?.section && `— Section ${meta.section}`}
+              {!meta?.year_level && !meta?.section && "BSIS Student"}
+            </>
+          }
+        />
 
         {/* Stats row */}
         <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mb-8">

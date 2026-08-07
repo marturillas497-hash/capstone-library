@@ -6,6 +6,7 @@ import { RISK_LABELS, RISK_BADGE as riskBadgeColor, RISK_BAR as riskBarColor } f
 import { parseAdvisory, getMatchRisk } from "@/lib/advisory";
 import MatchesList from "@/components/shared/MatchesList";
 import { ArrowLeft, Sparkles } from "lucide-react";
+import PageHeader from "@/components/shared/PageHeader";
 
 export default async function ReportPage({ params }) {
   const { id } = await params;
@@ -49,19 +50,20 @@ export default async function ReportPage({ params }) {
           Back
         </Link>
 
-        <div className="mb-6 border-l-4 border-orange pl-4">
-          <h1 className="font-display text-2xl text-navy leading-snug">
-            {report.input_title}
-          </h1>
-          <p className="text-sm text-slate-500 mt-1">
-            Submitted on{" "}
-            {new Date(report.created_at).toLocaleDateString("en-PH", {
-              year: "numeric",
-              month: "long",
-              day: "numeric",
-            })}
-          </p>
-        </div>
+        <PageHeader
+          compact
+          title={report.input_title}
+          subtitle={
+            <>
+              Submitted on{" "}
+              {new Date(report.created_at).toLocaleDateString("en-PH", {
+                year: "numeric",
+                month: "long",
+                day: "numeric",
+              })}
+            </>
+          }
+        />
 
         <div className="bg-white rounded-2xl border border-slate-200 p-6 mb-6">
 

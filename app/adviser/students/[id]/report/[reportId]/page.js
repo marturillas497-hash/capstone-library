@@ -6,6 +6,7 @@ import { parseAdvisory, getMatchRisk } from "@/lib/advisory";
 import MatchesList from "@/components/shared/MatchesList";
 import Link from "next/link";
 import { ArrowLeft, Sparkles } from "lucide-react";
+import PageHeader from "@/components/shared/PageHeader";
 
 export default async function AdviserStudentReportPage({ params }) {
   const { id, reportId } = await params;
@@ -64,17 +65,18 @@ export default async function AdviserStudentReportPage({ params }) {
         </Link>
 
         {/* Page header */}
-        <div className="mb-6 border-l-4 border-orange pl-4">
-          <h1 className="font-display text-2xl text-navy leading-snug">
-            {report.input_title}
-          </h1>
-          <p className="text-sm text-slate-500 mt-1">
-            {studentProfile?.full_name} · {meta.id_number} · Submitted on{" "}
-            {new Date(report.created_at).toLocaleDateString("en-PH", {
-              year: "numeric", month: "long", day: "numeric",
-            })}
-          </p>
-        </div>
+        <PageHeader
+          compact
+          title={report.input_title}
+          subtitle={
+            <>
+              {studentProfile?.full_name} · {meta.id_number} · Submitted on{" "}
+              {new Date(report.created_at).toLocaleDateString("en-PH", {
+                year: "numeric", month: "long", day: "numeric",
+              })}
+            </>
+          }
+        />
 
         {/* Header card */}
         <div className="bg-white rounded-2xl border border-slate-200 p-6 mb-6">

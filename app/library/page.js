@@ -5,7 +5,9 @@ import { createClient } from "@/lib/supabase/client";
 import Navbar from "@/components/shared/Navbar";
 import AbstractModal from "@/components/shared/AbstractModal";
 import { useEmbedding } from "@/components/shared/EmbeddingProvider";
-import { Search, X, ChevronDown } from "lucide-react";
+import { Search, X, ChevronDown, BookOpen } from "lucide-react";
+import PageHeader from "@/components/shared/PageHeader";
+import { sanitizeFilterValue } from "@/lib/postgrest";
 
 const YEAR_OPTIONS = Array.from({ length: 20 }, (_, i) => new Date().getFullYear() - i);
 
@@ -80,10 +82,11 @@ export default function LibraryPage() {
 
     if (wordCount <= 2) {
       setLoading(true);
+      const safe = sanitizeFilterValue(trimmed);
       let q = supabase
         .from("abstracts")
         .select("id, title, abstract_text, authors, year, accession_id, keywords")
-        .or(`title.ilike.%${trimmed}%,authors.ilike.%${trimmed}%,abstract_text.ilike.%${trimmed}%`);
+        .or(`title.ilike.%${safe}%,authors.ilike.%${safe}%,abstract_text.ilike.%${safe}%`);
       if (year) q = q.eq("year", year);
       const { data } = await q.order("created_at", { ascending: false });
       setAbstracts(data || []);
@@ -221,12 +224,12 @@ export default function LibraryPage() {
       <main className="max-w-7xl mx-auto px-4 py-10">
 
         {/* Page header */}
-        <div className="mb-8 border-l-4 border-orange pl-4">
-          <h1 className="font-display text-3xl text-foreground">Capstone Library</h1>
-          <p className="text-slate-500 mt-1 text-sm">
-            Browse completed BSIS capstone studies. Use the accession ID to request the physical document from the librarian.
-          </p>
-        </div>
+        <PageHeader
+          title="Capstone Library"
+          subtitle="Browse completed BSIS capstone studies. Use the accession ID to request the physical document from the librarian."
+          icon={BookOpen}
+          iconBg="bg-gold"
+        />
 
         <form onSubmit={onSearchSubmit} className="flex flex-col sm:flex-row gap-3 mb-4">
           <input

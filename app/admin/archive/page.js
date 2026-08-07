@@ -6,6 +6,7 @@ import Navbar from "@/components/shared/Navbar";
 import { useEmbedding } from "@/components/shared/EmbeddingProvider";
 import Link from "next/link";
 import { Plus, Pencil, BookOpen, X } from "lucide-react";
+import PageHeader from "@/components/shared/PageHeader";
 
 export default function AdminArchivePage() {
   const supabase = createClient();
@@ -159,17 +160,12 @@ export default function AdminArchivePage() {
     <div className="min-h-screen bg-background">
       <Navbar role={profile.role} fullName={profile.fullName} />
       <main className="max-w-4xl mx-auto px-4 py-10">
-        <div className="mb-8 border-l-4 border-orange pl-4">
-          <div className="flex items-center gap-3">
-            <div className="inline-flex items-center justify-center w-9 h-9 rounded-lg bg-navy">
-              <Plus className="w-5 h-5 text-white" strokeWidth={1.75} />
-            </div>
-            <h1 className="font-display text-3xl text-navy">Add to Archive</h1>
-          </div>
-          <p className="text-slate-500 mt-1 text-sm">
-            Add a completed BSIS capstone study to the institutional library.
-          </p>
-        </div>
+        <PageHeader
+          title="Add to Archive"
+          subtitle="Add a completed BSIS capstone study to the institutional library."
+          icon={Plus}
+          iconBg="bg-navy"
+        />
 
         {lastAccession && (
           <div className="bg-blue-50 border border-blue-100 rounded-xl px-4 py-3 text-sm text-blue-700 mb-6">

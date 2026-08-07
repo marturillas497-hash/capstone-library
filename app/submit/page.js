@@ -6,6 +6,7 @@ import { createClient } from "@/lib/supabase/client";
 import { useEmbedding } from "@/components/shared/EmbeddingProvider";
 import Navbar from "@/components/shared/Navbar";
 import { ScanLine, Loader2 } from "lucide-react";
+import PageHeader from "@/components/shared/PageHeader";
 
 const DAILY_LIMIT = 5;
 
@@ -132,13 +133,12 @@ export default function SubmitPage() {
       <main className="max-w-2xl mx-auto px-4 py-8">
 
         {/* Page header */}
-        <div className="mb-8 border-l-4 border-orange pl-4">
-          <h1 className="font-display text-3xl text-navy mb-1">New Similarity Scan</h1>
-          <p className="text-sm text-slate-500">
-            Enter your proposed capstone title and abstract to check for conceptual overlap
-            with existing BSIS studies.
-          </p>
-        </div>
+        <PageHeader
+          title="New Similarity Scan"
+          subtitle="Enter your proposed capstone title and abstract to check for conceptual overlap with existing BSIS studies."
+          icon={ScanLine}
+          iconBg="bg-navy"
+        />
 
         {/* Model status */}
         {modelLoading && (

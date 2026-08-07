@@ -6,6 +6,7 @@ import Navbar from "@/components/shared/Navbar";
 import { useEmbedding } from "@/components/shared/EmbeddingProvider";
 import Link from "next/link";
 import { ArrowLeft, Pencil, Save, Loader2, X } from "lucide-react";
+import PageHeader from "@/components/shared/PageHeader";
 
 export default function EditAbstractPage({ params }) {
   const { id } = use(params);
@@ -186,17 +187,12 @@ export default function EditAbstractPage({ params }) {
           Back to Archive
         </Link>
 
-        <div className="mb-8 border-l-4 border-orange pl-4">
-          <div className="flex items-center gap-3">
-            <div className="inline-flex items-center justify-center w-9 h-9 rounded-lg bg-navy">
-              <Pencil className="w-5 h-5 text-white" strokeWidth={1.75} />
-            </div>
-            <h1 className="font-display text-3xl text-navy">Edit Abstract</h1>
-          </div>
-          <p className="text-slate-500 mt-1 text-sm">
-            Changes will regenerate the embedding from the updated title and abstract text.
-          </p>
-        </div>
+        <PageHeader
+          title="Edit Abstract"
+          subtitle="Changes will regenerate the embedding from the updated title and abstract text."
+          icon={Pencil}
+          iconBg="bg-navy"
+        />
 
         {embeddingLoading && (
           <div className="bg-amber-50 border border-amber-100 rounded-xl px-4 py-3 text-sm text-amber-700 mb-6">
