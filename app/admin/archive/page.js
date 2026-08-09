@@ -1,11 +1,13 @@
 "use client";
 
-import { useState, useEffect, useMemo, useRef } from "react";
+import { useState, useEffect, useRef } from "react";
 import { createClient } from "@/lib/supabase/client";
 import Navbar from "@/components/shared/Navbar";
 import { useEmbedding } from "@/components/shared/EmbeddingProvider";
 import Link from "next/link";
-import { Plus, Pencil, BookOpen, X } from "lucide-react";
+import { Plus, Pencil, BookOpen } from "lucide-react";
+import PageHeader from "@/components/shared/PageHeader";
+import TagInput, { fetchAllTags } from "@/components/shared/TagInput";
 
 export default function AdminArchivePage() {
   const supabase = createClient();
@@ -26,10 +28,8 @@ export default function AdminArchivePage() {
   const [recentAbstracts, setRecentAbstracts] = useState([]);
   const [profile, setProfile] = useState({ role: "admin", fullName: "" });
 
-  // Tag input state
+  // Full distinct keyword list, powers the TagInput autocomplete dropdown
   const [allTags, setAllTags] = useState([]);
-  const [tagInput, setTagInput] = useState("");
-  const [tagDropdownOpen, setTagDropdownOpen] = useState(false);
 
   useEffect(() => {
     async function init() {
@@ -43,7 +43,7 @@ export default function AdminArchivePage() {
         if (data) setProfile({ role: data.role, fullName: data.full_name });
       }
       await fetchRecent();
-      await fetchAllTags();
+      setAllTags(await fetchAllTags(supabase));
     }
     init();
   }, []);
@@ -61,52 +61,12 @@ export default function AdminArchivePage() {
   }
 
   // Pulls the full distinct keyword set across the library to power the autocomplete dropdown
-  async function fetchAllTags() {
-    const { data } = await supabase.from("abstracts").select("keywords");
-    if (data) {
-      const set = new Set();
-      data.forEach((row) => (row.keywords || []).forEach((kw) => set.add(kw)));
-      setAllTags(Array.from(set).sort());
-    }
-  }
+  // (fetchAllTags itself now lives in components/shared/TagInput.js)
 
   function handleChange(e) {
     setForm((f) => ({ ...f, [e.target.name]: e.target.value }));
     setError(null);
     setSuccess(false);
-  }
-
-  const tagSuggestions = useMemo(() => {
-    const trimmed = tagInput.trim().toLowerCase();
-    if (!trimmed) return [];
-    return allTags.filter(
-      (kw) => kw.toLowerCase().includes(trimmed) && !form.keywords.includes(kw)
-    );
-  }, [tagInput, allTags, form.keywords]);
-
-  function commitTag(tag) {
-    const clean = tag.trim();
-    if (!clean) return;
-    setForm((f) =>
-      f.keywords.includes(clean) ? f : { ...f, keywords: [...f.keywords, clean] }
-    );
-    setTagInput("");
-    setTagDropdownOpen(false);
-  }
-
-  function removeTag(tag) {
-    setForm((f) => ({ ...f, keywords: f.keywords.filter((t) => t !== tag) }));
-  }
-
-  function onTagInputKeyDown(e) {
-    if (e.key === "Enter") {
-      e.preventDefault();
-      if (tagInput.trim()) commitTag(tagInput);
-    } else if (e.key === "Backspace" && !tagInput && form.keywords.length > 0) {
-      removeTag(form.keywords[form.keywords.length - 1]);
-    } else if (e.key === "Escape") {
-      setTagDropdownOpen(false);
-    }
   }
 
   async function handleSubmit(e) {
@@ -147,7 +107,7 @@ export default function AdminArchivePage() {
       setSuccess(true);
       setForm({ title: "", abstract_text: "", authors: "", year: "", accession_id: "", keywords: [] });
       await fetchRecent();
-      await fetchAllTags();
+      setAllTags(await fetchAllTags(supabase));
     } catch (err) {
       setError(err.message);
     } finally {
@@ -159,17 +119,12 @@ export default function AdminArchivePage() {
     <div className="min-h-screen bg-background">
       <Navbar role={profile.role} fullName={profile.fullName} />
       <main className="max-w-4xl mx-auto px-4 py-10">
-        <div className="mb-8 border-l-4 border-orange pl-4">
-          <div className="flex items-center gap-3">
-            <div className="inline-flex items-center justify-center w-9 h-9 rounded-lg bg-navy">
-              <Plus className="w-5 h-5 text-white" strokeWidth={1.75} />
-            </div>
-            <h1 className="font-display text-3xl text-navy">Add to Archive</h1>
-          </div>
-          <p className="text-slate-500 mt-1 text-sm">
-            Add a completed BSIS capstone study to the institutional library.
-          </p>
-        </div>
+        <PageHeader
+          title="Add to Archive"
+          subtitle="Add a completed BSIS capstone study to the institutional library."
+          icon={Plus}
+          iconBg="bg-navy"
+        />
 
         {lastAccession && (
           <div className="bg-blue-50 border border-blue-100 rounded-xl px-4 py-3 text-sm text-blue-700 mb-6">
@@ -263,55 +218,12 @@ export default function AdminArchivePage() {
 
           <div>
             <label className="block text-sm font-medium text-slate-700 mb-1.5">Keywords</label>
-            <div className="relative">
-              <div className="flex flex-wrap items-center gap-2 border border-slate-200 rounded-lg px-3 py-2 focus-within:ring-2 focus-within:ring-navy/30">
-                {form.keywords.map((tag) => (
-                  <span
-                    key={tag}
-                    className="flex items-center gap-1.5 bg-navy text-white text-xs font-medium px-2.5 py-1 rounded-full"
-                  >
-                    {tag}
-                    <button
-                      type="button"
-                      onClick={() => removeTag(tag)}
-                      aria-label={`Remove ${tag}`}
-                      className="text-white/70 hover:text-white transition-colors"
-                    >
-                      <X className="w-3 h-3" strokeWidth={2.5} />
-                    </button>
-                  </span>
-                ))}
-                <input
-                  type="text"
-                  value={tagInput}
-                  onChange={(e) => {
-                    setTagInput(e.target.value);
-                    setTagDropdownOpen(true);
-                  }}
-                  onFocus={() => setTagDropdownOpen(true)}
-                  onBlur={() => setTimeout(() => setTagDropdownOpen(false), 150)}
-                  onKeyDown={onTagInputKeyDown}
-                  placeholder={form.keywords.length === 0 ? "Type a keyword, press Enter…" : ""}
-                  className="flex-1 min-w-[120px] text-sm text-slate-700 bg-transparent focus:outline-none placeholder:text-slate-400 py-0.5"
-                />
-              </div>
-              {tagDropdownOpen && tagSuggestions.length > 0 && (
-                <ul className="absolute z-10 mt-1 w-full bg-white border border-slate-200 rounded-lg shadow-md max-h-48 overflow-y-auto">
-                  {tagSuggestions.map((kw) => (
-                    <li key={kw}>
-                      <button
-                        type="button"
-                        onMouseDown={(e) => e.preventDefault()}
-                        onClick={() => commitTag(kw)}
-                        className="w-full text-left px-3 py-2 text-sm text-slate-600 hover:bg-navy/5 hover:text-navy transition-colors"
-                      >
-                        {kw}
-                      </button>
-                    </li>
-                  ))}
-                </ul>
-              )}
-            </div>
+            <TagInput
+              tags={form.keywords}
+              onChange={(keywords) => setForm((f) => ({ ...f, keywords }))}
+              allTags={allTags}
+              variant="page"
+            />
             <p className="text-xs text-slate-400 mt-1.5">
               Press Enter to add a keyword. Existing keywords will autocomplete as you type.
             </p>

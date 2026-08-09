@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { sanitizeFilterValue } from "@/lib/postgrest";
 
 export async function GET(request) {
   try {
@@ -31,7 +32,8 @@ export async function GET(request) {
       .limit(100);
 
     if (q) {
-      query = query.or(`id_number.ilike.%${q}%,full_name.ilike.%${q}%`);
+      const safe = sanitizeFilterValue(q);
+      query = query.or(`id_number.ilike.%${safe}%,full_name.ilike.%${safe}%`);
     }
 
     const { data, error } = await query;

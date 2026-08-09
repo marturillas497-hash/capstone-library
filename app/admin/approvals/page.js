@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { createClient } from "@/lib/supabase/client";
 import Navbar from "@/components/shared/Navbar";
 import { CheckCircle, XCircle, Clock } from "lucide-react";
+import PageHeader from "@/components/shared/PageHeader";
 
 export default function ApprovalsPage() {
   const supabase = createClient();
@@ -75,17 +76,12 @@ export default function ApprovalsPage() {
     <div className="min-h-screen bg-background">
       <Navbar role={profile.role} fullName={profile.fullName} />
       <main className="max-w-4xl mx-auto px-4 py-10">
-        <div className="mb-8 border-l-4 border-orange pl-4">
-          <div className="flex items-center gap-3">
-            <div className="inline-flex items-center justify-center w-9 h-9 rounded-lg bg-orange">
-              <Clock className="w-5 h-5 text-white" strokeWidth={1.75} />
-            </div>
-            <h1 className="font-display text-3xl text-navy">Adviser Applications</h1>
-          </div>
-          <p className="text-slate-500 mt-1 text-sm">
-            Review and act on pending capstone adviser registrations.
-          </p>
-        </div>
+        <PageHeader
+          title="Adviser Applications"
+          subtitle="Review and act on pending capstone adviser registrations."
+          icon={Clock}
+          iconBg="bg-orange"
+        />
 
         {loading ? (
           <div className="space-y-3">

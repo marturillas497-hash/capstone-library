@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { createClient } from "@/lib/supabase/client";
 import Navbar from "@/components/shared/Navbar";
 import { TrendingUp, Eye, Star, History } from "lucide-react";
+import PageHeader from "@/components/shared/PageHeader";
 
 export default function AnalyticsPage() {
   const supabase = createClient();
@@ -98,15 +99,12 @@ export default function AnalyticsPage() {
     <div className="min-h-screen bg-background">
       <Navbar role={profile.role} fullName={profile.fullName} />
       <main className="max-w-6xl mx-auto px-4 py-10">
-        <div className="mb-8 border-l-4 border-orange pl-4">
-          <div className="flex items-center gap-3">
-            <div className="inline-flex items-center justify-center w-9 h-9 rounded-lg bg-navy">
-              <TrendingUp className="w-5 h-5 text-white" strokeWidth={1.75} />
-            </div>
-            <h1 className="font-display text-3xl text-navy">Analytics</h1>
-          </div>
-          <p className="text-slate-500 mt-1 text-sm">Abstract view activity across the capstone library.</p>
-        </div>
+        <PageHeader
+          title="Analytics"
+          subtitle="Abstract view activity across the capstone library."
+          icon={TrendingUp}
+          iconBg="bg-navy"
+        />
 
         <div className="grid grid-cols-2 gap-4 mb-10">
           {[

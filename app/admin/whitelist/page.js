@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from "react";
 import { createClient } from "@/lib/supabase/client";
 import Navbar from "@/components/shared/Navbar";
 import { Upload, Search, User } from "lucide-react";
+import PageHeader from "@/components/shared/PageHeader";
 
 export default function WhitelistPage() {
   const supabase = createClient();
@@ -89,17 +90,12 @@ export default function WhitelistPage() {
     <div className="min-h-screen bg-background">
       <Navbar role={profile.role} fullName={profile.fullName} />
       <main className="max-w-4xl mx-auto px-4 py-10">
-        <div className="mb-8 border-l-4 border-orange pl-4">
-          <div className="flex items-center gap-3">
-            <div className="inline-flex items-center justify-center w-9 h-9 rounded-lg bg-gold">
-              <User className="w-5 h-5 text-navy" strokeWidth={1.75} />
-            </div>
-            <h1 className="font-display text-3xl text-navy">Student Whitelist</h1>
-          </div>
-          <p className="text-slate-500 mt-1 text-sm">
-            Manage the pre-registration access control list. Only whitelisted student IDs can register.
-          </p>
-        </div>
+        <PageHeader
+          title="Student Whitelist"
+          subtitle="Manage the pre-registration access control list. Only whitelisted student IDs can register."
+          icon={User}
+          iconBg="bg-gold"
+        />
 
         <div className="bg-white border border-slate-100 rounded-xl shadow-sm p-6 mb-6">
           <h2 className="text-sm font-semibold text-foreground mb-3 flex items-center gap-1.5">

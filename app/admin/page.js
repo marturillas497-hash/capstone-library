@@ -4,7 +4,8 @@ import { useState, useEffect } from "react";
 import { createClient } from "@/lib/supabase/client";
 import Navbar from "@/components/shared/Navbar";
 import Link from "next/link";
-import { Users, BookOpen, Clock, BarChart3, Plus, CheckCircle, TrendingUp, ShieldCheck, Search } from "lucide-react";
+import { Users, BookOpen, Clock, BarChart3, Plus, CheckCircle, TrendingUp, ShieldCheck, Search, LayoutDashboard } from "lucide-react";
+import PageHeader from "@/components/shared/PageHeader";
 
 export default function AdminPage() {
   const supabase = createClient();
@@ -129,10 +130,12 @@ export default function AdminPage() {
       <Navbar role={profile.role} fullName={profile.fullName} />
       <main className="max-w-6xl mx-auto px-4 py-10">
 
-        <div className="mb-8 border-l-4 border-orange pl-4">
-          <h1 className="text-3xl font-bold text-foreground font-display">Admin Dashboard</h1>
-          <p className="text-slate-500 mt-1 text-sm">System overview and quick actions.</p>
-        </div>
+        <PageHeader
+          title="Admin Dashboard"
+          subtitle="System overview and quick actions."
+          icon={LayoutDashboard}
+          iconBg="bg-navy"
+        />
 
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-10">
           {statCards.map((card) => {

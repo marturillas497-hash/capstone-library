@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { createClient } from "@/lib/supabase/client";
 import Navbar from "@/components/shared/Navbar";
 import { UserCog, Save, Lock, Loader2 } from "lucide-react";
+import PageHeader from "@/components/shared/PageHeader";
 
 const YEAR_LEVELS = ["1st Year", "2nd Year", "3rd Year", "4th Year"];
 const SECTIONS = ["A", "B", "C", "D", "E"];
@@ -113,17 +114,12 @@ export default function ProfilePage() {
       <Navbar role={profile.role} fullName={profile.full_name} />
 
       <main className="max-w-xl mx-auto px-4 py-8">
-        <div className="mb-8 border-l-4 border-orange pl-4">
-          <div className="flex items-center gap-3">
-            <div className="inline-flex items-center justify-center w-9 h-9 rounded-lg bg-navy">
-              <UserCog className="w-5 h-5 text-white" strokeWidth={1.75} />
-            </div>
-            <h1 className="font-display text-3xl text-navy">My Profile</h1>
-          </div>
-          <p className="text-slate-500 mt-1 text-sm">
-            Update your year level, section, and assigned adviser.
-          </p>
-        </div>
+        <PageHeader
+          title="My Profile"
+          subtitle="Update your year level, section, and assigned adviser."
+          icon={UserCog}
+          iconBg="bg-navy"
+        />
 
         <div className="bg-white rounded-2xl border border-slate-200 p-6">
           <form onSubmit={handleSave} className="space-y-5">

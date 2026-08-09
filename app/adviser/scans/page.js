@@ -4,6 +4,7 @@ import Navbar from "@/components/shared/Navbar";
 import { RISK_LABELS, RISK_BADGE as riskColor } from "@/lib/risk";
 import Link from "next/link";
 import { ScanLine, ChevronRight } from "lucide-react";
+import PageHeader from "@/components/shared/PageHeader";
 
 export default async function AdviserScansPage() {
   const supabase = await createClient();
@@ -36,17 +37,12 @@ export default async function AdviserScansPage() {
     <div className="min-h-screen bg-background">
       <Navbar role={profile.role} fullName={profile.full_name} />
       <main className="max-w-4xl mx-auto px-4 py-10">
-        <div className="mb-8 border-l-4 border-orange pl-4">
-          <div className="flex items-center gap-3">
-            <div className="inline-flex items-center justify-center w-9 h-9 rounded-lg bg-navy">
-              <ScanLine className="w-5 h-5 text-white" strokeWidth={1.75} />
-            </div>
-            <h1 className="font-display text-3xl text-navy">My Scans</h1>
-          </div>
-          <p className="text-slate-500 mt-1 text-sm">
-            Similarity scans you have run through your adviser portal.
-          </p>
-        </div>
+        <PageHeader
+          title="My Scans"
+          subtitle="Similarity scans you have run through your adviser portal."
+          icon={ScanLine}
+          iconBg="bg-navy"
+        />
 
         {!reports || reports.length === 0 ? (
           <div className="text-center py-20 text-slate-400">
