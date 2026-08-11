@@ -42,7 +42,7 @@ export default function AnalyticsPage() {
       supabase.from("abstract_views").select("id", { count: "exact", head: true }).gte("viewed_at", weekAgo),
       supabase
         .from("abstract_views")
-        .select("viewed_at, viewer_id, abstract_id, abstracts(title), profiles(full_name), student_metadata(id_number)")
+        .select("viewed_at, viewer_id, abstract_id, abstracts(title), profiles(full_name, student_metadata!profile_id(id_number))")
         .order("viewed_at", { ascending: false })
         .limit(50),
     ]);
@@ -201,7 +201,7 @@ export default function AnalyticsPage() {
                   {history.map((row, i) => (
                     <tr key={`${row.abstract_id}-${row.viewed_at}-${i}`} className="hover:bg-slate-50/50">
                       <td className="px-6 py-3 text-slate-700">{row.profiles?.full_name || "Unknown"}</td>
-                      <td className="px-6 py-3 font-mono text-slate-500 text-xs">{row.student_metadata?.id_number || ""}</td>
+                      <td className="px-6 py-3 font-mono text-slate-500 text-xs">{row.profiles?.student_metadata?.id_number || ""}</td>
                       <td className="px-6 py-3 text-slate-600 max-w-xs truncate">{row.abstracts?.title || "Unknown"}</td>
                       <td className="px-6 py-3 text-slate-400 text-xs text-right whitespace-nowrap">{formatDate(row.viewed_at)}</td>
                     </tr>
