@@ -3,8 +3,9 @@
 import { useState, useEffect } from "react";
 import { createClient } from "@/lib/supabase/client";
 import Navbar from "@/components/shared/Navbar";
-import { UserCog, Save, Lock, Loader2 } from "lucide-react";
+import { UserCog, Save, Lock, Loader2, KeyRound } from "lucide-react";
 import PageHeader from "@/components/shared/PageHeader";
+import ChangePasswordModal from "@/components/shared/ChangePasswordModal";
 
 const YEAR_LEVELS = ["1st Year", "2nd Year", "3rd Year", "4th Year"];
 const SECTIONS = ["A", "B", "C", "D", "E"];
@@ -20,6 +21,7 @@ export default function ProfilePage() {
   const [saving, setSaving] = useState(false);
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState("");
+  const [changePasswordOpen, setChangePasswordOpen] = useState(false);
 
   useEffect(() => {
     async function load() {
@@ -235,7 +237,28 @@ export default function ProfilePage() {
             </button>
           </form>
         </div>
+
+        <div className="bg-white rounded-2xl border border-slate-200 p-6 mt-4">
+          <div className="flex items-center justify-between gap-4">
+            <div>
+              <h2 className="text-sm font-semibold text-foreground">Security</h2>
+              <p className="text-xs text-slate-500 mt-0.5">Update the password you use to sign in.</p>
+            </div>
+            <button
+              onClick={() => setChangePasswordOpen(true)}
+              className="inline-flex items-center gap-1.5 shrink-0 bg-slate-100 text-slate-700 text-sm font-medium px-3.5 py-2 rounded-lg hover:bg-slate-200 transition"
+            >
+              <KeyRound className="w-4 h-4" strokeWidth={1.75} />
+              Change Password
+            </button>
+          </div>
+        </div>
       </main>
+
+      <ChangePasswordModal
+        open={changePasswordOpen}
+        onClose={() => setChangePasswordOpen(false)}
+      />
     </div>
   );
 }

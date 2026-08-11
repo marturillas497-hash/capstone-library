@@ -5,6 +5,7 @@ import { useRouter, usePathname } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import Image from "next/image";
 import { Menu, X, LogOut } from "lucide-react";
+import ChangePasswordModal from "./ChangePasswordModal";
 
 const NAV_LINKS = {
   student: [
@@ -34,6 +35,7 @@ export default function Navbar({ role, fullName }) {
   const [menuOpen, setMenuOpen] = useState(false);
   const [signOutModalOpen, setSignOutModalOpen] = useState(false);
   const [signingOut, setSigningOut] = useState(false);
+  const [changePasswordOpen, setChangePasswordOpen] = useState(false);
 
   const links = NAV_LINKS[role] ?? [];
 
@@ -113,6 +115,12 @@ export default function Navbar({ role, fullName }) {
               </span>
             </div>
             <button
+              onClick={() => setChangePasswordOpen(true)}
+              className="text-sm font-medium text-white/50 hover:text-white transition"
+            >
+              Change Password
+            </button>
+            <button
               onClick={openSignOutModal}
               className="text-sm font-medium text-red-400 hover:text-red-300 transition"
             >
@@ -165,6 +173,15 @@ export default function Navbar({ role, fullName }) {
               <p className="text-xs text-white/60 truncate">{fullName}</p>
             </div>
             <button
+              onClick={() => {
+                setMenuOpen(false);
+                setChangePasswordOpen(true);
+              }}
+              className="w-full text-left px-3 py-2 rounded-lg text-sm font-medium text-white/60 hover:text-white hover:bg-white/5 transition"
+            >
+              Change Password
+            </button>
+            <button
               onClick={openSignOutModal}
               className="w-full text-left px-3 py-2 rounded-lg text-sm font-medium text-red-400 hover:text-red-300 hover:bg-white/5 transition"
             >
@@ -210,6 +227,11 @@ export default function Navbar({ role, fullName }) {
           </div>
         </div>
       )}
+
+      <ChangePasswordModal
+        open={changePasswordOpen}
+        onClose={() => setChangePasswordOpen(false)}
+      />
     </nav>
   );
 }
