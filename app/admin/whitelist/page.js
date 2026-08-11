@@ -54,7 +54,7 @@ function classifyRows(rows, existingMap) {
     if (existingName === undefined) return { ...r, status: "new" };
 
     const nameMatches = (existingName || "") === (r.full_name || "");
-    return { ...r, status: nameMatches ? "unchanged" : "overwrite" };
+    return { ...r, status: nameMatches ? "unchanged" : "overwrite", existingName };
   });
 }
 
@@ -72,6 +72,7 @@ export default function WhitelistPage() {
   const [parseError, setParseError] = useState(null);
   const [uploadResult, setUploadResult] = useState(null);
   const [error, setError] = useState(null);
+  const [flaggedReview, setFlaggedReview] = useState(null);
 
   const fileRef = useRef(null);
   const searchTimeout = useRef(null);
@@ -115,6 +116,7 @@ export default function WhitelistPage() {
     setUploadResult(null);
     setError(null);
     setPreviewRows(null);
+    setFlaggedReview(null);
 
     if (!file) return;
     if (!file.name.toLowerCase().endsWith(".csv")) {
@@ -170,6 +172,7 @@ export default function WhitelistPage() {
 
   async function handleConfirm() {
     if (!previewRows) return;
+    const overwriteRows = previewRows.filter((r) => r.status === "overwrite");
     const toSubmit = previewRows
       .filter((r) => r.status === "new" || r.status === "overwrite")
       .map((r) => ({ id_number: r.id_number, full_name: r.full_name || null }));
@@ -190,6 +193,15 @@ export default function WhitelistPage() {
       const json = await res.json();
       if (!res.ok) throw new Error(json.error || "Upload failed");
       setUploadResult(`${json.count} record${json.count !== 1 ? "s" : ""} uploaded successfully.`);
+      setFlaggedReview(
+        overwriteRows.length > 0
+          ? overwriteRows.map((r) => ({
+              id_number: r.id_number,
+              oldName: r.existingName || "unnamed",
+              newName: r.full_name || "unnamed",
+            }))
+          : null
+      );
       setPreviewRows(null);
       await fetchEntries(query);
     } catch (err) {
@@ -234,6 +246,39 @@ export default function WhitelistPage() {
           {uploadResult && (
             <div className="bg-green-50 border border-green-200 rounded-lg px-4 py-2.5 text-sm text-green-700 mb-4">
               {uploadResult}
+            </div>
+          )}
+          {flaggedReview && flaggedReview.length > 0 && (
+            <div className="bg-orange/5 border border-orange/30 rounded-lg px-4 py-3 mb-4">
+              <div className="flex items-start gap-2.5">
+                <AlertTriangle className="w-4 h-4 text-orange-dark shrink-0 mt-0.5" strokeWidth={1.75} />
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-medium text-orange-dark mb-1">
+                    {flaggedReview.length} name{flaggedReview.length !== 1 ? "s" : ""} updated, flagged for review
+                  </p>
+                  <p className="text-xs text-slate-500 mb-2.5">
+                    These student IDs already existed under a different name, and the name from the file was applied.
+                    Check these against the registrar's record. If one looks wrong, records cannot be edited here,
+                    get a corrected file from the registrar and upload it again.
+                  </p>
+                  <div className="space-y-1 max-h-40 overflow-y-auto">
+                    {flaggedReview.map((r) => (
+                      <div key={r.id_number} className="text-xs flex flex-wrap items-center gap-1.5">
+                        <span className="font-mono text-foreground">{r.id_number}</span>
+                        <span className="text-slate-400 truncate">{r.oldName}</span>
+                        <span className="text-orange-dark">&rarr;</span>
+                        <span className="text-orange-dark font-medium truncate">{r.newName}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+                <button
+                  onClick={() => setFlaggedReview(null)}
+                  className="text-xs text-slate-400 hover:text-slate-600 shrink-0"
+                >
+                  Dismiss
+                </button>
+              </div>
             </div>
           )}
           {error && (
