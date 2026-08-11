@@ -12,6 +12,7 @@ export default function ChangePasswordModal({ open, onClose }) {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [showCurrent, setShowCurrent] = useState(false);
   const [showNew, setShowNew] = useState(false);
+  const [showConfirm, setShowConfirm] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState(false);
@@ -25,6 +26,7 @@ export default function ChangePasswordModal({ open, onClose }) {
     setConfirmPassword("");
     setShowCurrent(false);
     setShowNew(false);
+    setShowConfirm(false);
     setError(null);
     setSuccess(false);
     onClose();
@@ -184,15 +186,29 @@ export default function ChangePasswordModal({ open, onClose }) {
                 <label className="block text-xs font-medium text-slate-500 mb-1">
                   Confirm New Password
                 </label>
-                <input
-                  type={showNew ? "text" : "password"}
-                  value={confirmPassword}
-                  onChange={(e) => setConfirmPassword(e.target.value)}
-                  required
-                  minLength={MIN_LENGTH}
-                  autoComplete="new-password"
-                  className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-navy/30"
-                />
+                <div className="relative">
+                  <input
+                    type={showConfirm ? "text" : "password"}
+                    value={confirmPassword}
+                    onChange={(e) => setConfirmPassword(e.target.value)}
+                    required
+                    minLength={MIN_LENGTH}
+                    autoComplete="new-password"
+                    className="w-full border border-slate-200 rounded-lg px-3 py-2 pr-10 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-navy/30"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowConfirm((v) => !v)}
+                    tabIndex={-1}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
+                  >
+                    {showConfirm ? (
+                      <EyeOff className="w-4 h-4" strokeWidth={1.75} />
+                    ) : (
+                      <Eye className="w-4 h-4" strokeWidth={1.75} />
+                    )}
+                  </button>
+                </div>
               </div>
 
               {error && (
