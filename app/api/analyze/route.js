@@ -32,6 +32,7 @@ async function getRemainingScans(supabase, userId, role) {
 }
 
 async function generateAdvisory(inputTitle, inputDescription, matches, riskLevel) {
+  const GEMINI_TIMEOUT_MS = 25000;
   try {
     const genAI = new GoogleGenerativeAI(process.env.GOOGLE_GEMINI_API_KEY);
     const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
@@ -80,7 +81,12 @@ Write each title on its own line numbered 1, 2, and 3. Do not add any descriptio
 ALTERNATIVE RESEARCH DIRECTIONS
 Suggest exactly 3 directions the student can explore. Every direction must be the same core system type as the student's proposal applied to a different specific organization, a different specific record type, or a different specific document category not yet covered in the library. Do not suggest a direction from a different system type entirely. Do not use hedging words like might, may, perhaps, could consider, or you might also. Every direction must be written as a direct statement of what the student can build, not a suggestion. Write each direction as one short paragraph in plain and simple language. Do not add a sub-header, label, or title before any paragraph. Do not use bullet points or numbering.`;
 
-    const result = await model.generateContent(prompt);
+    const result = await Promise.race([
+      model.generateContent(prompt),
+      new Promise((_, reject) =>
+        setTimeout(() => reject(new Error("Gemini request timed out")), GEMINI_TIMEOUT_MS)
+      ),
+    ]);
     return result.response.text();
   } catch (err) {
     console.error("Gemini error:", err);

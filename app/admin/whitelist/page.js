@@ -3,18 +3,76 @@
 import { useState, useEffect, useRef } from "react";
 import { createClient } from "@/lib/supabase/client";
 import Navbar from "@/components/shared/Navbar";
-import { Upload, Search, User } from "lucide-react";
+import { UploadCloud, Search, User, AlertTriangle, CheckCircle2, RotateCcw } from "lucide-react";
 import PageHeader from "@/components/shared/PageHeader";
+
+const STATUS_META = {
+  new: { label: "New", className: "bg-navy/10 text-navy border-navy/20" },
+  overwrite: { label: "Will update", className: "bg-orange/10 text-orange-dark border-orange/30" },
+  unchanged: { label: "Unchanged", className: "bg-slate-100 text-slate-400 border-slate-200" },
+  duplicate: { label: "Duplicate in file", className: "bg-red-50 text-red-600 border-red-200" },
+  invalid: { label: "Missing ID", className: "bg-red-50 text-red-600 border-red-200" },
+};
+
+function parseCsv(text) {
+  const lines = text.split(/\r?\n/).filter((l) => l.trim().length > 0);
+  if (lines.length === 0) throw new Error("The file is empty.");
+
+  const header = lines[0].toLowerCase().split(",").map((h) => h.trim());
+  const idCol = header.indexOf("id_number");
+  const nameCol = header.indexOf("full_name");
+
+  if (idCol === -1 || nameCol === -1) {
+    throw new Error("The CSV must include a header row with columns: id_number, full_name.");
+  }
+
+  const rows = [];
+  for (let i = 1; i < lines.length; i++) {
+    const cols = lines[i].split(",").map((c) => c.trim());
+    rows.push({
+      rowNumber: i + 1,
+      id_number: cols[idCol] || "",
+      full_name: cols[nameCol] || "",
+    });
+  }
+
+  if (rows.length === 0) throw new Error("No data rows found in the file.");
+  return rows;
+}
+
+function classifyRows(rows, existingMap) {
+  const counts = {};
+  rows.forEach((r) => {
+    if (r.id_number) counts[r.id_number] = (counts[r.id_number] || 0) + 1;
+  });
+
+  return rows.map((r) => {
+    if (!r.id_number) return { ...r, status: "invalid" };
+    if (counts[r.id_number] > 1) return { ...r, status: "duplicate" };
+
+    const existingName = existingMap.get(r.id_number);
+    if (existingName === undefined) return { ...r, status: "new" };
+
+    const nameMatches = (existingName || "") === (r.full_name || "");
+    return { ...r, status: nameMatches ? "unchanged" : "overwrite" };
+  });
+}
 
 export default function WhitelistPage() {
   const supabase = createClient();
   const [entries, setEntries] = useState([]);
   const [query, setQuery] = useState("");
   const [loading, setLoading] = useState(true);
-  const [uploading, setUploading] = useState(false);
+  const [profile, setProfile] = useState({ role: "admin", fullName: "" });
+
+  const [dragActive, setDragActive] = useState(false);
+  const [checkingExisting, setCheckingExisting] = useState(false);
+  const [confirming, setConfirming] = useState(false);
+  const [previewRows, setPreviewRows] = useState(null);
+  const [parseError, setParseError] = useState(null);
   const [uploadResult, setUploadResult] = useState(null);
   const [error, setError] = useState(null);
-  const [profile, setProfile] = useState({ role: "admin", fullName: "" });
+
   const fileRef = useRef(null);
   const searchTimeout = useRef(null);
 
@@ -52,31 +110,92 @@ export default function WhitelistPage() {
     }
   }
 
-  async function handleUpload(e) {
-    const file = e.target.files?.[0];
-    if (!file) return;
-
-    setUploading(true);
+  async function handleFile(file) {
+    setParseError(null);
     setUploadResult(null);
     setError(null);
+    setPreviewRows(null);
 
-    const formData = new FormData();
-    formData.append("file", file);
+    if (!file) return;
+    if (!file.name.toLowerCase().endsWith(".csv")) {
+      setParseError("Please upload a .csv file.");
+      return;
+    }
 
+    let rows;
+    try {
+      const text = await file.text();
+      rows = parseCsv(text);
+    } catch (err) {
+      setParseError(err.message);
+      return;
+    }
+
+    setCheckingExisting(true);
+    try {
+      const uniqueIds = [...new Set(rows.map((r) => r.id_number).filter(Boolean))];
+      const res = await fetch("/api/admin/whitelist/check", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ ids: uniqueIds }),
+      });
+      const json = await res.json();
+      const existingMap = new Map((json.existing || []).map((e) => [e.id_number, e.full_name]));
+      setPreviewRows(classifyRows(rows, existingMap));
+    } catch {
+      setParseError("Could not check the file against the current whitelist. Try again.");
+    } finally {
+      setCheckingExisting(false);
+    }
+  }
+
+  function onDragOver(e) {
+    e.preventDefault();
+    setDragActive(true);
+  }
+  function onDragLeave(e) {
+    e.preventDefault();
+    setDragActive(false);
+  }
+  function onDrop(e) {
+    e.preventDefault();
+    setDragActive(false);
+    handleFile(e.dataTransfer.files?.[0]);
+  }
+
+  function handleCancelPreview() {
+    setPreviewRows(null);
+    setParseError(null);
+  }
+
+  async function handleConfirm() {
+    if (!previewRows) return;
+    const toSubmit = previewRows
+      .filter((r) => r.status === "new" || r.status === "overwrite")
+      .map((r) => ({ id_number: r.id_number, full_name: r.full_name || null }));
+
+    if (toSubmit.length === 0) {
+      setUploadResult("Nothing to update, every row already matches the current whitelist.");
+      setPreviewRows(null);
+      return;
+    }
+
+    setConfirming(true);
     try {
       const res = await fetch("/api/admin/whitelist", {
         method: "POST",
-        body: formData,
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ rows: toSubmit }),
       });
       const json = await res.json();
       if (!res.ok) throw new Error(json.error || "Upload failed");
       setUploadResult(`${json.count} record${json.count !== 1 ? "s" : ""} uploaded successfully.`);
+      setPreviewRows(null);
       await fetchEntries(query);
     } catch (err) {
       setError(err.message);
     } finally {
-      setUploading(false);
-      if (fileRef.current) fileRef.current.value = "";
+      setConfirming(false);
     }
   }
 
@@ -85,6 +204,11 @@ export default function WhitelistPage() {
       year: "numeric", month: "short", day: "numeric",
     });
   }
+
+  const counts = { new: 0, overwrite: 0, unchanged: 0, duplicate: 0, invalid: 0 };
+  if (previewRows) previewRows.forEach((r) => counts[r.status]++);
+  const blocking = counts.duplicate + counts.invalid > 0;
+  const changeCount = counts.new + counts.overwrite;
 
   return (
     <div className="min-h-screen bg-background">
@@ -99,12 +223,12 @@ export default function WhitelistPage() {
 
         <div className="bg-white border border-slate-100 rounded-xl shadow-sm p-6 mb-6">
           <h2 className="text-sm font-semibold text-foreground mb-3 flex items-center gap-1.5">
-            <Upload className="w-4 h-4 text-slate-500" strokeWidth={1.75} />
+            <UploadCloud className="w-4 h-4 text-slate-500" strokeWidth={1.75} />
             Upload CSV
           </h2>
           <p className="text-xs text-slate-500 mb-4">
             Required columns, <span className="font-mono">id_number</span> and <span className="font-mono">full_name</span>.
-            A header row is required. Duplicate IDs will update the existing record.
+            A header row is required. Nothing is saved until you review and confirm.
           </p>
 
           {uploadResult && (
@@ -112,24 +236,141 @@ export default function WhitelistPage() {
               {uploadResult}
             </div>
           )}
-
           {error && (
             <div className="bg-red-50 border border-red-200 rounded-lg px-4 py-2.5 text-sm text-red-600 mb-4">
               {error}
             </div>
           )}
+          {parseError && (
+            <div className="bg-red-50 border border-red-200 rounded-lg px-4 py-2.5 text-sm text-red-600 mb-4">
+              {parseError}
+            </div>
+          )}
 
-          <div className="flex items-center gap-3">
-            <input
-              ref={fileRef}
-              type="file"
-              accept=".csv"
-              onChange={handleUpload}
-              disabled={uploading}
-              className="text-sm text-slate-500 file:mr-3 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-medium file:bg-navy file:text-white hover:file:bg-navy-dark file:cursor-pointer disabled:opacity-50"
-            />
-            {uploading && <span className="text-sm text-slate-400">Uploading...</span>}
-          </div>
+          {!previewRows && !checkingExisting && (
+            <div
+              onDragOver={onDragOver}
+              onDragLeave={onDragLeave}
+              onDrop={onDrop}
+              onClick={() => fileRef.current?.click()}
+              className={`border-2 border-dashed rounded-xl p-8 text-center cursor-pointer transition-colors
+                ${dragActive ? "border-navy bg-navy/5" : "border-slate-200 hover:border-navy/30 hover:bg-slate-50"}`}
+            >
+              <input
+                ref={fileRef}
+                type="file"
+                accept=".csv"
+                className="hidden"
+                onChange={(e) => {
+                  const file = e.target.files?.[0];
+                  handleFile(file);
+                  e.target.value = "";
+                }}
+              />
+              <UploadCloud className="w-8 h-8 text-slate-300 mx-auto mb-2" strokeWidth={1.5} />
+              <p className="text-sm text-slate-600 font-medium">
+                Drag and drop a CSV file here, or click to browse
+              </p>
+              <p className="text-xs text-slate-400 mt-1">.csv files only</p>
+            </div>
+          )}
+
+          {checkingExisting && (
+            <div className="border-2 border-dashed border-slate-200 rounded-xl p-8 text-center">
+              <div className="w-6 h-6 border-2 border-navy/20 border-t-navy rounded-full animate-spin mx-auto mb-3" />
+              <p className="text-sm text-slate-500">Checking against the current whitelist…</p>
+            </div>
+          )}
+
+          {previewRows && !checkingExisting && (
+            <div>
+              <div className="flex flex-wrap gap-2 mb-4">
+                <span className="text-xs font-medium px-2.5 py-1 rounded-full border bg-navy/10 text-navy border-navy/20">
+                  {counts.new} new
+                </span>
+                <span className="text-xs font-medium px-2.5 py-1 rounded-full border bg-orange/10 text-orange-dark border-orange/30">
+                  {counts.overwrite} will update
+                </span>
+                <span className="text-xs font-medium px-2.5 py-1 rounded-full border bg-slate-100 text-slate-400 border-slate-200">
+                  {counts.unchanged} unchanged
+                </span>
+                {blocking && (
+                  <span className="text-xs font-medium px-2.5 py-1 rounded-full border bg-red-50 text-red-600 border-red-200">
+                    {counts.duplicate + counts.invalid} issue{counts.duplicate + counts.invalid !== 1 ? "s" : ""}
+                  </span>
+                )}
+              </div>
+
+              <div className="border border-slate-100 rounded-lg overflow-hidden mb-4 max-h-72 overflow-y-auto">
+                <div className="grid grid-cols-12 px-3 py-2 bg-slate-50 border-b border-slate-100 text-xs font-medium text-slate-500 uppercase tracking-wide sticky top-0">
+                  <span className="col-span-3">Row</span>
+                  <span className="col-span-3">Student ID</span>
+                  <span className="col-span-3">Name</span>
+                  <span className="col-span-3 text-right">Status</span>
+                </div>
+                <div className="divide-y divide-slate-50">
+                  {previewRows.map((r) => {
+                    const meta = STATUS_META[r.status];
+                    const isIssue = r.status === "duplicate" || r.status === "invalid";
+                    return (
+                      <div
+                        key={r.rowNumber}
+                        className={`grid grid-cols-12 px-3 py-2 text-sm items-center ${isIssue ? "bg-red-50/50" : ""}`}
+                      >
+                        <span className="col-span-3 text-slate-400 text-xs">Row {r.rowNumber}</span>
+                        <span className="col-span-3 font-mono text-foreground truncate">
+                          {r.id_number || <span className="text-red-400 italic">missing</span>}
+                        </span>
+                        <span className="col-span-3 text-slate-600 truncate">
+                          {r.full_name || <span className="text-slate-300 italic">unnamed</span>}
+                        </span>
+                        <span className="col-span-3 text-right">
+                          <span className={`text-xs font-medium px-2 py-0.5 rounded-full border ${meta.className}`}>
+                            {meta.label}
+                          </span>
+                        </span>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {blocking ? (
+                <div className="bg-red-50 border border-red-200 rounded-lg px-4 py-3 mb-4 flex gap-2.5">
+                  <AlertTriangle className="w-4 h-4 text-red-500 shrink-0 mt-0.5" strokeWidth={1.75} />
+                  <p className="text-sm text-red-700">
+                    Fix the flagged row{counts.duplicate + counts.invalid !== 1 ? "s" : ""} in your file, then re-upload. Nothing has been saved yet.
+                  </p>
+                </div>
+              ) : changeCount === 0 ? (
+                <div className="bg-slate-50 border border-slate-200 rounded-lg px-4 py-3 mb-4 flex gap-2.5">
+                  <CheckCircle2 className="w-4 h-4 text-slate-400 shrink-0 mt-0.5" strokeWidth={1.75} />
+                  <p className="text-sm text-slate-500">
+                    Every row already matches the current whitelist, there is nothing to update.
+                  </p>
+                </div>
+              ) : null}
+
+              <div className="flex gap-2">
+                <button
+                  onClick={handleCancelPreview}
+                  disabled={confirming}
+                  className="inline-flex items-center gap-1.5 bg-white text-slate-600 border border-slate-200 text-sm font-medium px-4 py-2 rounded-lg hover:bg-slate-50 transition-colors disabled:opacity-50"
+                >
+                  <RotateCcw className="w-4 h-4" strokeWidth={1.75} />
+                  Choose a different file
+                </button>
+                <button
+                  onClick={handleConfirm}
+                  disabled={blocking || confirming || changeCount === 0}
+                  className="inline-flex items-center gap-1.5 bg-navy text-white text-sm font-medium px-4 py-2 rounded-lg hover:bg-navy-dark transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  <CheckCircle2 className="w-4 h-4" strokeWidth={1.75} />
+                  {confirming ? "Uploading…" : `Confirm Upload (${changeCount})`}
+                </button>
+              </div>
+            </div>
+          )}
         </div>
 
         <div className="mb-4 relative">

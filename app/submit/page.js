@@ -1,14 +1,29 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { useEmbedding } from "@/components/shared/EmbeddingProvider";
 import Navbar from "@/components/shared/Navbar";
 import { ScanLine, Loader2 } from "lucide-react";
 import PageHeader from "@/components/shared/PageHeader";
+import ScanProgress from "@/components/shared/ScanProgress";
 
 const DAILY_LIMIT = 5;
+
+// Staged, client-paced progress. The embedding stage reflects a real
+// client-side promise. The middle stage's timing is an estimate, not a
+// live server signal, since /api/analyze is one atomic request with no
+// intermediate checkpoints. The advisory stage holds until the request
+// actually resolves rather than guessing when Gemini finishes.
+const STAGES = [
+  { key: "embedding", label: "Generating embedding…", description: "Converting your title and abstract into a semantic fingerprint." },
+  { key: "matching", label: "Comparing against the capstone library…", description: "Checking your proposed topic against existing BSIS studies." },
+  { key: "advisory", label: "Generating AI advisory…", description: "Gemini is drafting structured feedback based on your closest matches." },
+];
+
+const MATCHING_STAGE_DELAY_MS = 1600;
+const REQUEST_TIMEOUT_MS = 45000;
 
 async function fetchScansUsedToday(supabase, userId, role) {
   const startOfDayPHT = new Date(
@@ -43,7 +58,10 @@ export default function SubmitPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [scansLeft, setScansLeft] = useState(null);
-  const [status, setStatus] = useState("");
+  const [activeIndex, setActiveIndex] = useState(0);
+  const stageTimerRef = useRef(null);
+  const abortControllerRef = useRef(null);
+  const abortTimerRef = useRef(null);
 
   useEffect(() => {
     async function loadProfile() {
@@ -68,6 +86,14 @@ export default function SubmitPage() {
     loadProfile();
   }, []);
 
+  useEffect(() => {
+    return () => {
+      clearTimeout(stageTimerRef.current);
+      clearTimeout(abortTimerRef.current);
+      abortControllerRef.current?.abort();
+    };
+  }, []);
+
   async function handleSubmit(e) {
     e.preventDefault();
     setError("");
@@ -83,14 +109,27 @@ export default function SubmitPage() {
     }
 
     setLoading(true);
-    setStatus("Generating embedding…");
+    setActiveIndex(0);
 
+    let embedding;
     try {
       const combined = `${title.trim()} ${description.trim()}`;
-      const embedding = await getEmbedding(combined);
+      embedding = await getEmbedding(combined);
+    } catch (err) {
+      console.error(err);
+      setError("Failed to generate embedding. Please try again.");
+      setLoading(false);
+      return;
+    }
 
-      setStatus("Running similarity scan…");
+    setActiveIndex(1);
+    stageTimerRef.current = setTimeout(() => setActiveIndex(2), MATCHING_STAGE_DELAY_MS);
 
+    const controller = new AbortController();
+    abortControllerRef.current = controller;
+    abortTimerRef.current = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
+
+    try {
       const res = await fetch("/api/analyze", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -99,14 +138,18 @@ export default function SubmitPage() {
           description: description.trim(),
           embedding,
         }),
+        signal: controller.signal,
       });
+
+      clearTimeout(stageTimerRef.current);
+      clearTimeout(abortTimerRef.current);
+      setActiveIndex(2);
 
       const data = await res.json();
 
       if (!res.ok) {
         setError(data.error ?? "Something went wrong. Please try again.");
         setLoading(false);
-        setStatus("");
         return;
       }
 
@@ -119,10 +162,15 @@ export default function SubmitPage() {
 
       router.push(reportPath);
     } catch (err) {
+      clearTimeout(stageTimerRef.current);
+      clearTimeout(abortTimerRef.current);
       console.error(err);
-      setError("Failed to generate embedding. Please try again.");
+      if (err.name === "AbortError") {
+        setError("This is taking longer than expected. Check your connection and try again.");
+      } else {
+        setError("Could not reach the server. Check your connection and try again.");
+      }
       setLoading(false);
-      setStatus("");
     }
   }
 
@@ -141,13 +189,13 @@ export default function SubmitPage() {
         />
 
         {/* Model status */}
-        {modelLoading && (
+        {!loading && modelLoading && (
           <div className="mb-5 flex items-center gap-2 text-sm text-slate-500 bg-white border border-slate-200 rounded-lg px-4 py-3">
             <span className="inline-block w-2 h-2 rounded-full bg-amber-400 animate-pulse shrink-0" />
             Initializing embedding model in the background…
           </div>
         )}
-        {isReady && (
+        {!loading && isReady && (
           <div className="mb-5 flex items-center gap-2 text-sm text-green-700 bg-green-50 border border-green-200 rounded-lg px-4 py-3">
             <span className="inline-block w-2 h-2 rounded-full bg-green-500 shrink-0" />
             Embedding model ready
@@ -155,7 +203,7 @@ export default function SubmitPage() {
         )}
 
         {/* Scans remaining */}
-        {scansLeft !== null && (
+        {!loading && scansLeft !== null && (
           <div className="mb-5 text-sm text-slate-500">
             {scansLeft > 0
               ? `${scansLeft} of ${DAILY_LIMIT} scans remaining today`
@@ -163,59 +211,54 @@ export default function SubmitPage() {
           </div>
         )}
 
-        <div className="bg-white rounded-2xl border border-slate-200 p-6">
-          <form onSubmit={handleSubmit} className="space-y-5">
-            <div>
-              <label className="block text-sm font-medium text-foreground mb-1">
-                Proposed Capstone Title
-              </label>
-              <input
-                type="text"
-                value={title}
-                onChange={(e) => setTitle(e.target.value)}
-                required
-                placeholder="e.g. Automated Attendance Monitoring System Using Face Recognition"
-                className="w-full px-3 py-2 rounded-lg border border-slate-200 bg-slate-50 text-sm text-foreground placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-navy/20 focus:border-navy transition"
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-foreground mb-1">
-                Abstract or Problem Statement
-              </label>
-              <textarea
-                value={description}
-                onChange={(e) => setDescription(e.target.value)}
-                required
-                rows={7}
-                placeholder="Describe your proposed study, its objectives, and the problem it aims to address…"
-                className="w-full px-3 py-2 rounded-lg border border-slate-200 bg-slate-50 text-sm text-foreground placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-navy/20 focus:border-navy transition resize-none"
-              />
-            </div>
-
-            {error && <p className="text-sm text-red-600">{error}</p>}
-
-            {loading && status && (
-              <div className="flex items-center gap-2 text-sm text-slate-500">
-                <span className="inline-block w-2 h-2 rounded-full bg-navy animate-pulse shrink-0" />
-                {status}
+        {loading ? (
+          <div className="bg-white rounded-2xl border border-slate-200">
+            <ScanProgress stages={STAGES} activeIndex={activeIndex} />
+          </div>
+        ) : (
+          <div className="bg-white rounded-2xl border border-slate-200 p-6">
+            <form onSubmit={handleSubmit} className="space-y-5">
+              <div>
+                <label className="block text-sm font-medium text-foreground mb-1">
+                  Proposed Capstone Title
+                </label>
+                <input
+                  type="text"
+                  value={title}
+                  onChange={(e) => setTitle(e.target.value)}
+                  required
+                  placeholder="e.g. Automated Attendance Monitoring System Using Face Recognition"
+                  className="w-full px-3 py-2 rounded-lg border border-slate-200 bg-slate-50 text-sm text-foreground placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-navy/20 focus:border-navy transition"
+                />
               </div>
-            )}
 
-            <button
-              type="submit"
-              disabled={loading || !isReady || scansLeft === 0}
-              className="w-full flex items-center justify-center gap-2 bg-navy text-white text-sm font-medium py-2.5 rounded-lg hover:bg-navy-light transition disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              {loading ? (
-                <Loader2 className="w-4 h-4 animate-spin" />
-              ) : (
+              <div>
+                <label className="block text-sm font-medium text-foreground mb-1">
+                  Abstract or Problem Statement
+                </label>
+                <textarea
+                  value={description}
+                  onChange={(e) => setDescription(e.target.value)}
+                  required
+                  rows={7}
+                  placeholder="Describe your proposed study, its objectives, and the problem it aims to address…"
+                  className="w-full px-3 py-2 rounded-lg border border-slate-200 bg-slate-50 text-sm text-foreground placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-navy/20 focus:border-navy transition resize-none"
+                />
+              </div>
+
+              {error && <p className="text-sm text-red-600">{error}</p>}
+
+              <button
+                type="submit"
+                disabled={loading || !isReady || scansLeft === 0}
+                className="w-full flex items-center justify-center gap-2 bg-navy text-white text-sm font-medium py-2.5 rounded-lg hover:bg-navy-light transition disabled:opacity-50 disabled:cursor-not-allowed"
+              >
                 <ScanLine className="w-4 h-4" strokeWidth={1.75} />
-              )}
-              {loading ? "Running scan…" : "Run Semantic Scan"}
-            </button>
-          </form>
-        </div>
+                Run Semantic Scan
+              </button>
+            </form>
+          </div>
+        )}
 
         <p className="mt-4 text-xs text-slate-400 text-center px-4">
           Scans are limited to {DAILY_LIMIT} per calendar day and reset at 12:00 AM
