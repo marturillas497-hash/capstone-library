@@ -42,7 +42,7 @@ export default function AnalyticsPage() {
       supabase.from("abstract_views").select("id", { count: "exact", head: true }).gte("viewed_at", weekAgo),
       supabase
         .from("abstract_views")
-        .select("viewed_at, viewer_id, abstract_id, abstracts(title), profiles(full_name, student_metadata(id_number))")
+        .select("viewed_at, viewer_id, abstract_id, abstracts(title), profiles(full_name, student_metadata!profile_id(id_number))")
         .order("viewed_at", { ascending: false })
         .limit(50),
     ]);
