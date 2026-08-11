@@ -46,6 +46,10 @@ export async function GET(request) {
   }
 }
 
+// Accepts { rows: [{ id_number, full_name }, ...] }, already parsed and
+// reviewed by the user in the /admin/whitelist preview step. Re-validates
+// server-side rather than trusting the client blindly, since this endpoint
+// can be called directly regardless of what the UI enforces.
 export async function POST(request) {
   try {
     const supabase = await createClient();
@@ -64,53 +68,43 @@ export async function POST(request) {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
 
-    const formData = await request.formData();
-    const file = formData.get("file");
+    const body = await request.json();
+    const rows = Array.isArray(body?.rows) ? body.rows : null;
 
-    if (!file) {
-      return NextResponse.json({ error: "No file provided" }, { status: 400 });
+    if (!rows || rows.length === 0) {
+      return NextResponse.json({ error: "No rows provided" }, { status: 400 });
     }
 
-    const text = await file.text();
-    const lines = text.split(/\r?\n/).filter((l) => l.trim());
+    const cleaned = [];
+    const seen = new Set();
+    for (const row of rows) {
+      const id_number = typeof row.id_number === "string" ? row.id_number.trim() : "";
+      const full_name = typeof row.full_name === "string" && row.full_name.trim() ? row.full_name.trim() : null;
 
-    if (lines.length === 0) {
-      return NextResponse.json({ error: "CSV file is empty" }, { status: 400 });
-    }
-
-    const header = lines[0].toLowerCase().split(",").map((h) => h.trim());
-    const idCol = header.indexOf("id_number");
-    const nameCol = header.indexOf("full_name");
-
-    if (idCol === -1 || nameCol === -1) {
-      return NextResponse.json(
-        { error: "Upload rejected. The CSV file must include a header row with columns: id_number, full_name." },
-        { status: 400 }
-      );
-    }
-
-    const rows = [];
-    for (let i = 1; i < lines.length; i++) {
-      const cols = lines[i].split(",").map((c) => c.trim());
-      const id_number = cols[idCol];
-      const full_name = cols[nameCol] || null;
-      if (id_number) {
-        rows.push({ id_number, full_name });
+      if (!id_number) {
+        return NextResponse.json(
+          { error: "One or more rows is missing a student ID. Fix the file and re-upload." },
+          { status: 400 }
+        );
       }
-    }
-
-    if (rows.length === 0) {
-      return NextResponse.json({ error: "No valid rows found in CSV" }, { status: 400 });
+      if (seen.has(id_number)) {
+        return NextResponse.json(
+          { error: `Student ID ${id_number} appears more than once in this upload. Fix the file and re-upload.` },
+          { status: 400 }
+        );
+      }
+      seen.add(id_number);
+      cleaned.push({ id_number, full_name });
     }
 
     const admin = createAdminClient();
     const { error } = await admin
       .from("student_whitelist")
-      .upsert(rows, { onConflict: "id_number" });
+      .upsert(cleaned, { onConflict: "id_number" });
 
     if (error) throw error;
 
-    return NextResponse.json({ ok: true, count: rows.length });
+    return NextResponse.json({ ok: true, count: cleaned.length });
   } catch (err) {
     console.error("[POST /api/admin/whitelist]", err);
     return NextResponse.json({ error: "Failed to upload whitelist" }, { status: 500 });

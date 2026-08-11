@@ -8,8 +8,20 @@ import { useEmbedding } from "@/components/shared/EmbeddingProvider";
 import { Search, X, ChevronDown, BookOpen } from "lucide-react";
 import PageHeader from "@/components/shared/PageHeader";
 import { sanitizeFilterValue } from "@/lib/postgrest";
+import ScanProgress from "@/components/shared/ScanProgress";
 
 const YEAR_OPTIONS = Array.from({ length: 20 }, (_, i) => new Date().getFullYear() - i);
+
+// Two stages only, no advisory step, unlike /submit. Embedding reflects a
+// real client-side promise, the search stage holds until the actual
+// /api/library/search response resolves. See ScanProgress for why this is
+// staged rather than a literal server-driven readout.
+const SEARCH_STAGES = [
+  { key: "embedding", label: "Generating embedding…", description: "Converting your query into a semantic fingerprint." },
+  { key: "searching", label: "Searching the library…", description: "Comparing against the BSIS capstone archive." },
+];
+
+const SEARCH_TIMEOUT_MS = 45000;
 
 export default function LibraryPage() {
   const supabase = createClient();
@@ -20,6 +32,7 @@ export default function LibraryPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [yearFilter, setYearFilter] = useState("");
   const [searchLoading, setSearchLoading] = useState(false);
+  const [searchStageIndex, setSearchStageIndex] = useState(0);
   const [selectedAbstract, setSelectedAbstract] = useState(null);
   const [modalOpen, setModalOpen] = useState(false);
   const [profile, setProfile] = useState({ role: null, fullName: "" });
@@ -99,17 +112,27 @@ export default function LibraryPage() {
     lastSemanticQuery.current = trimmed;
 
     setSearchLoading(true);
+    setSearchStageIndex(0);
+
+    const controller = new AbortController();
+    const abortTimer = setTimeout(() => controller.abort(), SEARCH_TIMEOUT_MS);
+
     try {
       const embedding = await getEmbedding(trimmed);
+      setSearchStageIndex(1);
       const res = await fetch("/api/library/search", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ embedding, year: year ? parseInt(year) : null }),
+        signal: controller.signal,
       });
+      clearTimeout(abortTimer);
       const json = await res.json();
       setAbstracts(json.results || []);
     } catch (err) {
+      clearTimeout(abortTimer);
       console.error("Search failed:", err);
+      setAbstracts([]);
     } finally {
       setSearchLoading(false);
     }
@@ -364,7 +387,11 @@ export default function LibraryPage() {
           </p>
         )}
 
-        {loading || searchLoading ? (
+        {searchLoading ? (
+          <div className="bg-white rounded-2xl border border-slate-100 shadow-sm">
+            <ScanProgress stages={SEARCH_STAGES} activeIndex={searchStageIndex} />
+          </div>
+        ) : loading ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
             {Array.from({ length: 6 }).map((_, i) => (
               <div key={i} className="bg-white rounded-xl border border-slate-100 p-5 animate-pulse shadow-sm">
