@@ -5,7 +5,7 @@ import { createClient } from "@/lib/supabase/client";
 import Navbar from "@/components/shared/Navbar";
 import AbstractModal from "@/components/shared/AbstractModal";
 import { useEmbedding } from "@/components/shared/EmbeddingProvider";
-import { Search, X, ChevronDown, BookOpen } from "lucide-react";
+import { Search, X, ChevronDown, BookOpen, Info } from "lucide-react";
 import PageHeader from "@/components/shared/PageHeader";
 import { sanitizeFilterValue } from "@/lib/postgrest";
 import ScanProgress from "@/components/shared/ScanProgress";
@@ -281,6 +281,12 @@ export default function LibraryPage() {
             {searchLoading ? "Searching…" : "Search"}
           </button>
         </form>
+        <div className="flex items-start gap-2 bg-navy/5 border border-navy/10 rounded-lg px-4 py-2.5 mb-6 text-xs text-navy">
+          <Info className="w-4 h-4 mt-0.5 flex-shrink-0" strokeWidth={1.75} />
+          <p>
+            Type 1–2 words to filter instantly by title, author, or topic. Type 3 or more words to run a full semantic search across the library.
+          </p>
+        </div>
 
         {/* Tag filter */}
         <div className="mb-8">
