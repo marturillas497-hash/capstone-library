@@ -234,7 +234,7 @@ export default function SubmitPage() {
 
               <div>
                 <label className="block text-sm font-medium text-foreground mb-1">
-                  Abstract or Problem Statement
+                  Description
                 </label>
                 <textarea
                   value={description}

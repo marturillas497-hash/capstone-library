@@ -104,7 +104,7 @@ export default async function AdviserStudentReportPage({ params }) {
 
           <div className="pt-5 border-t border-slate-100">
             <p className="text-xs font-medium text-slate-500 uppercase tracking-wide mb-2">
-              Submitted Abstract / Problem Statement
+              Submitted Description
             </p>
             <p className="text-sm text-slate-600 leading-relaxed whitespace-pre-wrap">
               {report.input_description}
