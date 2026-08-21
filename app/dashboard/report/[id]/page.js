@@ -5,11 +5,12 @@ import Navbar from "@/components/shared/Navbar";
 import { RISK_LABELS, RISK_BADGE as riskBadgeColor, RISK_BAR as riskBarColor } from "@/lib/risk";
 import { parseAdvisory, getMatchRisk } from "@/lib/advisory";
 import MatchesList from "@/components/shared/MatchesList";
-import { ArrowLeft, Sparkles } from "lucide-react";
+import { ArrowLeft, Sparkles, Info } from "lucide-react";
 import PageHeader from "@/components/shared/PageHeader";
 
-export default async function ReportPage({ params }) {
+export default async function ReportPage({ params, searchParams }) {
   const { id } = await params;
+  const { fallback } = await searchParams;
 
   const supabase = await createClient();
 
@@ -65,6 +66,18 @@ export default async function ReportPage({ params }) {
           }
         />
 
+        {fallback === "1" && (
+          <div className="flex items-start gap-2 bg-navy/5 border border-navy/10 rounded-lg px-4 py-2.5 mb-6 text-xs text-navy">
+            <Info className="w-4 h-4 mt-0.5 flex-shrink-0" strokeWidth={1.75} />
+            <p>
+              Our AI reviewer didn't respond in time, so this advisory uses our
+              standard guidance for this risk level instead of a review written
+              specifically for your topic. Your similarity check itself ran
+              normally and the results above are unaffected.
+            </p>
+          </div>
+        )}
+
         <div className="bg-white rounded-2xl border border-slate-200 p-6 mb-6">
 
           {report.risk_level && (
@@ -92,7 +105,7 @@ export default async function ReportPage({ params }) {
 
           <div className="pt-5 border-t border-slate-100">
             <p className="text-xs font-medium text-slate-500 uppercase tracking-wide mb-2">
-              Submitted Description
+              Submitted Abstract / Problem Statement
             </p>
             <p className="text-sm text-slate-600 leading-relaxed whitespace-pre-wrap">
               {report.input_description}
@@ -238,4 +251,4 @@ export default async function ReportPage({ params }) {
       </main>
     </div>
   );
-}
+} 

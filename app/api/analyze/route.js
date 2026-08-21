@@ -87,10 +87,10 @@ Suggest exactly 3 directions the student can explore. Every direction must be th
         setTimeout(() => reject(new Error("Gemini request timed out")), GEMINI_TIMEOUT_MS)
       ),
     ]);
-    return result.response.text();
+    return { text: result.response.text(), usedFallback: false };
   } catch (err) {
     console.error("Gemini error:", err);
-    return generateFallbackAdvisory(riskLevel);
+    return { text: generateFallbackAdvisory(riskLevel), usedFallback: true };
   }
 }
 
@@ -243,7 +243,7 @@ export async function POST(request) {
       input_description: description,
       similarity_score: topScore,
       risk_level: riskLevel,
-      ai_recommendations: advisory,
+      ai_recommendations: advisory.text,
       results_json: matches,
     })
     .select("id")
@@ -254,5 +254,8 @@ export async function POST(request) {
     return NextResponse.json({ error: "Failed to save report." }, { status: 500 });
   }
 
-  return NextResponse.json({ reportId: report.id }, { status: 201 });
+  return NextResponse.json(
+    { reportId: report.id, usedFallback: advisory.usedFallback },
+    { status: 201 }
+  );
 }
