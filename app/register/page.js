@@ -54,6 +54,11 @@ function TermsModal({ onClose }) {
             assigned adviser, and the institution.
           </p>
           <p>
+            Certain activities within the system, such as the similarity
+            checks you submit, are recorded to help maintain the integrity
+            and quality of the capstone library.
+          </p>
+          <p>
             Misuse of the system, including submitting false information or
             attempting to circumvent access controls, may result in account
             suspension.
