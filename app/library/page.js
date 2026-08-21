@@ -5,7 +5,7 @@ import { createClient } from "@/lib/supabase/client";
 import Navbar from "@/components/shared/Navbar";
 import AbstractModal from "@/components/shared/AbstractModal";
 import { useEmbedding } from "@/components/shared/EmbeddingProvider";
-import { Search, X, ChevronDown, BookOpen, Info } from "lucide-react";
+import { Search, X, ChevronDown, BookOpen } from "lucide-react";
 import PageHeader from "@/components/shared/PageHeader";
 import { sanitizeFilterValue } from "@/lib/postgrest";
 import ScanProgress from "@/components/shared/ScanProgress";
@@ -99,7 +99,7 @@ export default function LibraryPage() {
       let q = supabase
         .from("abstracts")
         .select("id, title, abstract_text, authors, year, accession_id, keywords")
-        .or(`title.ilike.%${safe}%,authors.ilike.%${safe}%,abstract_text.ilike.%${safe}%`);
+        .or(`title.ilike.%${safe}%,authors.ilike.%${safe}%,abstract_text.ilike.%${safe}%,accession_id.ilike.%${safe}%`);
       if (year) q = q.eq("year", year);
       const { data } = await q.order("created_at", { ascending: false });
       setAbstracts(data || []);
@@ -259,7 +259,7 @@ export default function LibraryPage() {
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Search by title, author, or topic..."
+            placeholder="Search by title, author, topic, or accession ID..."
             className="flex-1 border border-slate-200 rounded-lg px-4 py-2.5 text-sm text-foreground bg-white shadow-sm focus:outline-none focus:ring-2 focus:ring-navy/30 placeholder:text-slate-400"
           />
           <select
@@ -281,12 +281,6 @@ export default function LibraryPage() {
             {searchLoading ? "Searching…" : "Search"}
           </button>
         </form>
-        <div className="flex items-start gap-2 bg-navy/5 border border-navy/10 rounded-lg px-4 py-2.5 mb-6 text-xs text-navy">
-          <Info className="w-4 h-4 mt-0.5 flex-shrink-0" strokeWidth={1.75} />
-          <p>
-            Type 1–2 words to filter instantly by title, author, or topic. Type 3 or more words to run a full semantic search across the library.
-          </p>
-        </div>
 
         {/* Tag filter */}
         <div className="mb-8">

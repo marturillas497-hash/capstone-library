@@ -155,10 +155,11 @@ export default function SubmitPage() {
 
       setScansLeft((prev) => Math.max(0, (prev ?? 1) - 1));
 
-      const reportPath =
+      const basePath =
         profile?.role === "capstone_adviser"
           ? `/adviser/report/${data.reportId}`
           : `/dashboard/report/${data.reportId}`;
+      const reportPath = data.usedFallback ? `${basePath}?fallback=1` : basePath;
 
       router.push(reportPath);
     } catch (err) {
@@ -234,7 +235,7 @@ export default function SubmitPage() {
 
               <div>
                 <label className="block text-sm font-medium text-foreground mb-1">
-                  Description
+                  Abstract or Problem Statement
                 </label>
                 <textarea
                   value={description}
