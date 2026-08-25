@@ -100,7 +100,7 @@ export default function EditAbstractPage({ params }) {
         body: JSON.stringify({
           title: form.title.trim(),
           abstract_text: form.abstract_text.trim(),
-          authors: form.authors.trim() || null,
+          authors: form.authors.trim(),
           year: form.year ? parseInt(form.year) : null,
           accession_id: form.accession_id.trim() || null,
           keywords: form.keywords,
@@ -215,6 +215,7 @@ export default function EditAbstractPage({ params }) {
                 name="authors"
                 value={form.authors}
                 onChange={handleChange}
+                required
                 className="w-full border border-slate-200 rounded-lg px-4 py-2.5 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-navy/30"
               />
             </div>

@@ -28,6 +28,10 @@ export async function PATCH(request, { params }) {
       return NextResponse.json({ error: "Title and abstract text are required" }, { status: 400 });
     }
 
+    if (!authors || !authors.trim()) {
+      return NextResponse.json({ error: "Authors is required" }, { status: 400 });
+    }
+
     if (!embedding || !Array.isArray(embedding) || embedding.length !== 384) {
       return NextResponse.json({ error: "Invalid embedding" }, { status: 400 });
     }
@@ -38,7 +42,7 @@ export async function PATCH(request, { params }) {
       .update({
         title,
         abstract_text,
-        authors: authors || null,
+        authors,
         year: year || null,
         accession_id: accession_id || null,
         embedding: `[${embedding.join(",")}]`,
