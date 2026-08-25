@@ -392,7 +392,7 @@ export default function LibraryPage() {
             <ScanProgress stages={SEARCH_STAGES} activeIndex={searchStageIndex} />
           </div>
         ) : loading ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
             {Array.from({ length: 6 }).map((_, i) => (
               <div key={i} className="bg-white rounded-xl border border-slate-100 p-5 animate-pulse shadow-sm">
                 <div className="h-4 bg-slate-100 rounded w-3/4 mb-3" />
@@ -412,7 +412,7 @@ export default function LibraryPage() {
             <p className="text-xs text-slate-400 mb-4">
               {displayedAbstracts.length} result{displayedAbstracts.length !== 1 ? "s" : ""}
             </p>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
               {displayedAbstracts.map((abstract) => (
                 <button
                   key={abstract.id}
@@ -438,7 +438,18 @@ export default function LibraryPage() {
                   <p className="text-xs text-slate-400 line-clamp-3 leading-relaxed mb-2">
                     {abstract.abstract_text}
                   </p>
-                  {(!abstract.keywords || abstract.keywords.length === 0) && (
+                  {abstract.keywords?.length > 0 ? (
+                    <div className="flex flex-wrap gap-1.5">
+                      {abstract.keywords.map((kw, i) => (
+                        <span
+                          key={i}
+                          className="text-[11px] bg-navy/5 text-navy px-2 py-0.5 rounded-full"
+                        >
+                          {kw}
+                        </span>
+                      ))}
+                    </div>
+                  ) : (
                     <span className="text-[11px] text-slate-300 italic">No tags</span>
                   )}
                 </button>
