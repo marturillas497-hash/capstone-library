@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { useEmbedding } from "@/components/shared/EmbeddingProvider";
 import Navbar from "@/components/shared/Navbar";
-import { ScanLine, Loader2 } from "lucide-react";
+import { ScanLine, Loader2, Info } from "lucide-react";
 import PageHeader from "@/components/shared/PageHeader";
 import ScanProgress from "@/components/shared/ScanProgress";
 
@@ -218,6 +218,12 @@ export default function SubmitPage() {
           </div>
         ) : (
           <div className="bg-white rounded-2xl border border-slate-200 p-6">
+            <div className="flex items-start gap-2 bg-navy/5 border border-navy/10 rounded-lg px-4 py-2.5 mb-5 text-xs text-navy">
+              <Info className="w-4 h-4 mt-0.5 flex-shrink-0" strokeWidth={1.75} />
+              <p>
+                Enter your proposed title and description in English. The similarity model is trained primarily on English text and is not accurate for other languages, including Filipino and regional languages.
+              </p>
+            </div>
             <form onSubmit={handleSubmit} className="space-y-5">
               <div>
                 <label className="block text-sm font-medium text-foreground mb-1">
