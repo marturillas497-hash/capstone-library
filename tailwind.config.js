@@ -28,7 +28,7 @@ module.exports = {
       },
       fontFamily: {
         sans: ["DM Sans", "sans-serif"],
-        display: ["DM Serif Display", "serif"],
+        display: ["DM Sans", "sans-serif"],
       },
     },
   },
