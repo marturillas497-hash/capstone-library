@@ -23,6 +23,7 @@ const NAV_LINKS = {
   admin: [
     { href: "/admin", label: "Dashboard" },
     { href: "/library", label: "Library" },
+    { href: "/admin/archive", label: "Add Abstract" },
     { href: "/admin/approvals", label: "Approvals" },
     { href: "/admin/analytics", label: "Analytics" },
     { href: "/admin/whitelist", label: "Whitelist" },
