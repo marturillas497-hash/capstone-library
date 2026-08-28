@@ -126,14 +126,14 @@ export default async function AdviserReportPage({ params, searchParams }) {
                   {advisory.verdict && (
                     <div className="bg-white rounded-2xl border border-slate-200 p-5">
                       <p className="text-xs font-medium text-slate-500 uppercase tracking-wide mb-2">Verdict</p>
-                      <p className="text-sm text-slate-700 leading-relaxed">{advisory.verdict}</p>
+                      <p className="text-sm text-slate-700 leading-relaxed indent-6">{advisory.verdict}</p>
                     </div>
                   )}
 
                   {advisory.criticalAnalysis && (
                     <div className="bg-white rounded-2xl border border-slate-200 p-5">
                       <p className="text-xs font-medium text-slate-500 uppercase tracking-wide mb-2">Critical Analysis of Overlap</p>
-                      <p className="text-sm text-slate-600 leading-relaxed">{advisory.criticalAnalysis}</p>
+                      <p className="text-sm text-slate-600 leading-relaxed indent-6">{advisory.criticalAnalysis}</p>
 
                       {matches.length >= 1 && (
                         <div className="mt-4 rounded-xl overflow-hidden border border-slate-100">

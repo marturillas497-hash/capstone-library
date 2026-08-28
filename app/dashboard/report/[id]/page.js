@@ -130,7 +130,7 @@ export default async function ReportPage({ params, searchParams }) {
                       <p className="text-xs font-medium text-slate-500 uppercase tracking-wide mb-2">
                         Verdict
                       </p>
-                      <p className="text-sm text-slate-700 leading-relaxed">
+                      <p className="text-sm text-slate-700 leading-relaxed indent-6">
                         {advisory.verdict}
                       </p>
                     </div>
@@ -141,7 +141,7 @@ export default async function ReportPage({ params, searchParams }) {
                       <p className="text-xs font-medium text-slate-500 uppercase tracking-wide mb-2">
                         Critical Analysis of Overlap
                       </p>
-                      <p className="text-sm text-slate-600 leading-relaxed">
+                      <p className="text-sm text-slate-600 leading-relaxed indent-6">
                         {advisory.criticalAnalysis}
                       </p>
 
@@ -251,4 +251,4 @@ export default async function ReportPage({ params, searchParams }) {
       </main>
     </div>
   );
-} 
+}
