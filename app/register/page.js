@@ -31,9 +31,7 @@ function TermsModal({ onClose }) {
           </button>
         </div>
         <div className="overflow-y-auto px-6 py-5 text-sm text-slate-600 space-y-4">
-          <p className="text-xs text-amber-600 font-medium bg-amber-50 border border-amber-200 rounded-lg px-3 py-2">
-            Placeholder, final Terms and Conditions text has not been drafted yet.
-          </p>
+
           <p>
             By creating an account on Capstone Library, you agree to use this
             system solely for academic purposes related to the BSIS program at
@@ -57,11 +55,6 @@ function TermsModal({ onClose }) {
             Certain activities within the system, such as the similarity
             checks you submit, are recorded to help maintain the integrity
             and quality of the capstone library.
-          </p>
-          <p>
-            Misuse of the system, including submitting false information or
-            attempting to circumvent access controls, may result in account
-            suspension.
           </p>
           <p>
             These terms are subject to change. Continued use of the system
