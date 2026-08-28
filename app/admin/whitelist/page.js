@@ -12,6 +12,7 @@ const STATUS_META = {
   unchanged: { label: "Unchanged", className: "bg-slate-100 text-slate-400 border-slate-200" },
   duplicate: { label: "Duplicate in file", className: "bg-red-50 text-red-600 border-red-200" },
   invalid: { label: "Missing ID", className: "bg-red-50 text-red-600 border-red-200" },
+  invalid_name: { label: "Missing Name", className: "bg-red-50 text-red-600 border-red-200" },
 };
 
 function parseCsv(text) {
@@ -49,6 +50,7 @@ function classifyRows(rows, existingMap) {
   return rows.map((r) => {
     if (!r.id_number) return { ...r, status: "invalid" };
     if (counts[r.id_number] > 1) return { ...r, status: "duplicate" };
+    if (!r.full_name) return { ...r, status: "invalid_name" };
 
     const existingName = existingMap.get(r.id_number);
     if (existingName === undefined) return { ...r, status: "new" };
@@ -62,6 +64,7 @@ export default function WhitelistPage() {
   const supabase = createClient();
   const [entries, setEntries] = useState([]);
   const [query, setQuery] = useState("");
+  const [sort, setSort] = useState("date");
   const [loading, setLoading] = useState(true);
   const [profile, setProfile] = useState({ role: "admin", fullName: "" });
 
@@ -88,20 +91,20 @@ export default function WhitelistPage() {
           .single();
         if (data) setProfile({ role: data.role, fullName: data.full_name });
       }
-      await fetchEntries("");
+      await fetchEntries("", sort);
     }
     init();
   }, []);
 
   useEffect(() => {
     clearTimeout(searchTimeout.current);
-    searchTimeout.current = setTimeout(() => fetchEntries(query), 300);
-  }, [query]);
+    searchTimeout.current = setTimeout(() => fetchEntries(query, sort), 300);
+  }, [query, sort]);
 
-  async function fetchEntries(q) {
+  async function fetchEntries(q, s) {
     setLoading(true);
     try {
-      const res = await fetch(`/api/admin/whitelist?q=${encodeURIComponent(q)}`);
+      const res = await fetch(`/api/admin/whitelist?q=${encodeURIComponent(q)}&sort=${s}`);
       const json = await res.json();
       setEntries(json.entries || []);
     } catch {
@@ -203,7 +206,7 @@ export default function WhitelistPage() {
           : null
       );
       setPreviewRows(null);
-      await fetchEntries(query);
+      await fetchEntries(query, sort);
     } catch (err) {
       setError(err.message);
     } finally {
@@ -217,9 +220,9 @@ export default function WhitelistPage() {
     });
   }
 
-  const counts = { new: 0, overwrite: 0, unchanged: 0, duplicate: 0, invalid: 0 };
+  const counts = { new: 0, overwrite: 0, unchanged: 0, duplicate: 0, invalid: 0, invalid_name: 0 };
   if (previewRows) previewRows.forEach((r) => counts[r.status]++);
-  const blocking = counts.duplicate + counts.invalid > 0;
+  const blocking = counts.duplicate + counts.invalid + counts.invalid_name > 0;
   const changeCount = counts.new + counts.overwrite;
 
   return (
@@ -341,7 +344,7 @@ export default function WhitelistPage() {
                 </span>
                 {blocking && (
                   <span className="text-xs font-medium px-2.5 py-1 rounded-full border bg-red-50 text-red-600 border-red-200">
-                    {counts.duplicate + counts.invalid} issue{counts.duplicate + counts.invalid !== 1 ? "s" : ""}
+                    {counts.duplicate + counts.invalid + counts.invalid_name} issue{counts.duplicate + counts.invalid + counts.invalid_name !== 1 ? "s" : ""}
                   </span>
                 )}
               </div>
@@ -356,7 +359,7 @@ export default function WhitelistPage() {
                 <div className="divide-y divide-slate-50">
                   {previewRows.map((r) => {
                     const meta = STATUS_META[r.status];
-                    const isIssue = r.status === "duplicate" || r.status === "invalid";
+                    const isIssue = r.status === "duplicate" || r.status === "invalid" || r.status === "invalid_name";
                     return (
                       <div
                         key={r.rowNumber}
@@ -418,15 +421,26 @@ export default function WhitelistPage() {
           )}
         </div>
 
-        <div className="mb-4 relative">
-          <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" strokeWidth={1.75} />
-          <input
-            type="text"
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            placeholder="Search by student ID or name..."
-            className="w-full border border-slate-200 rounded-lg pl-10 pr-4 py-2.5 text-sm text-foreground bg-white shadow-sm focus:outline-none focus:ring-2 focus:ring-navy/30"
-          />
+        <div className="mb-4 flex gap-2">
+          <div className="flex-1 relative">
+            <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" strokeWidth={1.75} />
+            <input
+              type="text"
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              placeholder="Search by student ID or name..."
+              className="w-full border border-slate-200 rounded-lg pl-10 pr-4 py-2.5 text-sm text-foreground bg-white shadow-sm focus:outline-none focus:ring-2 focus:ring-navy/30"
+            />
+          </div>
+          <select
+            value={sort}
+            onChange={(e) => setSort(e.target.value)}
+            className="border border-slate-200 rounded-lg px-3 py-2.5 text-sm text-foreground bg-white shadow-sm focus:outline-none focus:ring-2 focus:ring-navy/30"
+          >
+            <option value="date">Newest first</option>
+            <option value="name">Name (A to Z)</option>
+            <option value="id">Student ID</option>
+          </select>
         </div>
 
         {loading ? (

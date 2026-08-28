@@ -23,12 +23,20 @@ export async function GET(request) {
 
     const { searchParams } = new URL(request.url);
     const q = searchParams.get("q") || "";
+    const sort = searchParams.get("sort") || "date";
+
+    const SORT_MAP = {
+      name: { column: "full_name", ascending: true },
+      id: { column: "id_number", ascending: true },
+      date: { column: "created_at", ascending: false },
+    };
+    const { column, ascending } = SORT_MAP[sort] || SORT_MAP.date;
 
     const admin = createAdminClient();
     let query = admin
       .from("student_whitelist")
       .select("id, id_number, full_name, created_at")
-      .order("created_at", { ascending: false })
+      .order(column, { ascending })
       .limit(100);
 
     if (q) {
@@ -79,11 +87,17 @@ export async function POST(request) {
     const seen = new Set();
     for (const row of rows) {
       const id_number = typeof row.id_number === "string" ? row.id_number.trim() : "";
-      const full_name = typeof row.full_name === "string" && row.full_name.trim() ? row.full_name.trim() : null;
+      const full_name = typeof row.full_name === "string" ? row.full_name.trim() : "";
 
       if (!id_number) {
         return NextResponse.json(
           { error: "One or more rows is missing a student ID. Fix the file and re-upload." },
+          { status: 400 }
+        );
+      }
+      if (!full_name) {
+        return NextResponse.json(
+          { error: "One or more rows is missing a name. Fix the file and re-upload." },
           { status: 400 }
         );
       }
