@@ -30,7 +30,7 @@ const FEATURES = [
   {
     iconColorClass: "text-gold",
     icon: BookOpen,
-    label: "BSIS Capstone Archive",
+    label: "BSIS Abstract Catalog",
   },
 ];
 
@@ -103,7 +103,31 @@ function LoginForm() {
   }
 
   return (
-    <div className="min-h-screen flex">
+    <div className="min-h-screen flex flex-col lg:flex-row">
+
+      {/* Mobile-only top banner */}
+      <div className="lg:hidden bg-navy px-6 pt-8 pb-6 relative overflow-hidden">
+        <div className="absolute top-0 left-0 right-0 h-[3px] bg-orange" />
+        <div className="flex items-center gap-3 mb-3">
+          <img
+            src="/mist-logo.png"
+            alt="MIST"
+            className="h-10 w-10 object-contain"
+          />
+          <div className="w-px h-8 bg-white/15" />
+          <img
+            src="/is-logo.png"
+            alt="Information Systems"
+            className="h-10 w-10 object-contain"
+          />
+        </div>
+        <p className="text-white text-sm font-medium leading-snug">
+          Makilala Institute of Science and Technology
+        </p>
+        <p className="text-orange text-xs leading-snug mt-0.5">
+          Bachelor of Science in Information Systems
+        </p>
+      </div>
 
       {/* Left panel */}
       <div className="hidden lg:flex lg:w-[45%] flex-col justify-between p-10 relative overflow-hidden bg-navy">
@@ -137,7 +161,7 @@ function LoginForm() {
             Makilala Institute of Science and Technology
           </p>
           <p className="text-orange text-[10px] leading-snug mb-7">
-            Department of Information Systems
+            Bachelor of Science in Information Systems
           </p>
 
           <h1 className="font-display text-4xl text-white mb-3 leading-tight">
@@ -165,18 +189,8 @@ function LoginForm() {
       <div className="flex-1 flex items-center justify-center px-6 bg-slate-50">
         <div className="w-full max-w-sm">
 
-          {/* Mobile-only header */}
-          <div className="text-center mb-8 lg:hidden">
-            <h1 className="font-display text-3xl text-navy mb-1">
-              Capstone Library
-            </h1>
-            <p className="text-sm text-slate-600">
-              MIST, Bachelor of Science in Information Systems
-            </p>
-          </div>
-
           <h2 className="font-display text-3xl text-foreground mb-1">
-            Welcome back
+            Capstone Library
           </h2>
           <p className="text-sm text-slate-600 mb-8">
             Sign in to your Capstone Library account
