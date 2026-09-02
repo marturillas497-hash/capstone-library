@@ -30,6 +30,11 @@ module.exports = {
         sans: ["DM Sans", "sans-serif"],
         display: ["DM Sans", "sans-serif"],
       },
+      boxShadow: {
+        neo: "8px 8px 16px #b6c0cf, -8px -8px 16px #ffffff",
+        "neo-hover": "14px 14px 30px #9aa6b8, -10px -10px 24px #ffffff",
+        "neo-inset": "inset 4px 4px 8px #b6c0cf, inset -4px -4px 8px #ffffff",
+      },
     },
   },
   plugins: [],

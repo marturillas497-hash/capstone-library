@@ -19,3 +19,9 @@ body {
 .font-display {
   font-weight: 600;
 }
+
+@layer utilities {
+  .neo-transition {
+    transition: box-shadow 300ms ease-in-out, transform 300ms ease-in-out;
+  }
+}
