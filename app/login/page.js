@@ -190,7 +190,7 @@ function LoginForm() {
         <div className="w-full max-w-sm">
 
           <h2 className="font-display text-3xl text-foreground mb-1">
-            Capstone Library
+            Welcome Back
           </h2>
           <p className="text-sm text-slate-600 mb-8">
             Sign in to your Capstone Library account
