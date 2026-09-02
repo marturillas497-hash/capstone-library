@@ -79,7 +79,7 @@ export default async function AdviserReportPage({ params, searchParams }) {
           </div>
         )}
 
-        <div className="bg-white rounded-2xl border border-slate-200 p-6 mb-6">
+        <div className="bg-background shadow-neo neo-transition rounded-2xl p-6 mb-6">
 
           {report.risk_level && (
             <span className={`inline-block text-sm font-semibold px-3 py-1.5 rounded-full border mb-4 ${riskBadgeColor[report.risk_level]}`}>
@@ -124,14 +124,14 @@ export default async function AdviserReportPage({ params, searchParams }) {
               {advisory ? (
                 <>
                   {advisory.verdict && (
-                    <div className="bg-white rounded-2xl border border-slate-200 p-5">
+                    <div className="bg-background shadow-neo neo-transition rounded-2xl p-5">
                       <p className="text-xs font-medium text-slate-500 uppercase tracking-wide mb-2">Verdict</p>
                       <p className="text-sm text-slate-700 leading-relaxed indent-6">{advisory.verdict}</p>
                     </div>
                   )}
 
                   {advisory.criticalAnalysis && (
-                    <div className="bg-white rounded-2xl border border-slate-200 p-5">
+                    <div className="bg-background shadow-neo neo-transition rounded-2xl p-5">
                       <p className="text-xs font-medium text-slate-500 uppercase tracking-wide mb-2">Critical Analysis of Overlap</p>
                       <p className="text-sm text-slate-600 leading-relaxed indent-6">{advisory.criticalAnalysis}</p>
 
@@ -168,7 +168,7 @@ export default async function AdviserReportPage({ params, searchParams }) {
                   )}
 
                   {advisory.proposedTitles.length >= 1 && (
-                    <div className="bg-white rounded-2xl border border-slate-200 p-5">
+                    <div className="bg-background shadow-neo neo-transition rounded-2xl p-5">
                       <p className="text-xs font-medium text-slate-500 uppercase tracking-wide mb-3">Proposed Unique Titles</p>
                       <div className="divide-y divide-slate-100">
                         {advisory.proposedTitles.map((title, i) => (
@@ -189,7 +189,7 @@ export default async function AdviserReportPage({ params, searchParams }) {
                   )}
 
                   {advisory.alternativeDirections.length >= 1 && (
-                    <div className="bg-white rounded-2xl border border-slate-200 p-5">
+                    <div className="bg-background shadow-neo neo-transition rounded-2xl p-5">
                       <p className="text-xs font-medium text-slate-500 uppercase tracking-wide mb-3">Alternative Research Directions</p>
                       <div className="space-y-3">
                         {advisory.alternativeDirections.map((direction, i) => (
@@ -200,7 +200,7 @@ export default async function AdviserReportPage({ params, searchParams }) {
                   )}
                 </>
               ) : (
-                <div className="bg-white rounded-2xl border border-slate-200 p-5">
+                <div className="bg-background shadow-neo neo-transition rounded-2xl p-5">
                   <p className="text-sm text-slate-600 leading-relaxed whitespace-pre-wrap">{report.ai_recommendations}</p>
                 </div>
               )}
