@@ -213,11 +213,11 @@ export default function SubmitPage() {
         )}
 
         {loading ? (
-          <div className="bg-white rounded-2xl border border-slate-200">
+          <div className="bg-background shadow-neo neo-transition rounded-2xl">
             <ScanProgress stages={STAGES} activeIndex={activeIndex} />
           </div>
         ) : (
-          <div className="bg-white rounded-2xl border border-slate-200 p-6">
+          <div className="bg-background shadow-neo neo-transition rounded-2xl p-6">
             <div className="flex items-start gap-2 bg-navy/5 border border-navy/10 rounded-lg px-4 py-2.5 mb-5 text-xs text-navy">
               <Info className="w-4 h-4 mt-0.5 flex-shrink-0" strokeWidth={1.75} />
               <p>
@@ -235,7 +235,7 @@ export default function SubmitPage() {
                   onChange={(e) => setTitle(e.target.value)}
                   required
                   placeholder="e.g. Automated Attendance Monitoring System Using Face Recognition"
-                  className="w-full px-3 py-2 rounded-lg border border-slate-200 bg-slate-50 text-sm text-foreground placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-navy/20 focus:border-navy transition"
+                  className="w-full px-3 py-2 rounded-lg bg-background shadow-neo-inset border-none text-sm text-foreground placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-navy/20 neo-transition"
                 />
               </div>
 
@@ -249,7 +249,7 @@ export default function SubmitPage() {
                   required
                   rows={7}
                   placeholder="Describe your proposed study, its objectives, and the problem it aims to address…"
-                  className="w-full px-3 py-2 rounded-lg border border-slate-200 bg-slate-50 text-sm text-foreground placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-navy/20 focus:border-navy transition resize-none"
+                  className="w-full px-3 py-2 rounded-lg bg-background shadow-neo-inset border-none text-sm text-foreground placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-navy/20 neo-transition resize-none"
                 />
               </div>
 

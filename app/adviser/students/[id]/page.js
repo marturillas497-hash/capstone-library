@@ -78,7 +78,7 @@ export default async function AdviserStudentPage({ params }) {
           </h2>
 
           {!reports || reports.length === 0 ? (
-            <div className="bg-white rounded-xl border border-slate-200 p-8 text-center">
+            <div className="bg-background shadow-neo neo-transition rounded-xl p-8 text-center">
               <p className="text-slate-500 text-sm">
                 This student has not run any similarity scans yet.
               </p>
@@ -89,7 +89,7 @@ export default async function AdviserStudentPage({ params }) {
                 <Link
                   key={report.id}
                   href={`/adviser/students/${id}/report/${report.id}`}
-                  className="block bg-white rounded-xl border border-slate-200 p-4 hover:border-navy/30 hover:shadow-sm transition"
+                  className="block bg-background shadow-neo hover:shadow-neo-hover hover:-translate-y-1 active:shadow-neo-inset active:translate-y-0 neo-transition rounded-xl p-4"
                 >
                   <div className="flex items-start justify-between gap-3">
                     <div className="min-w-0">
