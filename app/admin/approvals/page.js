@@ -137,7 +137,7 @@ export default function ApprovalsPage() {
         {loading ? (
           <div className="space-y-3">
             {[1, 2, 3].map((i) => (
-              <div key={i} className="bg-white border border-slate-100 rounded-xl p-5 animate-pulse shadow-sm">
+              <div key={i} className="bg-background shadow-neo neo-transition rounded-xl p-5 animate-pulse">
                 <div className="h-4 bg-slate-100 rounded w-48 mb-2" />
                 <div className="h-3 bg-slate-100 rounded w-32" />
               </div>
@@ -161,7 +161,7 @@ export default function ApprovalsPage() {
             {advisers.map((adviser) => (
               <div
                 key={adviser.id}
-                className="bg-white border border-slate-100 rounded-xl p-5 shadow-sm flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4"
+                className="bg-background shadow-neo neo-transition rounded-xl p-5 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4"
               >
                 <div>
                   <p className="font-semibold text-slate-700">{adviser.full_name}</p>

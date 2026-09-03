@@ -111,7 +111,7 @@ export default function AnalyticsPage() {
             { label: "Total Abstract Views", value: stats.totalViews, icon: Eye },
             { label: "Views This Week", value: stats.viewsThisWeek, icon: TrendingUp },
           ].map((card) => (
-            <div key={card.label} className="bg-white rounded-xl border border-slate-100 shadow-sm p-5">
+            <div key={card.label} className="bg-background shadow-neo neo-transition rounded-xl p-5">
               <div className="inline-flex items-center justify-center w-9 h-9 rounded-lg bg-navy mb-3">
                 <card.icon className="w-5 h-5 text-white" strokeWidth={1.75} />
               </div>
@@ -126,7 +126,7 @@ export default function AnalyticsPage() {
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-10">
-          <div className="bg-white rounded-xl border border-slate-100 shadow-sm p-6">
+          <div className="bg-background shadow-neo neo-transition rounded-xl p-6">
             <h2 className="text-base font-semibold text-slate-700 mb-4 flex items-center gap-2">
               <Star className="w-4 h-4 text-gold-dark" strokeWidth={1.75} />
               Top 10 Most Viewed, All Time
@@ -150,7 +150,7 @@ export default function AnalyticsPage() {
             )}
           </div>
 
-          <div className="bg-white rounded-xl border border-slate-100 shadow-sm p-6">
+          <div className="bg-background shadow-neo neo-transition rounded-xl p-6">
             <h2 className="text-base font-semibold text-slate-700 mb-4 flex items-center gap-2">
               <TrendingUp className="w-4 h-4 text-orange" strokeWidth={1.75} />
               Top 5 Trending This Week
@@ -175,7 +175,7 @@ export default function AnalyticsPage() {
           </div>
         </div>
 
-        <div className="bg-white rounded-xl border border-slate-100 shadow-sm overflow-hidden">
+        <div className="bg-background shadow-neo neo-transition rounded-xl overflow-hidden">
           <div className="px-6 py-4 border-b border-slate-100 flex items-center gap-2">
             <History className="w-4 h-4 text-slate-500" strokeWidth={1.75} />
             <h2 className="text-base font-semibold text-slate-700">View History, Last 50</h2>
