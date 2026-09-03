@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { useEmbedding } from "@/components/shared/EmbeddingProvider";
 import Navbar from "@/components/shared/Navbar";
-import { ScanLine, Loader2, Info } from "lucide-react";
+import { ScanLine, Loader2, Info, Sparkles, Clock, Gauge } from "lucide-react";
 import PageHeader from "@/components/shared/PageHeader";
 import ScanProgress from "@/components/shared/ScanProgress";
 
@@ -24,6 +24,19 @@ const STAGES = [
 
 const MATCHING_STAGE_DELAY_MS = 1600;
 const REQUEST_TIMEOUT_MS = 45000;
+
+// Static, computed once when the limit modal opens. Not a live countdown,
+// the daily scan limit's reset display is explicitly out of scope for a
+// ticking timer per the PRD, this only states roughly how far away the
+// fixed 12:00 AM PHT reset is at the moment the modal is shown.
+function getResetLabel() {
+  const nowPHT = new Date(new Date().toLocaleString("en-US", { timeZone: "Asia/Manila" }));
+  const nextMidnight = new Date(nowPHT);
+  nextMidnight.setHours(24, 0, 0, 0);
+  const diffMs = nextMidnight - nowPHT;
+  const diffHrs = Math.max(1, Math.round(diffMs / (1000 * 60 * 60)));
+  return `about ${diffHrs} hour${diffHrs === 1 ? "" : "s"} from now`;
+}
 
 async function fetchScansUsedToday(supabase, userId, role) {
   const startOfDayPHT = new Date(
@@ -58,6 +71,8 @@ export default function SubmitPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [scansLeft, setScansLeft] = useState(null);
+  const [limitModalOpen, setLimitModalOpen] = useState(false);
+  const [resetLabel, setResetLabel] = useState("");
   const [activeIndex, setActiveIndex] = useState(0);
   const stageTimerRef = useRef(null);
   const abortControllerRef = useRef(null);
@@ -86,6 +101,20 @@ export default function SubmitPage() {
     loadProfile();
   }, []);
 
+  function openLimitModal() {
+    setResetLabel(getResetLabel());
+    setLimitModalOpen(true);
+  }
+
+  // Surfaces the limit automatically the moment the count reaches zero,
+  // whether that's discovered on page load or right after the last scan
+  // of the day is used.
+  useEffect(() => {
+    if (scansLeft === 0) {
+      openLimitModal();
+    }
+  }, [scansLeft]);
+
   useEffect(() => {
     return () => {
       clearTimeout(stageTimerRef.current);
@@ -104,7 +133,7 @@ export default function SubmitPage() {
     }
 
     if (scansLeft === 0) {
-      setError("You have reached your daily scan limit. Your scans will reset tomorrow.");
+      openLimitModal();
       return;
     }
 
@@ -189,26 +218,62 @@ export default function SubmitPage() {
           iconBg="bg-navy"
         />
 
-        {/* Model status */}
-        {!loading && modelLoading && (
-          <div className="mb-5 flex items-center gap-2 text-sm text-slate-500 bg-white border border-slate-200 rounded-lg px-4 py-3">
-            <span className="inline-block w-2 h-2 rounded-full bg-amber-400 animate-pulse shrink-0" />
-            Initializing embedding model in the background…
-          </div>
-        )}
-        {!loading && isReady && (
-          <div className="mb-5 flex items-center gap-2 text-sm text-green-700 bg-green-50 border border-green-200 rounded-lg px-4 py-3">
-            <span className="inline-block w-2 h-2 rounded-full bg-green-500 shrink-0" />
-            Embedding model ready
-          </div>
-        )}
+        {/* Status row: model readiness and scan count, side by side on desktop */}
+        {!loading && (
+          <div className="mb-5 grid grid-cols-1 md:grid-cols-2 gap-3">
+            {/* Model status */}
+            {modelLoading && (
+              <div className="flex items-center gap-3 bg-background shadow-neo neo-transition rounded-xl px-4 py-3">
+                <div className="shrink-0 w-9 h-9 rounded-full bg-amber-50 flex items-center justify-center">
+                  <Loader2 className="w-4 h-4 text-amber-500 animate-spin" strokeWidth={2} />
+                </div>
+                <div className="min-w-0">
+                  <p className="text-sm font-medium text-foreground">Waking up the embedding model</p>
+                  <p className="text-xs text-slate-400">Running locally in your browser, almost there…</p>
+                </div>
+              </div>
+            )}
+            {isReady && (
+              <div className="flex items-center gap-3 bg-background shadow-neo neo-transition rounded-xl px-4 py-3 animate-pop-in">
+                <div className="shrink-0 w-9 h-9 rounded-full bg-green-50 flex items-center justify-center">
+                  <Sparkles className="w-4 h-4 text-green-600" strokeWidth={2} />
+                </div>
+                <div className="min-w-0">
+                  <p className="text-sm font-medium text-foreground">Model's warmed up and ready</p>
+                  <p className="text-xs text-slate-400">Your scan will run instantly, no wait this time.</p>
+                </div>
+              </div>
+            )}
 
-        {/* Scans remaining */}
-        {!loading && scansLeft !== null && (
-          <div className="mb-5 text-sm text-slate-500">
-            {scansLeft > 0
-              ? `${scansLeft} of ${DAILY_LIMIT} scans remaining today`
-              : "Daily scan limit reached. Resets at 12:00 AM Philippine Standard Time."}
+            {/* Scans remaining */}
+            {scansLeft !== null && (
+              <button
+                type="button"
+                onClick={scansLeft === 0 ? openLimitModal : undefined}
+                className={`flex items-center justify-between gap-3 bg-background shadow-neo neo-transition rounded-xl px-4 py-3 text-left
+                  ${scansLeft === 0 ? "cursor-pointer" : "cursor-default"}`}
+              >
+                <div className="min-w-0">
+                  <p className="text-xs text-slate-500">Scans left today</p>
+                  <p
+                    className={`font-display text-3xl leading-none mt-1
+                      ${scansLeft === 0 ? "text-red-500" : scansLeft === 1 ? "text-orange" : "text-navy"}`}
+                  >
+                    {scansLeft}
+                    <span className="text-sm text-slate-400 font-sans"> / {DAILY_LIMIT}</span>
+                  </p>
+                </div>
+                <div
+                  className={`shrink-0 w-9 h-9 rounded-full flex items-center justify-center
+                    ${scansLeft === 0 ? "bg-red-50" : scansLeft === 1 ? "bg-orange/10" : "bg-navy/5"}`}
+                >
+                  <Gauge
+                    className={`w-4 h-4 ${scansLeft === 0 ? "text-red-500" : scansLeft === 1 ? "text-orange" : "text-navy"}`}
+                    strokeWidth={1.75}
+                  />
+                </div>
+              </button>
+            )}
           </div>
         )}
 
@@ -273,6 +338,35 @@ export default function SubmitPage() {
           not plagiarism checking.
         </p>
       </main>
+
+      {/* Daily limit reached modal */}
+      {limitModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center px-4">
+          <div
+            className="absolute inset-0 bg-black/40 backdrop-blur-sm"
+            onClick={() => setLimitModalOpen(false)}
+          />
+          <div className="relative bg-white rounded-2xl shadow-xl w-full max-w-sm p-6 text-center animate-pop-in">
+            <div className="mx-auto mb-4 w-14 h-14 rounded-full bg-orange/10 flex items-center justify-center">
+              <Clock className="w-7 h-7 text-orange" strokeWidth={1.75} />
+            </div>
+            <h2 className="font-display text-xl text-navy mb-2">Daily Scan Limit Reached</h2>
+            <p className="text-sm text-slate-600 mb-1">
+              You've used all {DAILY_LIMIT} of your scans for today.
+            </p>
+            <p className="text-sm text-slate-600 mb-6">
+              Scans reset at <span className="font-medium text-navy">12:00 AM Philippine Standard Time</span>
+              {resetLabel && <>, {resetLabel}.</>}
+            </p>
+            <button
+              onClick={() => setLimitModalOpen(false)}
+              className="w-full bg-navy text-white text-sm font-medium py-2.5 rounded-lg hover:bg-navy-light transition"
+            >
+              Got it
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
