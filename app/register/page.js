@@ -13,11 +13,16 @@ function capitalizeName(value) {
     .join(" ");
 }
 
+const ROLE_OPTIONS = [
+  { value: "student", label: "Student" },
+  { value: "capstone_adviser", label: "Capstone Adviser" },
+];
+
 function TermsModal({ onClose }) {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center px-4">
       <div className="absolute inset-0 bg-black/40" onClick={onClose} />
-      <div className="relative bg-white rounded-2xl shadow-xl border border-slate-200 w-full max-w-lg max-h-[80vh] flex flex-col">
+      <div className="relative bg-background shadow-neo neo-transition rounded-2xl w-full max-w-lg max-h-[80vh] flex flex-col">
         <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100">
           <h2 className="font-sans font-semibold text-base text-foreground flex items-center gap-2">
             <FileText className="w-4 h-4 text-slate-500" strokeWidth={1.75} />
@@ -155,17 +160,17 @@ export default function RegisterPage() {
   }
 
   const inputClass =
-    "w-full px-3 py-2 rounded-lg border border-slate-200 bg-slate-50 text-sm text-foreground placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-navy/20 focus:border-navy transition";
+    "w-full px-3 py-2 rounded-lg bg-background shadow-neo-inset border-none text-sm text-foreground placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-navy/20 neo-transition";
 
   const passwordInputClass =
-    "w-full px-3 py-2 pr-10 rounded-lg border border-slate-200 bg-slate-50 text-sm text-foreground placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-navy/20 focus:border-navy transition";
+    "w-full px-3 py-2 pr-10 rounded-lg bg-background shadow-neo-inset border-none text-sm text-foreground placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-navy/20 neo-transition";
 
   return (
     <>
       {showTermsModal && <TermsModal onClose={() => setShowTermsModal(false)} />}
 
       <div className="min-h-screen bg-background flex items-center justify-center px-4 py-10">
-        <div className="w-full max-w-md">
+        <div className="w-full max-w-md animate-page-ease-in">
 
           {/* Back link */}
           <Link
@@ -185,7 +190,7 @@ export default function RegisterPage() {
           </div>
 
           {/* Card */}
-          <div className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+          <div className="bg-background shadow-neo neo-transition rounded-2xl overflow-hidden">
 
             {/* Orange accent strip */}
             <div className="h-1 bg-orange" />
@@ -198,19 +203,22 @@ export default function RegisterPage() {
                   <label className="block text-sm font-medium text-foreground mb-2">
                     Registering as
                   </label>
-                  <div className="grid grid-cols-2 gap-2">
-                    {[
-                      { value: "student", label: "Student" },
-                      { value: "capstone_adviser", label: "Capstone Adviser" },
-                    ].map((opt) => (
+                  <div className="relative flex bg-slate-100 rounded-lg p-1">
+                    <div
+                      className="absolute top-1 bottom-1 rounded-md bg-navy transition-transform duration-300 ease-in-out"
+                      style={{
+                        width: "calc(50% - 4px)",
+                        marginLeft: "4px",
+                        transform: `translateX(${ROLE_OPTIONS.findIndex((o) => o.value === role) * 100}%)`,
+                      }}
+                    />
+                    {ROLE_OPTIONS.map((opt) => (
                       <button
                         key={opt.value}
                         type="button"
                         onClick={() => setRole(opt.value)}
-                        className={`py-2 px-3 rounded-lg border text-sm font-medium transition ${
-                          role === opt.value
-                            ? "bg-navy text-white border-navy"
-                            : "bg-slate-50 text-slate-600 border-slate-200 hover:border-navy/40"
+                        className={`relative z-10 flex-1 py-2 px-3 rounded-md text-sm font-medium transition-colors duration-300 ${
+                          role === opt.value ? "text-white" : "text-slate-600 hover:text-navy"
                         }`}
                       >
                         {opt.label}
