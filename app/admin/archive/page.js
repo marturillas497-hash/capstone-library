@@ -150,7 +150,7 @@ export default function AdminArchivePage() {
           </div>
         )}
 
-        <form onSubmit={handleSubmit} className="bg-white rounded-xl border border-slate-100 shadow-sm p-6 space-y-5 mb-10">
+        <form onSubmit={handleSubmit} className="bg-background shadow-neo neo-transition rounded-xl p-6 space-y-5 mb-10">
           <div>
             <label className="block text-sm font-medium text-slate-700 mb-1.5">
               Capstone Title <span className="text-red-500">*</span>
@@ -160,7 +160,7 @@ export default function AdminArchivePage() {
               value={form.title}
               onChange={handleChange}
               placeholder="Full capstone project title"
-              className="w-full border border-slate-200 rounded-lg px-4 py-2.5 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-navy/30"
+              className="w-full bg-background shadow-neo-inset border-none rounded-lg px-4 py-2.5 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-navy/20 neo-transition"
               required
             />
           </div>
@@ -173,7 +173,7 @@ export default function AdminArchivePage() {
                 value={form.accession_id}
                 onChange={handleChange}
                 placeholder="e.g. BSIS-042"
-                className="w-full border border-slate-200 rounded-lg px-4 py-2.5 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-navy/30"
+                className="w-full bg-background shadow-neo-inset border-none rounded-lg px-4 py-2.5 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-navy/20 neo-transition"
               />
             </div>
             <div>
@@ -186,7 +186,7 @@ export default function AdminArchivePage() {
                 placeholder="e.g. 2024"
                 min="2000"
                 max={new Date().getFullYear()}
-                className="w-full border border-slate-200 rounded-lg px-4 py-2.5 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-navy/30"
+                className="w-full bg-background shadow-neo-inset border-none rounded-lg px-4 py-2.5 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-navy/20 neo-transition"
               />
             </div>
             <div>
@@ -197,7 +197,7 @@ export default function AdminArchivePage() {
                 onChange={handleChange}
                 required
                 placeholder="Comma-separated names"
-                className="w-full border border-slate-200 rounded-lg px-4 py-2.5 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-navy/30"
+                className="w-full bg-background shadow-neo-inset border-none rounded-lg px-4 py-2.5 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-navy/20 neo-transition"
               />
             </div>
           </div>
@@ -212,7 +212,7 @@ export default function AdminArchivePage() {
               onChange={handleChange}
               placeholder="Paste the full abstract here..."
               rows={8}
-              className="w-full border border-slate-200 rounded-lg px-4 py-2.5 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-navy/30 resize-none"
+              className="w-full bg-background shadow-neo-inset border-none rounded-lg px-4 py-2.5 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-navy/20 neo-transition resize-none"
               required
             />
           </div>
@@ -252,7 +252,7 @@ export default function AdminArchivePage() {
                 <Link
                   key={a.id}
                   href={`/admin/archive/${a.id}`}
-                  className="flex items-center justify-between bg-white border border-slate-100 rounded-lg px-4 py-3 hover:border-navy/20 transition-colors group"
+                  className="flex items-center justify-between bg-background shadow-neo hover:shadow-neo-hover hover:-translate-y-1 active:shadow-neo-inset active:translate-y-0 neo-transition rounded-lg px-4 py-3 group"
                 >
                   <div className="min-w-0">
                     <p className="text-sm font-medium text-slate-700 truncate group-hover:text-navy transition-colors">
