@@ -31,6 +31,7 @@ export default function LibraryPage() {
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
   const [yearFilter, setYearFilter] = useState("");
+  const [semanticTipOpen, setSemanticTipOpen] = useState(false);
   const [searchLoading, setSearchLoading] = useState(false);
   const [searchStageIndex, setSearchStageIndex] = useState(0);
   const [selectedAbstract, setSelectedAbstract] = useState(null);
@@ -281,6 +282,36 @@ export default function LibraryPage() {
             {searchLoading ? "Searching…" : "Search"}
           </button>
         </form>
+
+        <p className="text-xs text-slate-500 mb-8 -mt-2">
+          Type 1 or 2 words for instant keyword matching. 3 or more words triggers{" "}
+          <span className="relative inline-block">
+            <button
+              type="button"
+              onClick={() => setSemanticTipOpen((v) => !v)}
+              onMouseEnter={() => setSemanticTipOpen(true)}
+              onMouseLeave={() => setSemanticTipOpen(false)}
+              onFocus={() => setSemanticTipOpen(true)}
+              onBlur={() => setSemanticTipOpen(false)}
+              aria-describedby="semantic-search-tip"
+              className="text-orange font-medium underline decoration-dotted underline-offset-2 hover:text-orange-dark"
+            >
+              semantic search
+            </button>
+            {semanticTipOpen && (
+              <span
+                id="semantic-search-tip"
+                role="tooltip"
+                className="absolute z-20 left-1/2 -translate-x-1/2 top-full mt-2 w-64 bg-navy text-white text-xs leading-relaxed rounded-lg px-3 py-2 shadow-neo"
+              >
+                Semantic search looks at what your query MEANS, not just the exact words.
+                It can show studies that use different terms for the same idea.
+                <span className="absolute -top-1 left-1/2 -translate-x-1/2 w-2 h-2 bg-navy rotate-45" />
+              </span>
+            )}
+          </span>
+          , comparing your query against the meaning of every abstract in the library.
+        </p>
 
         {/* Tag filter */}
         <div className="mb-8">
