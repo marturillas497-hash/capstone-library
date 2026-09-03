@@ -187,7 +187,7 @@ function LoginForm() {
 
       {/* Right panel */}
       <div className="flex-1 flex items-center justify-center px-6 bg-slate-50">
-        <div className="w-full max-w-sm bg-background rounded-2xl shadow-neo neo-transition p-8">
+        <div className="w-full max-w-sm bg-background rounded-2xl shadow-neo neo-transition animate-page-ease-in p-8">
 
           <h2 className="font-display text-3xl text-foreground mb-1">
             Welcome back
