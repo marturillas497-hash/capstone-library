@@ -337,7 +337,7 @@ export default function LibraryPage() {
             </div>
 
             {tagDropdownOpen && tagSuggestions.length > 0 && (
-              <ul className="absolute z-10 mt-1 w-full bg-white border border-slate-200 rounded-lg shadow-md max-h-48 overflow-y-auto">
+              <ul className="absolute z-10 mt-1 w-full bg-background shadow-neo neo-transition rounded-lg max-h-48 overflow-y-auto">
                 {tagSuggestions.map((kw) => (
                   <li key={kw}>
                     <button
@@ -354,7 +354,7 @@ export default function LibraryPage() {
             )}
 
             {browseTagsOpen && (
-              <ul className="absolute z-10 mt-1 w-full bg-white border border-slate-200 rounded-lg shadow-md max-h-56 overflow-y-auto">
+              <ul className="absolute z-10 mt-1 w-full bg-background shadow-neo neo-transition rounded-lg max-h-56 overflow-y-auto">
                 {allTags.length === 0 ? (
                   <li className="px-3 py-2 text-sm text-slate-400">No tags in the library yet.</li>
                 ) : (
@@ -388,13 +388,13 @@ export default function LibraryPage() {
         )}
 
         {searchLoading ? (
-          <div className="bg-white rounded-2xl border border-slate-100 shadow-sm">
+          <div className="bg-background shadow-neo neo-transition rounded-2xl">
             <ScanProgress stages={SEARCH_STAGES} activeIndex={searchStageIndex} />
           </div>
         ) : loading ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
             {Array.from({ length: 6 }).map((_, i) => (
-              <div key={i} className="bg-white rounded-xl border border-slate-100 p-5 animate-pulse shadow-sm">
+              <div key={i} className="bg-background shadow-neo neo-transition rounded-xl p-5 animate-pulse">
                 <div className="h-4 bg-slate-100 rounded w-3/4 mb-3" />
                 <div className="h-3 bg-slate-100 rounded w-1/2 mb-2" />
                 <div className="h-3 bg-slate-100 rounded w-full mb-1" />
@@ -417,7 +417,7 @@ export default function LibraryPage() {
                 <button
                   key={abstract.id}
                   onClick={() => openModal(abstract)}
-                  className="text-left bg-white rounded-xl border border-slate-100 shadow-sm p-5 hover:shadow-md hover:border-navy/20 transition-all group"
+                  className="text-left bg-background shadow-neo hover:shadow-neo-hover hover:-translate-y-1 active:shadow-neo-inset active:translate-y-0 neo-transition rounded-xl p-5 group"
                 >
                   <div className="flex items-start justify-between gap-2 mb-2">
                     {abstract.accession_id && (

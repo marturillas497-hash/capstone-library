@@ -73,7 +73,7 @@ export default function StudentList({ students }) {
               <Link
                 key={student.profile_id}
                 href={`/adviser/students/${student.profile_id}`}
-                className="block bg-white border border-slate-100 rounded-xl px-5 py-4 shadow-sm hover:shadow-md hover:border-navy/20 transition-all group"
+                className="block bg-background shadow-neo hover:shadow-neo-hover hover:-translate-y-1 active:shadow-neo-inset active:translate-y-0 neo-transition rounded-xl px-5 py-4 group"
               >
                 {/* Top row: name + badge + chevron */}
                 <div className="flex items-start justify-between gap-2">
@@ -115,7 +115,7 @@ export default function StudentList({ students }) {
           </div>
 
           {/* Desktop: table */}
-          <div className="hidden md:block bg-white border border-slate-200 rounded-xl overflow-hidden shadow-sm">
+          <div className="hidden md:block bg-background shadow-neo neo-transition rounded-xl overflow-hidden">
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b border-slate-100 bg-slate-50">

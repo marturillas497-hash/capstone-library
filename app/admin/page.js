@@ -143,8 +143,8 @@ export default function AdminPage() {
             return (
               <div
                 key={card.label}
-                className={`bg-white rounded-xl border shadow-sm p-5 transition-colors ${
-                  card.alert ? "border-orange/30" : "border-gray-100"
+                className={`bg-background shadow-neo neo-transition rounded-xl p-5 ${
+                  card.alert ? "ring-2 ring-orange/30" : ""
                 }`}
               >
                 <div className={`inline-flex items-center justify-center w-9 h-9 rounded-lg mb-3 ${card.iconBg}`}>
@@ -171,7 +171,7 @@ export default function AdminPage() {
               <Link
                 key={action.href}
                 href={action.href}
-                className="bg-white rounded-xl border border-gray-100 shadow-sm p-5 hover:shadow-md hover:border-navy/20 transition-all group flex items-start gap-4"
+                className="bg-background shadow-neo hover:shadow-neo-hover hover:-translate-y-1 active:shadow-neo-inset active:translate-y-0 neo-transition rounded-xl p-5 group flex items-start gap-4"
               >
                 <div className={`inline-flex items-center justify-center w-10 h-10 rounded-lg shrink-0 ${action.iconBg}`}>
                   <Icon className={`w-5 h-5 ${action.iconColor}`} strokeWidth={1.75} />

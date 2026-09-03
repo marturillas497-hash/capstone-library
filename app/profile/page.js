@@ -104,10 +104,10 @@ export default function ProfilePage() {
   }
 
   const inputClass =
-    "w-full px-3 py-2 rounded-lg border border-slate-200 bg-slate-50 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-navy/20 focus:border-navy transition";
+    "w-full px-3 py-2 rounded-lg bg-background shadow-neo-inset border-none text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-navy/20 neo-transition";
 
   const readonlyClass =
-    "w-full px-3 py-2 rounded-lg border border-slate-100 bg-slate-50 text-sm text-slate-600 cursor-not-allowed";
+    "w-full px-3 py-2 rounded-lg bg-background shadow-neo-inset border-none text-sm text-slate-500 cursor-not-allowed";
 
   return (
     <div className="min-h-screen bg-background">
@@ -121,7 +121,7 @@ export default function ProfilePage() {
           iconBg="bg-navy"
         />
 
-        <div className="bg-white rounded-2xl border border-slate-200 p-6">
+        <div className="bg-background shadow-neo neo-transition rounded-2xl p-6">
           <form onSubmit={handleSave} className="space-y-5">
 
             {/* Read-only fields */}

@@ -78,7 +78,7 @@ export default async function ReportPage({ params, searchParams }) {
           </div>
         )}
 
-        <div className="bg-white rounded-2xl border border-slate-200 p-6 mb-6">
+        <div className="bg-background shadow-neo neo-transition rounded-2xl p-6 mb-6">
 
           {report.risk_level && (
             <span
@@ -126,7 +126,7 @@ export default async function ReportPage({ params, searchParams }) {
               {advisory ? (
                 <>
                   {advisory.verdict && (
-                    <div className="bg-white rounded-2xl border border-slate-200 p-5">
+                    <div className="bg-background shadow-neo neo-transition rounded-2xl p-5">
                       <p className="text-xs font-medium text-slate-500 uppercase tracking-wide mb-2">
                         Verdict
                       </p>
@@ -137,7 +137,7 @@ export default async function ReportPage({ params, searchParams }) {
                   )}
 
                   {advisory.criticalAnalysis && (
-                    <div className="bg-white rounded-2xl border border-slate-200 p-5">
+                    <div className="bg-background shadow-neo neo-transition rounded-2xl p-5">
                       <p className="text-xs font-medium text-slate-500 uppercase tracking-wide mb-2">
                         Critical Analysis of Overlap
                       </p>
@@ -187,7 +187,7 @@ export default async function ReportPage({ params, searchParams }) {
                   )}
 
                   {advisory.proposedTitles.length >= 1 && (
-                    <div className="bg-white rounded-2xl border border-slate-200 p-5">
+                    <div className="bg-background shadow-neo neo-transition rounded-2xl p-5">
                       <p className="text-xs font-medium text-slate-500 uppercase tracking-wide mb-3">
                         Proposed Unique Titles
                       </p>
@@ -214,7 +214,7 @@ export default async function ReportPage({ params, searchParams }) {
                   )}
 
                   {advisory.alternativeDirections.length >= 1 && (
-                    <div className="bg-white rounded-2xl border border-slate-200 p-5">
+                    <div className="bg-background shadow-neo neo-transition rounded-2xl p-5">
                       <p className="text-xs font-medium text-slate-500 uppercase tracking-wide mb-3">
                         Alternative Research Directions
                       </p>
@@ -229,7 +229,7 @@ export default async function ReportPage({ params, searchParams }) {
                   )}
                 </>
               ) : (
-                <div className="bg-white rounded-2xl border border-slate-200 p-5">
+                <div className="bg-background shadow-neo neo-transition rounded-2xl p-5">
                   <p className="text-sm text-slate-600 leading-relaxed whitespace-pre-wrap">
                     {report.ai_recommendations}
                   </p>

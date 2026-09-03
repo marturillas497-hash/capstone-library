@@ -127,7 +127,7 @@ export default function EditAbstractPage({ params }) {
         <main className="max-w-4xl mx-auto px-4 py-10">
           <div className="animate-pulse space-y-4">
             <div className="h-8 bg-slate-100 rounded w-64" />
-            <div className="bg-white rounded-xl border border-slate-100 p-6 space-y-4">
+            <div className="bg-background shadow-neo neo-transition rounded-xl p-6 space-y-4">
               {[1, 2, 3, 4].map((i) => <div key={i} className="h-10 bg-slate-100 rounded" />)}
             </div>
           </div>
@@ -173,7 +173,7 @@ export default function EditAbstractPage({ params }) {
           </div>
         )}
 
-        <form onSubmit={handleSubmit} className="bg-white rounded-xl border border-slate-100 shadow-sm p-6 space-y-5">
+        <form onSubmit={handleSubmit} className="bg-background shadow-neo neo-transition rounded-xl p-6 space-y-5">
           <div>
             <label className="block text-sm font-medium text-slate-700 mb-1.5">
               Capstone Title <span className="text-red-500">*</span>
@@ -182,7 +182,7 @@ export default function EditAbstractPage({ params }) {
               name="title"
               value={form.title}
               onChange={handleChange}
-              className="w-full border border-slate-200 rounded-lg px-4 py-2.5 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-navy/30"
+              className="w-full bg-background shadow-neo-inset border-none rounded-lg px-4 py-2.5 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-navy/20 neo-transition"
               required
             />
           </div>
@@ -194,7 +194,7 @@ export default function EditAbstractPage({ params }) {
                 name="accession_id"
                 value={form.accession_id}
                 onChange={handleChange}
-                className="w-full border border-slate-200 rounded-lg px-4 py-2.5 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-navy/30"
+                className="w-full bg-background shadow-neo-inset border-none rounded-lg px-4 py-2.5 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-navy/20 neo-transition"
               />
             </div>
             <div>
@@ -206,7 +206,7 @@ export default function EditAbstractPage({ params }) {
                 onChange={handleChange}
                 min="2000"
                 max={new Date().getFullYear()}
-                className="w-full border border-slate-200 rounded-lg px-4 py-2.5 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-navy/30"
+                className="w-full bg-background shadow-neo-inset border-none rounded-lg px-4 py-2.5 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-navy/20 neo-transition"
               />
             </div>
             <div>
@@ -216,7 +216,7 @@ export default function EditAbstractPage({ params }) {
                 value={form.authors}
                 onChange={handleChange}
                 required
-                className="w-full border border-slate-200 rounded-lg px-4 py-2.5 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-navy/30"
+                className="w-full bg-background shadow-neo-inset border-none rounded-lg px-4 py-2.5 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-navy/20 neo-transition"
               />
             </div>
           </div>
@@ -230,7 +230,7 @@ export default function EditAbstractPage({ params }) {
               value={form.abstract_text}
               onChange={handleChange}
               rows={10}
-              className="w-full border border-slate-200 rounded-lg px-4 py-2.5 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-navy/30 resize-none"
+              className="w-full bg-background shadow-neo-inset border-none rounded-lg px-4 py-2.5 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-navy/20 neo-transition resize-none"
               required
             />
           </div>

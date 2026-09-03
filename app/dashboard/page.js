@@ -53,11 +53,11 @@ export default async function DashboardPage() {
 
         {/* Stats row */}
         <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mb-8">
-          <div className="bg-white rounded-xl border border-slate-200 p-4">
+          <div className="bg-background shadow-neo neo-transition rounded-xl p-4">
             <p className="text-xs text-slate-500 mb-1">Total Scans</p>
             <p className="font-display text-3xl text-navy">{count ?? 0}</p>
           </div>
-          <div className="bg-white rounded-xl border border-slate-200 p-4">
+          <div className="bg-background shadow-neo neo-transition rounded-xl p-4">
             <p className="text-xs text-slate-500 mb-1">Latest Risk</p>
             <p className="font-display text-3xl text-navy">
               {reports?.[0]?.risk_level ?? "—"}
@@ -82,7 +82,7 @@ export default async function DashboardPage() {
           </h2>
 
           {!reports || reports.length === 0 ? (
-            <div className="bg-white rounded-xl border border-slate-200 p-8 text-center">
+            <div className="bg-background shadow-neo neo-transition rounded-xl p-8 text-center">
               <p className="text-slate-500 text-sm">
                 No scans yet. Run your first similarity check to get started.
               </p>
@@ -93,7 +93,7 @@ export default async function DashboardPage() {
                 <a
                   key={report.id}
                   href={`/dashboard/report/${report.id}`}
-                  className="block bg-white rounded-xl border border-slate-200 p-4 hover:border-navy/30 hover:shadow-sm transition"
+                  className="block bg-background shadow-neo hover:shadow-neo-hover hover:-translate-y-1 active:shadow-neo-inset active:translate-y-0 neo-transition rounded-xl p-4"
                 >
                   <div className="flex items-start justify-between gap-3">
                     <div className="min-w-0">

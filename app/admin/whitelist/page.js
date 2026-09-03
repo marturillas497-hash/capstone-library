@@ -236,7 +236,7 @@ export default function WhitelistPage() {
           iconBg="bg-gold"
         />
 
-        <div className="bg-white border border-slate-100 rounded-xl shadow-sm p-6 mb-6">
+        <div className="bg-background shadow-neo neo-transition rounded-xl p-6 mb-6">
           <h2 className="text-sm font-semibold text-foreground mb-3 flex items-center gap-1.5">
             <UploadCloud className="w-4 h-4 text-slate-500" strokeWidth={1.75} />
             Upload CSV
@@ -301,8 +301,8 @@ export default function WhitelistPage() {
               onDragLeave={onDragLeave}
               onDrop={onDrop}
               onClick={() => fileRef.current?.click()}
-              className={`border-2 border-dashed rounded-xl p-8 text-center cursor-pointer transition-colors
-                ${dragActive ? "border-navy bg-navy/5" : "border-slate-200 hover:border-navy/30 hover:bg-slate-50"}`}
+              className={`border-2 border-dashed rounded-xl p-8 text-center cursor-pointer neo-transition
+                ${dragActive ? "border-navy shadow-neo-inset" : "border-slate-200 shadow-neo hover:shadow-neo-hover hover:border-navy/30"}`}
             >
               <input
                 ref={fileRef}
@@ -324,7 +324,7 @@ export default function WhitelistPage() {
           )}
 
           {checkingExisting && (
-            <div className="border-2 border-dashed border-slate-200 rounded-xl p-8 text-center">
+            <div className="border-2 border-dashed border-slate-200 shadow-neo neo-transition rounded-xl p-8 text-center">
               <div className="w-6 h-6 border-2 border-navy/20 border-t-navy rounded-full animate-spin mx-auto mb-3" />
               <p className="text-sm text-slate-500">Checking against the current whitelist…</p>
             </div>
@@ -349,7 +349,7 @@ export default function WhitelistPage() {
                 )}
               </div>
 
-              <div className="border border-slate-100 rounded-lg overflow-hidden mb-4 max-h-72 overflow-y-auto">
+              <div className="bg-background shadow-neo neo-transition rounded-lg overflow-hidden mb-4 max-h-72 overflow-y-auto">
                 <div className="grid grid-cols-12 px-3 py-2 bg-slate-50 border-b border-slate-100 text-xs font-medium text-slate-500 uppercase tracking-wide sticky top-0">
                   <span className="col-span-3">Row</span>
                   <span className="col-span-3">Student ID</span>
@@ -446,7 +446,7 @@ export default function WhitelistPage() {
         {loading ? (
           <div className="space-y-2">
             {[1, 2, 3, 4, 5].map((i) => (
-              <div key={i} className="bg-white border border-slate-100 rounded-lg px-4 py-3 animate-pulse h-12" />
+              <div key={i} className="bg-background shadow-neo neo-transition rounded-lg px-4 py-3 animate-pulse h-12" />
             ))}
           </div>
         ) : entries.length === 0 ? (
@@ -455,7 +455,7 @@ export default function WhitelistPage() {
             <p className="text-sm mt-1">Upload a CSV to populate the whitelist.</p>
           </div>
         ) : (
-          <div className="bg-white border border-slate-100 rounded-xl shadow-sm overflow-hidden">
+          <div className="bg-background shadow-neo neo-transition rounded-xl overflow-hidden">
             <div className="grid grid-cols-12 px-4 py-2.5 bg-slate-50 border-b border-slate-100 text-xs font-medium text-slate-500 uppercase tracking-wide">
               <span className="col-span-4">Student ID</span>
               <span className="col-span-5">Name</span>

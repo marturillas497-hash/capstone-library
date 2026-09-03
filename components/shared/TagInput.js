@@ -10,7 +10,7 @@ const VARIANTS = {
     input:
       "flex-1 min-w-[120px] text-sm text-slate-700 bg-transparent focus:outline-none placeholder:text-slate-400 py-0.5",
     dropdown:
-      "absolute z-10 mt-1 w-full bg-white border border-slate-200 rounded-lg shadow-md max-h-48 overflow-y-auto",
+      "absolute z-10 mt-1 w-full bg-background rounded-lg shadow-neo neo-transition max-h-48 overflow-y-auto",
   },
   modal: {
     container:
@@ -18,7 +18,7 @@ const VARIANTS = {
     input:
       "flex-1 min-w-[120px] text-sm text-foreground bg-transparent focus:outline-none placeholder:text-slate-400 py-0.5",
     dropdown:
-      "absolute z-10 mt-1 w-full bg-white border border-slate-200 rounded-lg shadow-md max-h-40 overflow-y-auto",
+      "absolute z-10 mt-1 w-full bg-background rounded-lg shadow-neo neo-transition max-h-40 overflow-y-auto",
   },
 };
 

@@ -28,7 +28,7 @@ export default function MatchesList({ matches, showAccessionNote = false }) {
             <div
               key={match.id ?? index}
               onClick={() => setSelectedMatch(match)}
-              className="bg-white rounded-xl border border-slate-200 p-4 hover:border-navy/30 hover:shadow-sm transition cursor-pointer"
+              className="bg-background rounded-xl shadow-neo p-4 hover:shadow-neo-hover hover:-translate-y-1 active:shadow-neo-inset active:translate-y-0 neo-transition cursor-pointer"
             >
               <div className="flex items-start justify-between gap-3">
                 <div className="min-w-0">

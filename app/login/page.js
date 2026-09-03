@@ -187,10 +187,10 @@ function LoginForm() {
 
       {/* Right panel */}
       <div className="flex-1 flex items-center justify-center px-6 bg-slate-50">
-        <div className="w-full max-w-sm">
+        <div className="w-full max-w-sm bg-background rounded-2xl shadow-neo neo-transition animate-page-ease-in p-8">
 
           <h2 className="font-display text-3xl text-foreground mb-1">
-            Welcome Back
+            Welcome back
           </h2>
           <p className="text-sm text-slate-600 mb-8">
             Sign in to your Capstone Library account
@@ -222,7 +222,7 @@ function LoginForm() {
                   required
                   autoComplete="email"
                   placeholder="you@example.com"
-                  className="w-full pl-10 pr-3 py-2 rounded-lg border border-slate-200 bg-white text-sm text-foreground placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-navy/20 focus:border-navy transition"
+                  className="w-full pl-10 pr-3 py-2 rounded-lg bg-background shadow-neo-inset border-none text-sm text-foreground placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-navy/20 transition neo-transition"
                 />
               </div>
             </div>
@@ -240,7 +240,7 @@ function LoginForm() {
                   required
                   autoComplete="current-password"
                   placeholder="••••••••"
-                  className="w-full pl-10 pr-10 py-2 rounded-lg border border-slate-200 bg-white text-sm text-foreground placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-navy/20 focus:border-navy transition"
+                  className="w-full pl-10 pr-10 py-2 rounded-lg bg-background shadow-neo-inset border-none text-sm text-foreground placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-navy/20 transition neo-transition"
                 />
                 <button
                   type="button"
