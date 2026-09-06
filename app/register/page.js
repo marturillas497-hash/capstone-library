@@ -21,8 +21,8 @@ const ROLE_OPTIONS = [
 function TermsModal({ onClose }) {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center px-4">
-      <div className="absolute inset-0 bg-black/40" onClick={onClose} />
-      <div className="relative bg-background shadow-neo neo-transition rounded-2xl w-full max-w-lg max-h-[80vh] flex flex-col">
+      <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={onClose} />
+      <div className="relative bg-background shadow-xl rounded-2xl w-full max-w-lg max-h-[80vh] flex flex-col">
         <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100">
           <h2 className="font-sans font-semibold text-base text-foreground flex items-center gap-2">
             <FileText className="w-4 h-4 text-slate-500" strokeWidth={1.75} />
