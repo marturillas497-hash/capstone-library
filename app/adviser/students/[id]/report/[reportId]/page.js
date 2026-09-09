@@ -2,10 +2,10 @@ import { createClient } from "@/lib/supabase/server";
 import { redirect, notFound } from "next/navigation";
 import Navbar from "@/components/shared/Navbar";
 import { RISK_LABELS, RISK_BADGE as riskBadgeColor, RISK_BAR as riskBarColor } from "@/lib/risk";
-import { parseAdvisory, getMatchRisk } from "@/lib/advisory";
+import { parseAdvisory, isFallbackAdvisory, getFallbackMessage } from "@/lib/advisory";
 import MatchesList from "@/components/shared/MatchesList";
 import Link from "next/link";
-import { ArrowLeft, Sparkles } from "lucide-react";
+import { ArrowLeft, Sparkles, Info } from "lucide-react";
 import PageHeader from "@/components/shared/PageHeader";
 
 export default async function AdviserStudentReportPage({ params }) {
@@ -125,7 +125,14 @@ export default async function AdviserStudentReportPage({ params }) {
             </h2>
 
             <div className="space-y-3">
-              {advisory ? (
+              {isFallbackAdvisory(report.ai_recommendations) ? (
+                <div className="flex items-start gap-2 bg-orange/10 border border-orange/30 rounded-2xl px-4 py-3.5 text-sm text-orange-dark">
+                  <Info className="w-4 h-4 mt-0.5 flex-shrink-0" strokeWidth={1.75} />
+                  <p className="leading-relaxed">
+                    {getFallbackMessage(report.ai_recommendations)}
+                  </p>
+                </div>
+              ) : advisory ? (
                 <>
                   {advisory.verdict && (
                     <div className="bg-background shadow-neo neo-transition rounded-2xl p-5">
@@ -146,41 +153,6 @@ export default async function AdviserStudentReportPage({ params }) {
                       <p className="text-sm text-slate-600 leading-relaxed indent-6">
                         {advisory.criticalAnalysis}
                       </p>
-
-                      {matches.length >= 1 && (
-                        <div className="mt-4 rounded-xl overflow-hidden border border-slate-100">
-                          <table className="w-full">
-                            <thead>
-                              <tr className="bg-slate-50 border-b border-slate-100">
-                                <th className="text-left text-xs font-medium text-slate-500 uppercase tracking-wide px-4 py-2.5">
-                                  Matched Study
-                                </th>
-                                <th className="text-right text-xs font-medium text-slate-500 uppercase tracking-wide px-4 py-2.5 whitespace-nowrap">
-                                  Similarity
-                                </th>
-                              </tr>
-                            </thead>
-                            <tbody suppressHydrationWarning>
-                              {matches.map((m, i) => (
-                                <tr key={i} className="border-b border-slate-100 last:border-0">
-                                  <td className="px-4 py-3">
-                                    <p className="text-sm text-slate-700 leading-snug">{m.title}</p>
-                                    <p className="text-xs text-slate-500 mt-0.5">
-                                      {m.accession_id ?? ""}
-                                      {m.year ? ` · ${m.year}` : ""}
-                                    </p>
-                                  </td>
-                                  <td className="px-4 py-3 text-right">
-                                    <span className={`inline-block text-xs font-medium px-2 py-0.5 rounded-full border ${riskBadgeColor[getMatchRisk(m.similarity)]}`}>
-                                      {(m.similarity * 100).toFixed(1)}%
-                                    </span>
-                                  </td>
-                                </tr>
-                              ))}
-                            </tbody>
-                          </table>
-                        </div>
-                      )}
                     </div>
                   )}
 

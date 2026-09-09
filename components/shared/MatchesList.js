@@ -33,7 +33,7 @@ export default function MatchesList({ matches, showAccessionNote = false }) {
               <div className="flex items-start justify-between gap-3">
                 <div className="min-w-0">
                   <p className="text-sm font-medium text-slate-700">{match.title}</p>
-                  <p className="text-xs text-slate-500 mt-0.5">
+                  <p className="text-xs text-slate-600 mt-0.5">
                     {match.authors && `${match.authors}, `}
                     {match.year && match.year}
                     {match.accession_id && `, ${match.accession_id}`}

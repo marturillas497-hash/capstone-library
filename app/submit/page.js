@@ -184,11 +184,10 @@ export default function SubmitPage() {
 
       setScansLeft((prev) => Math.max(0, (prev ?? 1) - 1));
 
-      const basePath =
+      const reportPath =
         profile?.role === "capstone_adviser"
           ? `/adviser/report/${data.reportId}`
           : `/dashboard/report/${data.reportId}`;
-      const reportPath = data.usedFallback ? `${basePath}?fallback=1` : basePath;
 
       router.push(reportPath);
     } catch (err) {
