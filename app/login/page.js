@@ -130,7 +130,7 @@ function LoginForm() {
       </div>
 
       {/* Left panel */}
-      <div className="hidden lg:flex lg:w-[45%] flex-col justify-between p-10 relative overflow-hidden bg-navy">
+      <div className="hidden lg:flex lg:w-[45%] flex-col justify-center p-10 relative overflow-hidden bg-navy">
         {/* Decorative circles */}
         <div className="absolute -top-24 -right-24 w-96 h-96 rounded-full bg-white/[0.04] pointer-events-none" />
         <div className="absolute -bottom-16 -left-16 w-72 h-72 rounded-full bg-white/[0.04] pointer-events-none" />
@@ -138,50 +138,54 @@ function LoginForm() {
         {/* IS Orange accent strip */}
         <div className="absolute top-0 left-0 right-0 h-[3px] bg-orange" />
 
-        {/* Top section */}
-        <div className="relative">
+        {/* Content group: crest, product identity, and feature list, sit together and center as one unit */}
+        <div className="relative flex flex-col gap-16">
 
-          {/* Dual logo row */}
-          <div className="flex items-center gap-3 mb-3">
-            <img
-              src="/mist-logo.png"
-              alt="MIST"
-              className="h-10 w-10 object-contain"
-            />
-            <div className="w-px h-8 bg-white/15" />
-            <img
-              src="/is-logo.png"
-              alt="Information Systems"
-              className="h-10 w-10 object-contain"
-            />
+          {/* Top: institutional crest and product identity, centered */}
+          <div className="text-center">
+
+            {/* Crest lockup */}
+            <div>
+              <div className="flex items-center justify-center gap-4 mb-3">
+                <img
+                  src="/mist-logo.png"
+                  alt="MIST"
+                  className="h-20 w-20 object-contain"
+                />
+                <div className="w-px h-12 bg-white/15" />
+                <img
+                  src="/is-logo.png"
+                  alt="Information Systems"
+                  className="h-20 w-20 object-contain"
+                />
+              </div>
+              <p className="text-white/80 text-sm font-medium leading-snug">
+                Makilala Institute of Science and Technology
+              </p>
+              <p className="text-orange text-xs leading-snug mt-0.5">
+                Bachelor of Science in Information Systems
+              </p>
+            </div>
+
+            <h1 className="font-display text-5xl text-white mt-8 mb-3 leading-tight">
+              Capstone Library
+            </h1>
+            <p className="text-white/60 text-base leading-relaxed max-w-sm mx-auto">
+              Validate your proposed capstone topics against the BSIS institutional
+              library through semantic similarity detection and AI-powered advisory
+              feedback.
+            </p>
           </div>
 
-          {/* School + department names */}
-          <p className="text-white/80 text-xs font-medium leading-snug mb-0.5">
-            Makilala Institute of Science and Technology
-          </p>
-          <p className="text-orange text-[10px] leading-snug mb-7">
-            Bachelor of Science in Information Systems
-          </p>
-
-          <h1 className="font-display text-4xl text-white mb-3 leading-tight">
-            Capstone Library
-          </h1>
-          <p className="text-white/60 text-sm leading-relaxed max-w-xs">
-            Validate your proposed capstone topics against the BSIS institutional
-            library through semantic similarity detection and AI-powered advisory
-            feedback.
-          </p>
-        </div>
-
-        {/* Bottom: feature bullets */}
-        <div className="relative space-y-3">
-          {FEATURES.map((f) => (
-            <div key={f.label} className="flex items-center gap-3">
-              <f.icon className={`${f.iconColorClass} shrink-0 w-4 h-4`} strokeWidth={1.75} />
-              <span className="text-white/70 text-sm">{f.label}</span>
-            </div>
-          ))}
+          {/* Feature bullets, left aligned, same size as before */}
+          <div className="space-y-3">
+            {FEATURES.map((f) => (
+              <div key={f.label} className="flex items-center gap-3">
+                <f.icon className={`${f.iconColorClass} shrink-0 w-4 h-4`} strokeWidth={1.75} />
+                <span className="text-white/70 text-m">{f.label}</span>
+              </div>
+            ))}
+          </div>
         </div>
       </div>
 
