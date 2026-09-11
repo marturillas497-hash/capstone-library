@@ -44,7 +44,7 @@ const VERDICT_GUIDANCE = {
 
 const OVERLAP_GUIDANCE = {
   GREEN: "No meaningful overlap was found. Say this clearly in one or two sentences. You may mention the closest study shown below only to note that you checked, not as a warning.",
-  DEFAULT: "Explain in plain, simple language which specific parts of the proposal overlap with the studies shown below. Name each matching study by its exact title, accession ID, and similarity score.",
+  DEFAULT: "Explain in plain, simple language which specific parts of the proposal overlap with the studies shown below. Name each matching study you discuss by its exact title, accession ID, and similarity score — but you do not need to discuss every match provided; skip any whose overlap is only superficial rather than stretching a justification for it.",
 };
 
 function buildMatchContext(matches, riskLevel) {
@@ -106,7 +106,7 @@ VERDICT
 Exactly two sentences. ${verdictInstruction}
 
 CRITICAL ANALYSIS OF OVERLAP
-${overlapInstruction} Discuss the highest-scoring matches first, in descending order of similarity, so your analysis lines up with what the student sees listed first elsewhere on the page. Write as if explaining to a college student, not an academic reviewer. Maximum 5 sentences total.
+${overlapInstruction} Discuss the matches in the same order they are numbered in the list above — do not reorder them. If you skip match #1 because its overlap is only superficial, add one short clause explaining why it doesn't represent meaningful overlap before moving to the next one — the student's report shows that match first, so it can't be left completely unaddressed. Write as if explaining to a college student, not an academic reviewer. Maximum 5 sentences total.
 
 PROPOSED UNIQUE TITLES
 Exactly 3 titles, one per line, numbered 1, 2, and 3. No description, label, or sub-header before or after any title. Each title: 12-15 words, describes one system with one clear purpose (never a feasibility study, analysis, assessment, or review), and follows its specific rule below:
@@ -138,9 +138,8 @@ const FALLBACK_MESSAGES = {
 };
 
 function generateFallbackAdvisory(riskLevel) {
-  const message = FALLBACK_MESSAGES[riskLevel] ?? FALLBACK_MESSAGES.GREEN;
   return buildFallbackAdvisoryText(
-    `${message} Our AI reviewer didn't respond in time to write a full analysis for your specific topic — please try running the scan again in a few minutes for a complete advisory.`
+    `Our AI reviewer didn't respond in time to write a full written analysis for this topic. This only affects the written advisory — the similarity score and matched studies below were calculated independently of the AI and are fully valid. ${FALLBACK_MESSAGES[riskLevel]} Try running the scan again in a few minutes for a complete AI advisory.`
   );
 }
 
