@@ -108,10 +108,10 @@ export default function ProfilePage() {
     "w-full px-3 py-2 rounded-lg bg-background shadow-neo-inset border-none text-sm text-slate-500 cursor-not-allowed";
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background md:flex">
       <Navbar role={profile.role} fullName={profile.full_name} />
 
-      <main className="max-w-xl mx-auto px-4 py-8">
+      <main className="flex-1 max-w-xl mx-auto px-4 py-8">
         <PageHeader
           title="My Profile"
           subtitle="Update your year level, section, and assigned adviser."

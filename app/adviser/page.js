@@ -75,9 +75,9 @@ export default async function AdviserPage() {
   const totalScans = students.reduce((sum, s) => sum + s.report_count, 0);
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background md:flex">
       <Navbar role={profile.role} fullName={profile.full_name} />
-      <main className="max-w-5xl mx-auto px-4 py-10">
+      <main className="flex-1 max-w-5xl mx-auto px-4 py-10">
         <PageHeader
           title="My Students"
           subtitle="Students who have assigned you as their capstone adviser."
