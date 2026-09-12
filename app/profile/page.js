@@ -5,9 +5,7 @@ import { createClient } from "@/lib/supabase/client";
 import Navbar from "@/components/shared/Navbar";
 import { UserCog, Save, Lock, Loader2 } from "lucide-react";
 import PageHeader from "@/components/shared/PageHeader";
-
-const YEAR_LEVELS = ["1st Year", "2nd Year", "3rd Year", "4th Year"];
-const SECTIONS = ["A", "B", "C", "D", "E"];
+import { YEAR_LEVELS, SECTIONS } from "@/lib/constants";
 
 export default function ProfilePage() {
   const [profile, setProfile] = useState(null);

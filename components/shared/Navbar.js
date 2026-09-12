@@ -27,6 +27,7 @@ const NAV_LINKS = {
     { href: "/admin/approvals", label: "Approvals" },
     { href: "/admin/analytics", label: "Analytics" },
     { href: "/admin/whitelist", label: "Whitelist" },
+    { href: "/admin/users", label: "User Management" },
   ],
 };
 
