@@ -122,9 +122,9 @@ export default function EditAbstractPage({ params }) {
 
   if (loadingAbstract) {
     return (
-      <div className="min-h-screen bg-background">
+      <div className="min-h-screen bg-background md:flex">
         <Navbar role={profile.role} fullName={profile.fullName} />
-        <main className="max-w-4xl mx-auto px-4 py-10">
+        <main className="flex-1 max-w-4xl mx-auto px-4 py-10">
           <div className="animate-pulse space-y-4">
             <div className="h-8 bg-slate-100 rounded w-64" />
             <div className="bg-background shadow-neo neo-transition rounded-xl p-6 space-y-4">
@@ -137,9 +137,9 @@ export default function EditAbstractPage({ params }) {
   }
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background md:flex">
       <Navbar role={profile.role} fullName={profile.fullName} />
-      <main className="max-w-4xl mx-auto px-4 py-10">
+      <main className="flex-1 max-w-4xl mx-auto px-4 py-10">
         <Link
           href="/admin/archive"
           className="inline-flex items-center gap-1.5 text-sm text-slate-500 hover:text-foreground mb-6 transition"

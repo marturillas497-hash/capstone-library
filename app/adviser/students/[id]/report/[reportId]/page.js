@@ -52,9 +52,9 @@ export default async function AdviserStudentReportPage({ params }) {
   const advisory = parseAdvisory(report.ai_recommendations);
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background md:flex">
       <Navbar role={profile.role} fullName={profile.full_name} />
-      <main className="max-w-4xl mx-auto px-4 py-8">
+      <main className="flex-1 max-w-4xl mx-auto px-4 py-8">
 
         <Link
           href={`/adviser/students/${id}`}

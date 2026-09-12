@@ -4,32 +4,69 @@ import { useState } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import Image from "next/image";
-import { Menu, X, LogOut } from "lucide-react";
+import {
+  Menu,
+  X,
+  LogOut,
+  LayoutDashboard,
+  BookOpen,
+  ScanLine,
+  User,
+  Users,
+  Clock,
+  Plus,
+  CheckCircle,
+  BarChart3,
+  ShieldCheck,
+  UserCog,
+} from "lucide-react";
 import ChangePasswordModal from "./ChangePasswordModal";
 
+// `group` controls sidebar sectioning (desktop only). `chip` controls the
+// icon treatment: "gold"/"orange" render a filled color chip (reused from
+// the existing bg-gold/bg-orange icon-box convention in Section 21 of the
+// PRD, e.g. Browse Library / Manage Whitelist), everything else renders as
+// a plain white icon since a navy chip would disappear against the navy
+// sidebar background.
 const NAV_LINKS = {
   student: [
-    { href: "/dashboard", label: "Dashboard" },
-    { href: "/library", label: "Library" },
-    { href: "/submit", label: "New Scan" },
-    { href: "/profile", label: "Profile" },
+    { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard, group: "Overview" },
+    { href: "/library", label: "Library", icon: BookOpen, group: "Library", chip: "gold" },
+    { href: "/submit", label: "New Scan", icon: ScanLine, group: "Library", chip: "orange" },
+    { href: "/profile", label: "Profile", icon: User, group: "Account" },
   ],
   capstone_adviser: [
-    { href: "/adviser", label: "My Students" },
-    { href: "/adviser/scans", label: "My Scans" },
-    { href: "/library", label: "Library" },
-    { href: "/submit", label: "New Scan" },
+    { href: "/adviser", label: "My Students", icon: Users, group: "Overview" },
+    { href: "/adviser/scans", label: "My Scans", icon: Clock, group: "Overview" },
+    { href: "/library", label: "Library", icon: BookOpen, group: "Library", chip: "gold" },
+    { href: "/submit", label: "New Scan", icon: ScanLine, group: "Library", chip: "orange" },
   ],
   admin: [
-    { href: "/admin", label: "Dashboard" },
-    { href: "/library", label: "Library" },
-    { href: "/admin/archive", label: "Add Abstract" },
-    { href: "/admin/approvals", label: "Approvals" },
-    { href: "/admin/analytics", label: "Analytics" },
-    { href: "/admin/whitelist", label: "Whitelist" },
-    { href: "/admin/users", label: "User Management" },
+    { href: "/admin", label: "Dashboard", icon: LayoutDashboard, group: "Overview" },
+    { href: "/library", label: "Library", icon: BookOpen, group: "Library", chip: "gold" },
+    { href: "/admin/archive", label: "Add Abstract", icon: Plus, group: "Library" },
+    { href: "/admin/approvals", label: "Approvals", icon: CheckCircle, group: "Governance" },
+    { href: "/admin/analytics", label: "Analytics", icon: BarChart3, group: "Governance" },
+    { href: "/admin/whitelist", label: "Whitelist", icon: ShieldCheck, group: "Governance", chip: "gold" },
+    { href: "/admin/users", label: "User Management", icon: UserCog, group: "Governance" },
   ],
 };
+
+// Groups links into sections, preserving first-appearance order, so each
+// role only ever shows the sections it actually has (e.g. only admin gets
+// "Governance").
+function groupLinks(links) {
+  const groups = [];
+  for (const link of links) {
+    let group = groups.find((g) => g.label === link.group);
+    if (!group) {
+      group = { label: link.group, items: [] };
+      groups.push(group);
+    }
+    group.items.push(link);
+  }
+  return groups;
+}
 
 export default function Navbar({ role, fullName }) {
   const router = useRouter();
@@ -40,6 +77,8 @@ export default function Navbar({ role, fullName }) {
   const [changePasswordOpen, setChangePasswordOpen] = useState(false);
 
   const links = NAV_LINKS[role] ?? [];
+  const groups = groupLinks(links);
+  const initials = fullName?.split(" ").map((n) => n[0]).slice(0, 2).join("");
 
   function openSignOutModal() {
     setMenuOpen(false);
@@ -65,135 +104,193 @@ export default function Navbar({ role, fullName }) {
     return pathname.startsWith(href);
   }
 
-  return (
-    <nav className="bg-navy sticky top-0 z-40">
-      <div className="max-w-6xl mx-auto px-4">
-        <div className="flex items-center justify-between h-14">
+  function renderIcon(link, active) {
+    const Icon = link.icon;
+    if (link.chip === "gold") {
+      return <Icon className="w-[15px] h-[15px] text-navy" strokeWidth={1.9} />;
+    }
+    if (link.chip === "orange") {
+      return <Icon className="w-[15px] h-[15px] text-white" strokeWidth={1.9} />;
+    }
+    return (
+      <Icon
+        className={`w-[15px] h-[15px] ${active ? "text-white" : "text-white/50"}`}
+        strokeWidth={1.9}
+      />
+    );
+  }
 
-          {/* Logo + wordmark */}
-          <a href="/" className="flex items-center gap-2.5 shrink-0">
+  return (
+    <>
+      {/* Mobile top bar — unchanged from the previous navbar, only visible below md */}
+      <nav className="md:hidden bg-navy sticky top-0 z-40">
+        <div className="max-w-6xl mx-auto px-4">
+          <div className="flex items-center justify-between h-14">
+            <a href="/" className="flex items-center gap-2.5 shrink-0">
+              <Image
+                src="/mist-logo.png"
+                alt="MIST"
+                width={28}
+                height={28}
+                className="rounded-full"
+              />
+              <span className="font-display text-lg text-white leading-none">
+                Capstone Library
+              </span>
+            </a>
+
+            <button
+              onClick={() => setMenuOpen((v) => !v)}
+              className="p-2 rounded-lg text-white/60 hover:text-white hover:bg-white/10 transition"
+              aria-label="Toggle menu"
+            >
+              {menuOpen ? (
+                <X className="w-5 h-5" strokeWidth={1.75} />
+              ) : (
+                <Menu className="w-5 h-5" strokeWidth={1.75} />
+              )}
+            </button>
+          </div>
+        </div>
+
+        {menuOpen && (
+          <div className="border-t border-white/10 bg-navy px-4 py-3 space-y-1">
+            {links.map((link) => {
+              const active = isActive(link.href);
+              return (
+                <a
+                  key={link.href}
+                  href={link.href}
+                  onClick={() => setMenuOpen(false)}
+                  className={`flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm font-medium transition ${
+                    active
+                      ? "bg-white/10 text-white"
+                      : link.label === "New Scan"
+                      ? "text-orange hover:bg-white/5"
+                      : "text-white/50 hover:text-white hover:bg-white/5"
+                  }`}
+                >
+                  <span
+                    className={`inline-flex items-center justify-center w-6 h-6 rounded-md shrink-0 ${
+                      link.chip === "gold" ? "bg-gold" : link.chip === "orange" ? "bg-orange" : ""
+                    }`}
+                  >
+                    {renderIcon(link, active)}
+                  </span>
+                  {link.label}
+                </a>
+              );
+            })}
+
+            <div className="pt-2 border-t border-white/10 mt-2">
+              <div className="flex items-center gap-2.5 px-3 py-1.5">
+                <div className="w-6 h-6 rounded-full bg-gold flex items-center justify-center shrink-0">
+                  <span className="text-xs font-bold text-navy leading-none">{initials}</span>
+                </div>
+                <p className="text-xs text-white/60 truncate">{fullName}</p>
+              </div>
+              <button
+                onClick={() => {
+                  setMenuOpen(false);
+                  setChangePasswordOpen(true);
+                }}
+                className="w-full text-left px-3 py-2 rounded-lg text-sm font-medium text-white/60 hover:text-white hover:bg-white/5 transition"
+              >
+                Change Password
+              </button>
+              <button
+                onClick={openSignOutModal}
+                className="w-full text-left px-3 py-2 rounded-lg text-sm font-medium text-red-400 hover:text-red-300 hover:bg-white/5 transition"
+              >
+                Sign out
+              </button>
+            </div>
+          </div>
+        )}
+      </nav>
+
+      {/* Desktop sidebar — visible at md and up */}
+      <aside className="hidden md:flex md:flex-col md:w-64 md:shrink-0 md:h-screen md:sticky md:top-0 bg-navy">
+        <div className="px-5 pt-6 pb-5 border-b border-white/10">
+          <div className="flex items-center gap-2 mb-3">
             <Image
               src="/mist-logo.png"
               alt="MIST"
-              width={28}
-              height={28}
-              className="rounded-full"
+              width={30}
+              height={30}
+              className="rounded-full border-2 border-gold"
             />
-            <span className="font-display text-lg text-white leading-none">
-              Capstone Library
-            </span>
-          </a>
-
-          {/* Desktop links */}
-          <div className="hidden md:flex items-center gap-1">
-            {links.map((link) => (
-              <a
-                key={link.href}
-                href={link.href}
-                className={`px-3 py-1.5 rounded-lg text-sm font-medium transition relative ${
-                  isActive(link.href)
-                    ? "text-white"
-                    : link.label === "New Scan"
-                    ? "text-orange hover:text-orange-light"
-                    : "text-white/50 hover:text-white"
-                }`}
-              >
-                {link.label}
-                {isActive(link.href) && (
-                  <span className="absolute bottom-0 left-3 right-3 h-0.5 bg-gold rounded-full" />
-                )}
-              </a>
-            ))}
+            <div className="w-px h-5 bg-white/20" />
+            <Image
+              src="/is-logo.png"
+              alt="Information Systems"
+              width={30}
+              height={30}
+              className="rounded-full border-2 border-orange"
+            />
           </div>
+          <p className="font-display text-white text-[15px] leading-tight">Capstone Library</p>
+          <p className="text-orange-light text-[11px] font-semibold mt-0.5">MIST · BSIS</p>
+        </div>
 
-          {/* Desktop right: initials avatar + sign out */}
-          <div className="hidden md:flex items-center gap-3">
-            <div className="group flex items-center bg-gold rounded-full h-7 overflow-hidden max-w-[28px] hover:max-w-[200px] transition-[max-width] duration-300 ease-in-out cursor-default shrink-0">
-              <span className="text-xs font-bold text-navy leading-none shrink-0 w-7 flex items-center justify-center">
-                {fullName?.split(" ").map((n) => n[0]).slice(0, 2).join("")}
-              </span>
-              <span className="text-xs font-semibold text-navy whitespace-nowrap pr-3 opacity-0 group-hover:opacity-100 transition-opacity duration-200 delay-100">
-                {fullName}
-              </span>
+        <nav className="flex-1 overflow-y-auto px-3 py-3">
+          {groups.map((group) => (
+            <div key={group.label}>
+              <p className="text-[11px] font-semibold text-white/35 px-3 pt-3 pb-1.5 first:pt-1">
+                {group.label}
+              </p>
+              {group.items.map((link) => {
+                const active = isActive(link.href);
+                return (
+                  <a
+                    key={link.href}
+                    href={link.href}
+                    className={`flex items-center gap-2.5 px-3 py-2 mb-0.5 rounded-lg text-[13.5px] font-medium border-l-[3px] transition ${
+                      active
+                        ? "bg-white/10 text-white font-semibold border-orange"
+                        : link.label === "New Scan"
+                        ? "text-orange-light hover:text-orange hover:bg-white/5 border-transparent"
+                        : "text-white/60 hover:text-white hover:bg-white/5 border-transparent"
+                    }`}
+                  >
+                    <span
+                      className={`inline-flex items-center justify-center w-6 h-6 rounded-md shrink-0 ${
+                        link.chip === "gold" ? "bg-gold" : link.chip === "orange" ? "bg-orange" : ""
+                      }`}
+                    >
+                      {renderIcon(link, active)}
+                    </span>
+                    {link.label}
+                  </a>
+                );
+              })}
             </div>
-            <button
-              onClick={() => setChangePasswordOpen(true)}
-              className="text-sm font-medium text-white/50 hover:text-white transition"
-            >
-              Change Password
-            </button>
-            <button
-              onClick={openSignOutModal}
-              className="text-sm font-medium text-red-400 hover:text-red-300 transition"
-            >
-              Sign out
-            </button>
-          </div>
+          ))}
+        </nav>
 
-          {/* Mobile hamburger */}
+        <div className="border-t border-white/10 px-4 py-4">
+          <div className="flex items-center gap-2.5 mb-3">
+            <div className="w-7 h-7 rounded-full bg-gold flex items-center justify-center shrink-0">
+              <span className="text-[11px] font-bold text-navy leading-none">{initials}</span>
+            </div>
+            <span className="text-[12.5px] text-white/70 truncate">{fullName}</span>
+          </div>
           <button
-            onClick={() => setMenuOpen((v) => !v)}
-            className="md:hidden p-2 rounded-lg text-white/60 hover:text-white hover:bg-white/10 transition"
-            aria-label="Toggle menu"
+            onClick={() => setChangePasswordOpen(true)}
+            className="block w-full text-left text-[12.5px] font-medium text-white/50 hover:text-white transition py-1"
           >
-            {menuOpen ? (
-              <X className="w-5 h-5" strokeWidth={1.75} />
-            ) : (
-              <Menu className="w-5 h-5" strokeWidth={1.75} />
-            )}
+            Change Password
+          </button>
+          <button
+            onClick={openSignOutModal}
+            className="block w-full text-left text-[12.5px] font-medium text-red-400 hover:text-red-300 transition py-1"
+          >
+            Sign out
           </button>
         </div>
-      </div>
+      </aside>
 
-      {/* Mobile menu */}
-      {menuOpen && (
-        <div className="md:hidden border-t border-white/10 bg-navy px-4 py-3 space-y-1">
-          {links.map((link) => (
-            <a
-              key={link.href}
-              href={link.href}
-              onClick={() => setMenuOpen(false)}
-              className={`block px-3 py-2 rounded-lg text-sm font-medium transition ${
-                isActive(link.href)
-                  ? "bg-white/10 text-white"
-                  : link.label === "New Scan"
-                  ? "text-orange hover:bg-white/5"
-                  : "text-white/50 hover:text-white hover:bg-white/5"
-              }`}
-            >
-              {link.label}
-            </a>
-          ))}
-
-          <div className="pt-2 border-t border-white/10 mt-2">
-            <div className="flex items-center gap-2.5 px-3 py-1.5">
-              <div className="w-6 h-6 rounded-full bg-gold flex items-center justify-center shrink-0">
-                <span className="text-xs font-bold text-navy leading-none">
-                  {fullName?.split(" ").map((n) => n[0]).slice(0, 2).join("")}
-                </span>
-              </div>
-              <p className="text-xs text-white/60 truncate">{fullName}</p>
-            </div>
-            <button
-              onClick={() => {
-                setMenuOpen(false);
-                setChangePasswordOpen(true);
-              }}
-              className="w-full text-left px-3 py-2 rounded-lg text-sm font-medium text-white/60 hover:text-white hover:bg-white/5 transition"
-            >
-              Change Password
-            </button>
-            <button
-              onClick={openSignOutModal}
-              className="w-full text-left px-3 py-2 rounded-lg text-sm font-medium text-red-400 hover:text-red-300 hover:bg-white/5 transition"
-            >
-              Sign out
-            </button>
-          </div>
-        </div>
-      )}
-
-      {/* Sign out confirmation modal */}
+      {/* Sign out confirmation modal — shared by both mobile and desktop nav */}
       {signOutModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center px-4">
           <div
@@ -234,6 +331,6 @@ export default function Navbar({ role, fullName }) {
         open={changePasswordOpen}
         onClose={() => setChangePasswordOpen(false)}
       />
-    </nav>
+    </>
   );
 }

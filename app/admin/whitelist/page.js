@@ -226,9 +226,9 @@ export default function WhitelistPage() {
   const changeCount = counts.new + counts.overwrite;
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background md:flex">
       <Navbar role={profile.role} fullName={profile.fullName} />
-      <main className="max-w-4xl mx-auto px-4 py-10">
+      <main className="flex-1 max-w-4xl mx-auto px-4 py-10">
         <PageHeader
           title="Student Whitelist"
           subtitle="Manage the pre-registration access control list. Only whitelisted student IDs can register."

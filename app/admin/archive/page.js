@@ -116,9 +116,9 @@ export default function AdminArchivePage() {
   }
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background md:flex">
       <Navbar role={profile.role} fullName={profile.fullName} />
-      <main className="max-w-4xl mx-auto px-4 py-10">
+      <main className="flex-1 max-w-4xl mx-auto px-4 py-10">
         <PageHeader
           title="Add to Archive"
           subtitle="Add a completed BSIS capstone study to the institutional library."

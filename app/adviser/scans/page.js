@@ -176,10 +176,10 @@ export default function SubmitPage() {
   }
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background md:flex">
       {profile && <Navbar role={profile.role} fullName={profile.full_name} />}
 
-      <main className="max-w-2xl mx-auto px-4 py-8">
+      <main className="flex-1 max-w-2xl mx-auto px-4 py-8">
 
         {/* Page header */}
         <PageHeader
