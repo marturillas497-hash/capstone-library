@@ -9,10 +9,11 @@ const HOME = {
   student: "/dashboard",
 };
 
-const STUDENT_ONLY = ["/dashboard", "/profile"];
+const STUDENT_ONLY = ["/dashboard"];
 const NO_ADMIN = ["/submit"];
 const ADVISER_ONLY = ["/adviser"];
 const ADMIN_ONLY = ["/admin"];
+const PROFILE_ALLOWED_ROLES = ["student", "capstone_adviser"];
 
 function toHome(role, request) {
   const path = HOME[role] ?? "/login";
@@ -106,6 +107,11 @@ export async function middleware(request) {
 
   // Student-only routes
   if (STUDENT_ONLY.some((p) => pathname.startsWith(p)) && role !== "student") {
+    return toHome(role, request);
+  }
+
+  // Profile — students and advisers only
+  if (pathname.startsWith("/profile") && !PROFILE_ALLOWED_ROLES.includes(role)) {
     return toHome(role, request);
   }
 
