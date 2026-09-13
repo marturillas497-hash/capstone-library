@@ -79,6 +79,77 @@ function TermsModal({ onClose }) {
   );
 }
 
+function IdentityConfirmModal({ match, checking, onConfirm, onReject, onClose }) {
+  const alreadyRegistered = match?.alreadyRegistered;
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center px-4">
+      <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={onClose} />
+      <div className="relative bg-background shadow-xl rounded-2xl w-full max-w-sm p-6">
+        <h2 className="font-display text-xl text-navy mb-1">
+          {alreadyRegistered ? "Already Registered" : "Confirm Your Identity"}
+        </h2>
+
+        {alreadyRegistered ? (
+          <>
+            <p className="text-sm text-slate-600 mb-5">
+              This student ID is already tied to an account under the name on
+              file below. If this is you, sign in instead. If you believe
+              this is a mistake, contact the librarian.
+            </p>
+            <div className="bg-navy/5 rounded-lg px-4 py-3 mb-5 text-sm">
+              <p className="text-slate-500">
+                Full name: <span className="text-foreground font-medium">{match.fullName}</span>
+              </p>
+              <p className="text-slate-500 mt-1">
+                Student ID: <span className="text-foreground font-medium">{match.idNumber}</span>
+              </p>
+            </div>
+            <button
+              onClick={onClose}
+              className="w-full bg-navy text-white text-sm font-medium py-2.5 rounded-lg hover:bg-navy-light transition"
+            >
+              Close
+            </button>
+          </>
+        ) : (
+          <>
+            <p className="text-sm text-slate-600 mb-5">
+              This is the name on file with the registrar for the student ID
+              you entered.
+            </p>
+            <div className="bg-navy/5 rounded-lg px-4 py-3 mb-5 text-sm">
+              <p className="text-slate-500">
+                Full name: <span className="text-foreground font-medium">{match.fullName}</span>
+              </p>
+              <p className="text-slate-500 mt-1">
+                Student ID: <span className="text-foreground font-medium">{match.idNumber}</span>
+              </p>
+            </div>
+            <p className="text-sm font-medium text-foreground mb-4">Is this you?</p>
+            <div className="flex gap-3">
+              <button
+                onClick={onConfirm}
+                disabled={checking}
+                className="flex-1 bg-navy text-white text-sm font-medium py-2 rounded-lg hover:bg-navy-light transition disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {checking ? "Creating account…" : "Yes, this is me"}
+              </button>
+              <button
+                onClick={onReject}
+                disabled={checking}
+                className="flex-1 bg-slate-100 text-slate-600 text-sm font-medium py-2 rounded-lg hover:bg-slate-200 transition disabled:opacity-50"
+              >
+                No, that's not me
+              </button>
+            </div>
+          </>
+        )}
+      </div>
+    </div>
+  );
+}
+
 export default function RegisterPage() {
   const router = useRouter();
 
@@ -97,6 +168,14 @@ export default function RegisterPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
+  // Identity confirmation (student registration only). `verifiedId` tracks
+  // which exact ID string the confirmation applies to, so editing the ID
+  // field after confirming forces a fresh lookup rather than silently
+  // reusing a stale "yes, that's me."
+  const [checkingId, setCheckingId] = useState(false);
+  const [idMatch, setIdMatch] = useState(null);
+  const [verifiedId, setVerifiedId] = useState(null);
+
   useEffect(() => {
     async function fetchAdvisers() {
       const supabase = createClient();
@@ -111,25 +190,14 @@ export default function RegisterPage() {
     fetchAdvisers();
   }, []);
 
-  async function handleRegister(e) {
-    e.preventDefault();
-    setError("");
+  function handleStudentIdChange(value) {
+    setStudentId(value);
+    // Any edit to the ID invalidates a prior "yes, that's me" confirmation.
+    if (verifiedId !== null) setVerifiedId(null);
+    if (idMatch) setIdMatch(null);
+  }
 
-    if (!agreedToTerms) {
-      setError("You must accept the Terms and Conditions to register.");
-      return;
-    }
-
-    if (password !== confirmPassword) {
-      setError("Passwords do not match.");
-      return;
-    }
-
-    if (password.length < 8) {
-      setError("Password must be at least 8 characters.");
-      return;
-    }
-
+  async function submitRegistration() {
     setLoading(true);
 
     const res = await fetch("/api/auth/register", {
@@ -159,6 +227,75 @@ export default function RegisterPage() {
     );
   }
 
+  async function handleRegister(e) {
+    e.preventDefault();
+    setError("");
+
+    if (!agreedToTerms) {
+      setError("You must accept the Terms and Conditions to register.");
+      return;
+    }
+
+    if (password !== confirmPassword) {
+      setError("Passwords do not match.");
+      return;
+    }
+
+    if (password.length < 8) {
+      setError("Password must be at least 8 characters.");
+      return;
+    }
+
+    // Capstone advisers have no whitelist ID to confirm — proceed directly.
+    if (role !== "student") {
+      submitRegistration();
+      return;
+    }
+
+    // Already confirmed this exact ID via the modal — submit directly.
+    if (verifiedId === studentId.trim()) {
+      submitRegistration();
+      return;
+    }
+
+    // Look up the ID and surface the "Is this you?" confirmation instead of
+    // creating the account immediately.
+    setCheckingId(true);
+    try {
+      const res = await fetch("/api/auth/register/verify-id", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ studentId: studentId.trim() }),
+      });
+      const data = await res.json();
+
+      if (!res.ok) {
+        setError(data.error ?? "Could not verify your student ID. Please try again.");
+        return;
+      }
+
+      if (!data.found) {
+        setError("Your student ID was not found in the system.");
+        return;
+      }
+
+      setIdMatch(data);
+    } finally {
+      setCheckingId(false);
+    }
+  }
+
+  function handleConfirmIdentity() {
+    setVerifiedId(studentId.trim());
+    setIdMatch(null);
+    submitRegistration();
+  }
+
+  function handleRejectIdentity() {
+    setIdMatch(null);
+    setStudentId("");
+  }
+
   const inputClass =
     "w-full px-3 py-2 rounded-lg bg-background shadow-neo-inset border-none text-sm text-foreground placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-navy/20 neo-transition";
 
@@ -168,6 +305,16 @@ export default function RegisterPage() {
   return (
     <>
       {showTermsModal && <TermsModal onClose={() => setShowTermsModal(false)} />}
+
+      {idMatch && (
+        <IdentityConfirmModal
+          match={idMatch}
+          checking={loading}
+          onConfirm={handleConfirmIdentity}
+          onReject={handleRejectIdentity}
+          onClose={() => setIdMatch(null)}
+        />
+      )}
 
       <div className="min-h-screen bg-background flex items-center justify-center px-4 py-10">
         <div className="w-full max-w-md animate-page-ease-in">
@@ -325,7 +472,7 @@ export default function RegisterPage() {
                       <input
                         type="text"
                         value={studentId}
-                        onChange={(e) => setStudentId(e.target.value)}
+                        onChange={(e) => handleStudentIdChange(e.target.value)}
                         required
                         placeholder="e.g. 2316075"
                         className={inputClass}
@@ -381,10 +528,14 @@ export default function RegisterPage() {
 
                 <button
                   type="submit"
-                  disabled={loading || !agreedToTerms}
+                  disabled={loading || checkingId || !agreedToTerms}
                   className="w-full bg-navy text-white text-sm font-medium py-2.5 rounded-lg hover:bg-navy-light transition disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  {loading ? "Creating account…" : "Create account"}
+                  {loading
+                    ? "Creating account…"
+                    : checkingId
+                    ? "Checking student ID…"
+                    : "Create account"}
                 </button>
               </form>
 

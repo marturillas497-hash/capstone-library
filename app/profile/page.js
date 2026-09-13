@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { createClient } from "@/lib/supabase/client";
 import Navbar from "@/components/shared/Navbar";
-import { UserCog, Save, Lock, Loader2 } from "lucide-react";
+import { UserCog, Save, Lock, Loader2, Mail, Users } from "lucide-react";
 import PageHeader from "@/components/shared/PageHeader";
 import { YEAR_LEVELS, SECTIONS } from "@/lib/constants";
 
@@ -14,6 +14,7 @@ export default function ProfilePage() {
   const [yearLevel, setYearLevel] = useState("");
   const [section, setSection] = useState("");
   const [adviserId, setAdviserId] = useState("");
+  const [assignedCount, setAssignedCount] = useState(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [success, setSuccess] = useState(false);
@@ -31,6 +32,19 @@ export default function ProfilePage() {
         .eq("id", user.id)
         .single();
 
+      // Advisers have no student_metadata-equivalent row. Instead, show
+      // their own auth email (already on the session, no RLS/service-role
+      // call needed) and a count of their assigned students, reusing the
+      // same route the "My Students" page already calls.
+      if (prof?.role === "capstone_adviser") {
+        const res = await fetch("/api/adviser/students");
+        const data = await res.json();
+        setAssignedCount(Array.isArray(data.students) ? data.students.length : 0);
+        setProfile({ ...prof, id: user.id, email: user.email });
+        setLoading(false);
+        return;
+      }
+
       const { data: m } = await supabase
         .from("student_metadata")
         .select("id_number, year_level, section, adviser_id")
@@ -44,7 +58,7 @@ export default function ProfilePage() {
         .eq("status", "active")
         .order("full_name");
 
-      setProfile({ ...prof, id: user.id });
+      setProfile({ ...prof, id: user.id, email: user.email });
       setMeta(m);
       setYearLevel(m?.year_level ?? "");
       setSection(m?.section ?? "");
@@ -106,6 +120,82 @@ export default function ProfilePage() {
 
   const readonlyClass =
     "w-full px-3 py-2 rounded-lg bg-background shadow-neo-inset border-none text-sm text-slate-500 cursor-not-allowed";
+
+  // Advisers have no editable fields today — no adviser-equivalent of
+  // student_metadata exists, so this is a read-only summary rather than a
+  // form. If that changes (e.g. a contact field is added), branch this into
+  // its own component the way the student form already is.
+  if (profile.role === "capstone_adviser") {
+    return (
+      <div className="min-h-screen bg-background md:flex">
+        <Navbar role={profile.role} fullName={profile.full_name} />
+
+        <main className="flex-1 max-w-xl mx-auto px-4 py-8">
+          <PageHeader
+            title="My Profile"
+            subtitle="Your account details on file with the institution."
+            icon={UserCog}
+            iconBg="bg-navy"
+          />
+
+          <div className="bg-background shadow-neo neo-transition rounded-2xl p-6 space-y-5">
+            <div>
+              <label className="block text-sm font-medium text-slate-600 mb-1">
+                Full name
+              </label>
+              <div className={readonlyClass}>{profile.full_name}</div>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-slate-600 mb-1 flex items-center gap-1.5">
+                <Mail className="w-3.5 h-3.5 text-slate-400" strokeWidth={1.75} />
+                Email
+              </label>
+              <div className={readonlyClass}>{profile.email}</div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <label className="block text-sm font-medium text-slate-600 mb-1">
+                  Role
+                </label>
+                <div className={readonlyClass}>Capstone Adviser</div>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-slate-600 mb-1">
+                  Status
+                </label>
+                <div className={readonlyClass + " capitalize"}>{profile.status}</div>
+              </div>
+            </div>
+
+            <hr className="border-slate-100" />
+
+            <div>
+              <label className="block text-sm font-medium text-slate-600 mb-1 flex items-center gap-1.5">
+                <Users className="w-3.5 h-3.5 text-slate-400" strokeWidth={1.75} />
+                Assigned Students
+              </label>
+              <div className={readonlyClass}>
+                {assignedCount === null ? "…" : assignedCount}
+              </div>
+              <a
+                href="/adviser"
+                className="inline-block mt-2 text-xs font-medium text-orange hover:underline"
+              >
+                View my students →
+              </a>
+            </div>
+
+            <p className="text-xs text-slate-500 pt-2 border-t border-slate-100">
+              Your name and account status are managed by the administrator.
+              To change your password, use Change Password in the sidebar.
+            </p>
+          </div>
+        </main>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-background md:flex">

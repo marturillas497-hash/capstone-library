@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef } from "react";
 import { createClient } from "@/lib/supabase/client";
 import Navbar from "@/components/shared/Navbar";
-import { UploadCloud, Search, User, AlertTriangle, CheckCircle2, RotateCcw } from "lucide-react";
+import { UploadCloud, Search, User, AlertTriangle, CheckCircle2, RotateCcw, UserPlus } from "lucide-react";
 import PageHeader from "@/components/shared/PageHeader";
 
 const STATUS_META = {
@@ -76,6 +76,16 @@ export default function WhitelistPage() {
   const [uploadResult, setUploadResult] = useState(null);
   const [error, setError] = useState(null);
   const [flaggedReview, setFlaggedReview] = useState(null);
+
+  // Manual add-a-student form, an alternative to the CSV upload above for
+  // one-off additions. Reuses the same check and write endpoints the CSV
+  // flow already uses rather than introducing new ones.
+  const [addId, setAddId] = useState("");
+  const [addName, setAddName] = useState("");
+  const [addBusy, setAddBusy] = useState(false);
+  const [addError, setAddError] = useState(null);
+  const [addSuccess, setAddSuccess] = useState(null);
+  const [addConflict, setAddConflict] = useState(null);
 
   const fileRef = useRef(null);
   const searchTimeout = useRef(null);
@@ -212,6 +222,80 @@ export default function WhitelistPage() {
     } finally {
       setConfirming(false);
     }
+  }
+
+  async function handleManualAdd(e) {
+    e.preventDefault();
+    setAddError(null);
+    setAddSuccess(null);
+    setAddConflict(null);
+
+    const id_number = addId.trim();
+    const full_name = addName.trim();
+
+    if (!id_number || !full_name) {
+      setAddError("Both a student ID and full name are required.");
+      return;
+    }
+
+    setAddBusy(true);
+    try {
+      const res = await fetch("/api/admin/whitelist/check", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ ids: [id_number] }),
+      });
+      const json = await res.json();
+      const existing = (json.existing || [])[0];
+
+      if (existing && existing.full_name === full_name) {
+        setAddError(`${id_number} is already whitelisted under this exact name. Nothing to change.`);
+        return;
+      }
+
+      if (existing) {
+        // Name would change — same "overwrite" concept as the CSV preview,
+        // surfaced here as an explicit confirm step since there's no bulk
+        // preview table to show it in for a single manual entry.
+        setAddConflict({ id_number, full_name, existingName: existing.full_name });
+        return;
+      }
+
+      await submitManualAdd(id_number, full_name);
+    } catch {
+      setAddError("Could not reach the server. Try again.");
+    } finally {
+      setAddBusy(false);
+    }
+  }
+
+  async function submitManualAdd(id_number, full_name) {
+    setAddBusy(true);
+    try {
+      const res = await fetch("/api/admin/whitelist", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ rows: [{ id_number, full_name }] }),
+      });
+      const json = await res.json();
+      if (!res.ok) {
+        setAddError(json.error || "Failed to add student.");
+        return;
+      }
+      setAddSuccess(`${full_name} (${id_number}) added to the whitelist.`);
+      setAddId("");
+      setAddName("");
+      setAddConflict(null);
+      await fetchEntries(query, sort);
+    } catch {
+      setAddError("Could not reach the server. Try again.");
+    } finally {
+      setAddBusy(false);
+    }
+  }
+
+  function handleCancelConflict() {
+    setAddConflict(null);
   }
 
   function formatDate(iso) {
@@ -418,6 +502,85 @@ export default function WhitelistPage() {
                 </button>
               </div>
             </div>
+          )}
+        </div>
+
+        <div className="bg-background shadow-neo neo-transition rounded-xl p-6 mb-6">
+          <h2 className="text-sm font-semibold text-foreground mb-3 flex items-center gap-1.5">
+            <UserPlus className="w-4 h-4 text-slate-500" strokeWidth={1.75} />
+            Add a Student Manually
+          </h2>
+          <p className="text-xs text-slate-500 mb-4">
+            For one-off additions. Bulk changes are faster through the CSV upload above.
+          </p>
+
+          {addSuccess && (
+            <div className="bg-green-50 border border-green-200 rounded-lg px-4 py-2.5 text-sm text-green-700 mb-4">
+              {addSuccess}
+            </div>
+          )}
+          {addError && (
+            <div className="bg-red-50 border border-red-200 rounded-lg px-4 py-2.5 text-sm text-red-600 mb-4">
+              {addError}
+            </div>
+          )}
+
+          {addConflict ? (
+            <div className="bg-orange/5 border border-orange/30 rounded-lg px-4 py-3">
+              <div className="flex items-start gap-2.5 mb-3">
+                <AlertTriangle className="w-4 h-4 text-orange-dark shrink-0 mt-0.5" strokeWidth={1.75} />
+                <p className="text-sm text-slate-700">
+                  Student ID <span className="font-mono">{addConflict.id_number}</span> is
+                  already whitelisted as{" "}
+                  <span className="font-medium">{addConflict.existingName}</span>. Adding it
+                  now will overwrite that name with{" "}
+                  <span className="font-medium">{addConflict.full_name}</span>.
+                </p>
+              </div>
+              <div className="flex gap-2">
+                <button
+                  type="button"
+                  onClick={() => submitManualAdd(addConflict.id_number, addConflict.full_name)}
+                  disabled={addBusy}
+                  className="inline-flex items-center gap-1.5 bg-orange text-white text-sm font-medium px-4 py-2 rounded-lg hover:bg-orange-dark transition-colors disabled:opacity-50"
+                >
+                  {addBusy ? "Updating…" : "Overwrite Name"}
+                </button>
+                <button
+                  type="button"
+                  onClick={handleCancelConflict}
+                  disabled={addBusy}
+                  className="inline-flex items-center gap-1.5 bg-white text-slate-600 border border-slate-200 text-sm font-medium px-4 py-2 rounded-lg hover:bg-slate-50 transition-colors disabled:opacity-50"
+                >
+                  Cancel
+                </button>
+              </div>
+            </div>
+          ) : (
+            <form onSubmit={handleManualAdd} className="flex flex-col sm:flex-row gap-3">
+              <input
+                type="text"
+                value={addId}
+                onChange={(e) => setAddId(e.target.value)}
+                placeholder="Student ID"
+                className="flex-1 border border-slate-200 rounded-lg px-3 py-2.5 text-sm text-foreground bg-white shadow-sm focus:outline-none focus:ring-2 focus:ring-navy/30"
+              />
+              <input
+                type="text"
+                value={addName}
+                onChange={(e) => setAddName(e.target.value)}
+                placeholder="Full name"
+                className="flex-1 border border-slate-200 rounded-lg px-3 py-2.5 text-sm text-foreground bg-white shadow-sm focus:outline-none focus:ring-2 focus:ring-navy/30"
+              />
+              <button
+                type="submit"
+                disabled={addBusy}
+                className="inline-flex items-center justify-center gap-1.5 bg-navy text-white text-sm font-medium px-4 py-2.5 rounded-lg hover:bg-navy-light transition-colors disabled:opacity-50 disabled:cursor-not-allowed shrink-0"
+              >
+                <UserPlus className="w-4 h-4" strokeWidth={1.75} />
+                {addBusy ? "Checking…" : "Add"}
+              </button>
+            </form>
           )}
         </div>
 
