@@ -201,8 +201,9 @@ export default function Navbar({ role, fullName }) {
               </button>
               <button
                 onClick={openSignOutModal}
-                className="w-full text-left px-3 py-2 rounded-lg text-sm font-medium text-red-400 hover:text-red-300 hover:bg-white/5 transition"
+                className="w-full flex items-center justify-center gap-2 mt-1.5 px-3 py-2.5 rounded-lg text-sm font-semibold text-white bg-red-500 hover:bg-red-600 transition"
               >
+                <LogOut className="w-4 h-4" strokeWidth={1.75} />
                 Sign out
               </button>
             </div>
@@ -284,8 +285,9 @@ export default function Navbar({ role, fullName }) {
           </button>
           <button
             onClick={openSignOutModal}
-            className="block w-full text-left text-[12.5px] font-medium text-red-400 hover:text-red-300 transition py-1"
+            className="w-full flex items-center justify-center gap-2 mt-2 px-3 py-2.5 rounded-lg text-[13px] font-semibold text-white bg-red-500 hover:bg-red-600 transition"
           >
+            <LogOut className="w-4 h-4" strokeWidth={1.75} />
             Sign out
           </button>
         </div>
