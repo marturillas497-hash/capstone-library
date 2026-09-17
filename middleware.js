@@ -27,7 +27,15 @@ function toLogin(request, params = "") {
 export async function middleware(request) {
   const { pathname } = request.nextUrl;
 
-  let response = NextResponse.next({ request });
+  /*
+    requestHeaders carries the x-user-* values (set near the end of this
+    function) down to Server Components via next/headers, so pages can skip
+    re-querying profiles. pendingCookies preserves any Supabase session
+    refresh cookies so rebuilding the response later doesn't drop them.
+  */
+  let requestHeaders = new Headers(request.headers);
+  let response = NextResponse.next({ request: { headers: requestHeaders } });
+  let pendingCookies = [];
 
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL,
@@ -41,7 +49,8 @@ export async function middleware(request) {
           cookiesToSet.forEach(({ name, value }) =>
             request.cookies.set(name, value)
           );
-          response = NextResponse.next({ request });
+          pendingCookies = cookiesToSet;
+          response = NextResponse.next({ request: { headers: requestHeaders } });
           cookiesToSet.forEach(({ name, value, options }) =>
             response.cookies.set(name, value, options)
           );
@@ -74,16 +83,15 @@ export async function middleware(request) {
   // No session — send to login
   if (!user) return toLogin(request);
 
-  // Fetch profile
   const { data: profile } = await supabase
     .from("profiles")
-    .select("role, status")
+    .select("full_name, role, status")
     .eq("id", user.id)
     .single();
 
   if (!profile) return toLogin(request);
 
-  const { role, status } = profile;
+  const { role, status, full_name } = profile;
 
   // Pending adviser — block and send back to login
   if (role === "capstone_adviser" && status === "pending") {
@@ -119,6 +127,21 @@ export async function middleware(request) {
   if (NO_ADMIN.some((p) => pathname.startsWith(p)) && role === "admin") {
     return toHome(role, request);
   }
+
+  /*
+    Forward verified identity to the page. .set() always overwrites, so a
+    client-supplied header of the same name can't spoof this. full_name is
+    encodeURIComponent-escaped since header values must be ASCII-safe.
+  */
+  requestHeaders.set("x-user-id", user.id);
+  requestHeaders.set("x-user-role", role);
+  requestHeaders.set("x-user-status", status);
+  requestHeaders.set("x-user-name", encodeURIComponent(full_name ?? ""));
+
+  response = NextResponse.next({ request: { headers: requestHeaders } });
+  pendingCookies.forEach(({ name, value, options }) =>
+    response.cookies.set(name, value, options)
+  );
 
   return response;
 }
