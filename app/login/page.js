@@ -17,22 +17,25 @@ const STATUS_MESSAGES = {
 };
 
 const FEATURES = [
-  {
-    iconColorClass: "text-gold",
-    icon: ScanLine,
-    label: "Semantic Similarity Detection",
-  },
-  {
-    iconColorClass: "text-orange",
-    icon: Lightbulb,
-    label: "AI Advisory by Google Gemini",
-  },
-  {
-    iconColorClass: "text-gold",
-    icon: BookOpen,
-    label: "BSIS Abstract Catalog",
-  },
+  { icon: ScanLine, label: "Semantic Similarity Detection" },
+  { icon: Lightbulb, label: "AI Advisory by Google Gemini" },
+  { icon: BookOpen, label: "BSIS Abstract Catalog" },
 ];
+
+// Background photo lives at /public/bg_login.jpg. Tint overlay keeps the
+// white text/logos legible regardless of how bright the source photo is;
+// adjust the bg-navy/55 opacity below once you see it live.
+function PanelBackdrop() {
+  return (
+    <>
+      <div
+        className="absolute inset-0 bg-cover bg-center pointer-events-none"
+        style={{ backgroundImage: "url('/bg_login.jpg')" }}
+      />
+      <div className="absolute inset-0 bg-navy/55 pointer-events-none" />
+    </>
+  );
+}
 
 function LoginForm() {
   const router = useRouter();
@@ -103,49 +106,48 @@ function LoginForm() {
   }
 
   return (
-    <div className="min-h-screen flex flex-col lg:flex-row">
+    <div className="min-h-screen flex items-center justify-center bg-slate-100 p-4 lg:py-6 lg:px-10">
+      <div className="w-full max-w-4xl bg-white rounded-3xl shadow-neo overflow-hidden flex flex-col lg:flex-row">
 
-      {/* Mobile-only top banner */}
-      <div className="lg:hidden bg-navy px-6 pt-8 pb-6 relative overflow-hidden">
-        <div className="absolute top-0 left-0 right-0 h-[3px] bg-orange" />
-        <div className="flex items-center gap-3 mb-3">
-          <img
-            src="/mist-logo.png"
-            alt="MIST"
-            className="h-10 w-10 object-contain"
-          />
-          <div className="w-px h-8 bg-white/15" />
-          <img
-            src="/is-logo.png"
-            alt="Information Systems"
-            className="h-10 w-10 object-contain"
-          />
+        {/* Mobile-only top banner */}
+        <div className="lg:hidden bg-navy px-6 pt-8 pb-6 relative overflow-hidden">
+          <PanelBackdrop />
+          <div className="absolute top-0 left-0 right-0 h-[3px] bg-orange z-10" />
+          <div className="relative z-10">
+            <div className="flex items-center gap-3 mb-3">
+              <img
+                src="/mist-logo.png"
+                alt="MIST"
+                className="h-10 w-10 object-contain"
+              />
+              <div className="w-px h-8 bg-white/15" />
+              <img
+                src="/is-logo.png"
+                alt="Information Systems"
+                className="h-10 w-10 object-contain"
+              />
+            </div>
+            <p className="text-white text-sm font-medium leading-snug">
+              Makilala Institute of Science and Technology
+            </p>
+            <p className="text-orange text-xs leading-snug mt-0.5">
+              Bachelor of Science in Information Systems
+            </p>
+          </div>
         </div>
-        <p className="text-white text-sm font-medium leading-snug">
-          Makilala Institute of Science and Technology
-        </p>
-        <p className="text-orange text-xs leading-snug mt-0.5">
-          Bachelor of Science in Information Systems
-        </p>
-      </div>
 
-      {/* Left panel */}
-      <div className="hidden lg:flex lg:w-[45%] flex-col justify-center p-10 relative overflow-hidden bg-navy">
-        {/* Decorative circles */}
-        <div className="absolute -top-24 -right-24 w-96 h-96 rounded-full bg-white/[0.04] pointer-events-none" />
-        <div className="absolute -bottom-16 -left-16 w-72 h-72 rounded-full bg-white/[0.04] pointer-events-none" />
+        {/* Left panel */}
+        <div className="hidden lg:flex lg:w-[45%] flex-col justify-center p-10 relative overflow-hidden bg-navy">
+          <PanelBackdrop />
 
-        {/* IS Orange accent strip */}
-        <div className="absolute top-0 left-0 right-0 h-[3px] bg-orange" />
+          {/* IS Orange accent strip */}
+          <div className="absolute top-0 left-0 right-0 h-[3px] bg-orange z-10" />
 
-        {/* Content group: crest, product identity, and feature list, sit together and center as one unit */}
-        <div className="relative flex flex-col gap-16">
-
-          {/* Top: institutional crest and product identity, centered */}
-          <div className="text-center">
+          {/* Content group: crest, feature list, description, sit together and center as one unit */}
+          <div className="relative z-10 flex flex-col gap-10">
 
             {/* Crest lockup */}
-            <div>
+            <div className="text-center">
               <div className="flex items-center justify-center gap-4 mb-3">
                 <img
                   src="/mist-logo.png"
@@ -167,89 +169,81 @@ function LoginForm() {
               </p>
             </div>
 
-            <h1 className="font-display text-5xl text-white mt-8 mb-3 leading-tight">
-              Capstone Library
-            </h1>
-            <p className="text-white/60 text-base leading-relaxed max-w-sm mx-auto">
+            {/* Feature pills */}
+            <div className="space-y-3">
+              {FEATURES.map((f) => (
+                <div
+                  key={f.label}
+                  className="flex items-center gap-3 bg-white/10 border border-white/10 rounded-xl px-4 py-3"
+                >
+                  <f.icon className="text-white shrink-0 w-4 h-4" strokeWidth={1.75} />
+                  <span className="text-white text-sm font-medium">{f.label}</span>
+                </div>
+              ))}
+            </div>
+
+            {/* Description */}
+            <p className="text-white/60 text-sm leading-relaxed max-w-sm mx-auto text-center">
               Validate your proposed capstone topics against the BSIS institutional
               library through semantic similarity detection and AI-powered advisory
               feedback.
             </p>
           </div>
-
-          {/* Feature bullets, left aligned, same size as before */}
-          <div className="space-y-3">
-            {FEATURES.map((f) => (
-              <div key={f.label} className="flex items-center gap-3">
-                <f.icon className={`${f.iconColorClass} shrink-0 w-4 h-4`} strokeWidth={1.75} />
-                <span className="text-white/70 text-m">{f.label}</span>
-              </div>
-            ))}
-          </div>
         </div>
-      </div>
 
-      {/* Right panel */}
-      <div className="flex-1 flex items-center justify-center px-6 bg-slate-50">
-        <div className="w-full max-w-sm bg-background rounded-2xl shadow-neo neo-transition animate-page-ease-in p-8">
+        {/* Right panel */}
+        <div className="flex-1 flex items-center justify-center px-6 py-10 bg-white">
+          <div className="w-full max-w-sm">
 
-          <h2 className="font-display text-3xl text-foreground mb-1">
-            Welcome back
-          </h2>
-          <p className="text-sm text-slate-600 mb-8">
-            Sign in to your Capstone Library account
-          </p>
+            <h1 className="font-display !font-bold text-navy leading-tight mb-1">
+              <span className="block text-3xl">MIST - BSIS</span>
+              <span className="block text-3xl">Capstone Library</span>
+            </h1>
+            <p className="text-sm text-slate-600 mb-8">
+              Sign in to your Capstone Library Account
+            </p>
 
-          {(inlineStatus || statusMessage) && (
-            <div
-              className={`mb-6 px-4 py-3 rounded-lg text-sm ${
-                (inlineStatus?.isInfo ?? isInfo)
-                  ? "bg-blue-50 text-blue-700 border border-blue-200"
-                  : "bg-red-50 text-red-700 border border-red-200"
-              }`}
-            >
-              {inlineStatus?.message ?? statusMessage}
-            </div>
-          )}
+            {(inlineStatus || statusMessage) && (
+              <div
+                className={`mb-6 px-4 py-3 rounded-lg text-sm ${
+                  (inlineStatus?.isInfo ?? isInfo)
+                    ? "bg-blue-50 text-blue-700 border border-blue-200"
+                    : "bg-red-50 text-red-700 border border-red-200"
+                }`}
+              >
+                {inlineStatus?.message ?? statusMessage}
+              </div>
+            )}
 
-          <form onSubmit={handleLogin} className="space-y-4">
-            <div>
-              <label className="block text-sm font-medium text-foreground mb-1">
-                Email address
-              </label>
+            <form onSubmit={handleLogin} className="space-y-4">
               <div className="relative">
-                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" strokeWidth={1.75} />
+                <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" strokeWidth={1.75} />
                 <input
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   required
                   autoComplete="email"
-                  placeholder="you@example.com"
-                  className="w-full pl-10 pr-3 py-2 rounded-lg bg-background shadow-neo-inset border-none text-sm text-foreground placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-navy/20 transition neo-transition"
+                  placeholder="Email"
+                  className="w-full pl-11 pr-4 py-3 rounded-2xl bg-background shadow-neo-inset border-none text-sm text-foreground placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-navy/20 transition neo-transition"
                 />
               </div>
-            </div>
 
-            <div>
-              <label className="block text-sm font-medium text-foreground mb-1">
-                Password
-              </label>
               <div className="relative">
-                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" strokeWidth={1.75} />
+                <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" strokeWidth={1.75} />
                 <input
                   type={showPassword ? "text" : "password"}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   required
                   autoComplete="current-password"
-                  placeholder="••••••••"
-                  className="w-full pl-10 pr-10 py-2 rounded-lg bg-background shadow-neo-inset border-none text-sm text-foreground placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-navy/20 transition neo-transition"
+                  placeholder="Password"
+                  className="w-full pl-11 pr-11 py-3 rounded-2xl bg-background shadow-neo-inset border-none text-sm text-foreground placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-navy/20 transition neo-transition"
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword((v) => !v)}
-                  className="absolute inset-y-0 right-0 flex items-center px-3 text-slate-400 hover:text-slate-600 transition"
+                  className="absolute inset-y-0 right-0 flex items-center px-4 text-slate-400 hover:text-slate-600 transition"
                   tabIndex={-1}
                 >
                   {showPassword ? (
@@ -259,31 +253,31 @@ function LoginForm() {
                   )}
                 </button>
               </div>
-            </div>
 
-            {error && (
-              <p className="text-sm text-red-600">{error}</p>
-            )}
+              {error && (
+                <p className="text-sm text-red-600">{error}</p>
+              )}
 
-            <button
-              type="submit"
-              disabled={loading}
-              className="w-full bg-navy text-white text-sm font-medium py-2.5 rounded-lg hover:bg-navy-light transition disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              {loading ? "Signing in…" : "Sign in"}
-            </button>
-          </form>
+              <button
+                type="submit"
+                disabled={loading}
+                className="w-full bg-navy text-white text-sm font-medium py-3 rounded-full hover:bg-navy-light transition disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {loading ? "Logging in…" : "Log In"}
+              </button>
+            </form>
 
-          <p className="mt-6 text-center text-sm text-slate-600">
-            No account yet?{" "}
-            <a href="/register" className="text-orange font-medium hover:underline">
-              Register here
-            </a>
-          </p>
+            <p className="mt-6 text-center text-sm text-slate-600">
+              No account yet?{" "}
+              <a href="/register" className="text-orange font-medium hover:underline">
+                Register here
+              </a>
+            </p>
 
+          </div>
         </div>
-      </div>
 
+      </div>
     </div>
   );
 }
