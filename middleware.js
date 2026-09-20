@@ -130,13 +130,15 @@ export async function middleware(request) {
 
   /*
     Forward verified identity to the page. .set() always overwrites, so a
-    client-supplied header of the same name can't spoof this. full_name is
-    encodeURIComponent-escaped since header values must be ASCII-safe.
+    client-supplied header of the same name can't spoof this. full_name and
+    email are encodeURIComponent-escaped since header values must be
+    ASCII-safe.
   */
   requestHeaders.set("x-user-id", user.id);
   requestHeaders.set("x-user-role", role);
   requestHeaders.set("x-user-status", status);
   requestHeaders.set("x-user-name", encodeURIComponent(full_name ?? ""));
+  requestHeaders.set("x-user-email", encodeURIComponent(user.email ?? ""));
 
   response = NextResponse.next({ request: { headers: requestHeaders } });
   pendingCookies.forEach(({ name, value, options }) =>
