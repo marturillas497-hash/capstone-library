@@ -15,11 +15,51 @@ const STATUS_META = {
   invalid_name: { label: "Missing Name", className: "bg-red-50 text-red-600 border-red-200" },
 };
 
+/*
+ * Quote-aware CSV field split for a single line. Handles a name written
+ * as "Dela Cruz, Juan" (comma inside double quotes, standard Excel/Sheets
+ * export behavior) and "" as an escaped literal quote inside a quoted
+ * field. Does not handle a quoted field spanning multiple physical lines,
+ * names don't contain newlines, so this is a deliberate scope limit, not
+ * an oversight.
+ */
+function parseCsvLine(line) {
+  const result = [];
+  let cur = "";
+  let inQuotes = false;
+
+  for (let i = 0; i < line.length; i++) {
+    const ch = line[i];
+    if (inQuotes) {
+      if (ch === '"' && line[i + 1] === '"') {
+        cur += '"';
+        i++;
+      } else if (ch === '"') {
+        inQuotes = false;
+      } else {
+        cur += ch;
+      }
+    } else if (ch === '"') {
+      inQuotes = true;
+    } else if (ch === ",") {
+      result.push(cur);
+      cur = "";
+    } else {
+      cur += ch;
+    }
+  }
+  result.push(cur);
+  return result.map((c) => c.trim());
+}
+
 function parseCsv(text) {
-  const lines = text.split(/\r?\n/).filter((l) => l.trim().length > 0);
+  const lines = text
+    .split(/\r?\n/)
+    .map((raw, idx) => ({ raw, lineNo: idx + 1 }))
+    .filter((l) => l.raw.trim().length > 0);
   if (lines.length === 0) throw new Error("The file is empty.");
 
-  const header = lines[0].toLowerCase().split(",").map((h) => h.trim());
+  const header = parseCsvLine(lines[0].raw).map((h) => h.toLowerCase());
   const idCol = header.indexOf("id_number");
   const nameCol = header.indexOf("full_name");
 
@@ -29,9 +69,19 @@ function parseCsv(text) {
 
   const rows = [];
   for (let i = 1; i < lines.length; i++) {
-    const cols = lines[i].split(",").map((c) => c.trim());
+    const { raw, lineNo } = lines[i];
+    const cols = parseCsvLine(raw);
+    /* A stray unquoted comma (a name written without quotes) throws off
+     * the column count. Fail loudly with the row number instead of
+     * silently shifting every column after it. */
+    if (cols.length !== header.length) {
+      throw new Error(
+        `Row ${lineNo} has ${cols.length} column${cols.length === 1 ? "" : "s"}, expected ${header.length}. ` +
+        `If a name contains a comma (e.g. Dela Cruz, Juan), wrap it in double quotes and re-upload.`
+      );
+    }
     rows.push({
-      rowNumber: i + 1,
+      rowNumber: lineNo,
       id_number: cols[idCol] || "",
       full_name: cols[nameCol] || "",
     });
@@ -155,6 +205,7 @@ export default function WhitelistPage() {
         body: JSON.stringify({ ids: uniqueIds }),
       });
       const json = await res.json();
+      if (!res.ok) throw new Error(json.error || "Check failed");
       const existingMap = new Map((json.existing || []).map((e) => [e.id_number, e.full_name]));
       setPreviewRows(classifyRows(rows, existingMap));
     } catch {
@@ -246,6 +297,10 @@ export default function WhitelistPage() {
         body: JSON.stringify({ ids: [id_number] }),
       });
       const json = await res.json();
+      if (!res.ok) {
+        setAddError(json.error || "Could not check the whitelist. Try again.");
+        return;
+      }
       const existing = (json.existing || [])[0];
 
       if (existing && existing.full_name === full_name) {
