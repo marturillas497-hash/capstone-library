@@ -34,15 +34,27 @@ export async function POST(request) {
     // Cap defensively, this is a preview check, not a bulk export.
     const safeIds = ids.slice(0, 2000);
 
+    /*
+     * PostgREST puts .in() values in the URL and caps rows per response,
+     * so query in chunks of 200 and run them in parallel.
+     */
+    const CHUNK = 200;
+    const chunks = [];
+    for (let i = 0; i < safeIds.length; i += CHUNK) {
+      chunks.push(safeIds.slice(i, i + CHUNK));
+    }
+
     const admin = createAdminClient();
-    const { data, error } = await admin
-      .from("student_whitelist")
-      .select("id_number, full_name")
-      .in("id_number", safeIds);
+    const results = await Promise.all(
+      chunks.map((c) =>
+        admin.from("student_whitelist").select("id_number, full_name").in("id_number", c)
+      )
+    );
 
-    if (error) throw error;
+    const failed = results.find((r) => r.error);
+    if (failed) throw failed.error;
 
-    return NextResponse.json({ existing: data || [] });
+    return NextResponse.json({ existing: results.flatMap((r) => r.data || []) });
   } catch (err) {
     console.error("[POST /api/admin/whitelist/check]", err);
     return NextResponse.json({ error: "Failed to check whitelist" }, { status: 500 });
