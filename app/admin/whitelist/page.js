@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef } from "react";
 import { createClient } from "@/lib/supabase/client";
 import Navbar from "@/components/shared/Navbar";
-import { UploadCloud, Search, User, AlertTriangle, CheckCircle2, RotateCcw, UserPlus } from "lucide-react";
+import { UploadCloud, Search, User, AlertTriangle, CheckCircle2, RotateCcw, UserPlus, ChevronLeft, ChevronRight } from "lucide-react";
 import PageHeader from "@/components/shared/PageHeader";
 
 const STATUS_META = {
@@ -114,7 +114,13 @@ export default function WhitelistPage() {
   const supabase = createClient();
   const [entries, setEntries] = useState([]);
   const [query, setQuery] = useState("");
+  const [debouncedQuery, setDebouncedQuery] = useState("");
   const [sort, setSort] = useState("date");
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(25);
+  const [total, setTotal] = useState(0);
+  const [totalPages, setTotalPages] = useState(1);
+  const [listError, setListError] = useState(false);
   const [loading, setLoading] = useState(true);
   const [profile, setProfile] = useState({ role: "admin", fullName: "" });
 
@@ -138,7 +144,7 @@ export default function WhitelistPage() {
   const [addConflict, setAddConflict] = useState(null);
 
   const fileRef = useRef(null);
-  const searchTimeout = useRef(null);
+  const reqRef = useRef(0);
 
   useEffect(() => {
     async function init() {
@@ -151,26 +157,46 @@ export default function WhitelistPage() {
           .single();
         if (data) setProfile({ role: data.role, fullName: data.full_name });
       }
-      await fetchEntries("", sort);
     }
     init();
   }, []);
 
+  /* Only typing is debounced. A new search always returns to page 1. */
   useEffect(() => {
-    clearTimeout(searchTimeout.current);
-    searchTimeout.current = setTimeout(() => fetchEntries(query, sort), 300);
-  }, [query, sort]);
+    const t = setTimeout(() => {
+      setDebouncedQuery(query);
+      setPage(1);
+    }, 300);
+    return () => clearTimeout(t);
+  }, [query]);
 
-  async function fetchEntries(q, s) {
+  useEffect(() => {
+    fetchEntries(debouncedQuery, sort, page);
+  }, [debouncedQuery, sort, page]);
+
+  async function fetchEntries(q, s, p) {
+    /* Ignore any response that a newer request has already superseded. */
+    const id = ++reqRef.current;
     setLoading(true);
+    setListError(false);
     try {
-      const res = await fetch(`/api/admin/whitelist?q=${encodeURIComponent(q)}&sort=${s}`);
+      const res = await fetch(`/api/admin/whitelist?q=${encodeURIComponent(q)}&sort=${s}&page=${p}`);
       const json = await res.json();
+      if (!res.ok) throw new Error(json.error || "Failed to load whitelist");
+      if (id !== reqRef.current) return;
+      const pages = json.totalPages || 1;
       setEntries(json.entries || []);
+      setTotal(json.total || 0);
+      setTotalPages(pages);
+      setPageSize(json.pageSize || 25);
+      if (p > pages) setPage(pages);
     } catch {
+      if (id !== reqRef.current) return;
       setEntries([]);
+      setTotal(0);
+      setListError(true);
     } finally {
-      setLoading(false);
+      if (id === reqRef.current) setLoading(false);
     }
   }
 
@@ -267,7 +293,7 @@ export default function WhitelistPage() {
           : null
       );
       setPreviewRows(null);
-      await fetchEntries(query, sort);
+      await fetchEntries(debouncedQuery, sort, page);
     } catch (err) {
       setError(err.message);
     } finally {
@@ -341,7 +367,7 @@ export default function WhitelistPage() {
       setAddId("");
       setAddName("");
       setAddConflict(null);
-      await fetchEntries(query, sort);
+      await fetchEntries(debouncedQuery, sort, page);
     } catch {
       setAddError("Could not reach the server. Try again.");
     } finally {
@@ -358,6 +384,9 @@ export default function WhitelistPage() {
       year: "numeric", month: "short", day: "numeric",
     });
   }
+
+  const rangeStart = total === 0 ? 0 : (page - 1) * pageSize + 1;
+  const rangeEnd = rangeStart + entries.length - 1;
 
   const counts = { new: 0, overwrite: 0, unchanged: 0, duplicate: 0, invalid: 0, invalid_name: 0 };
   if (previewRows) previewRows.forEach((r) => counts[r.status]++);
@@ -652,7 +681,10 @@ export default function WhitelistPage() {
           </div>
           <select
             value={sort}
-            onChange={(e) => setSort(e.target.value)}
+            onChange={(e) => {
+              setSort(e.target.value);
+              setPage(1);
+            }}
             className="border border-slate-200 rounded-lg px-3 py-2.5 text-sm text-foreground bg-white shadow-sm focus:outline-none focus:ring-2 focus:ring-navy/30"
           >
             <option value="date">Newest first</option>
@@ -669,8 +701,10 @@ export default function WhitelistPage() {
           </div>
         ) : entries.length === 0 ? (
           <div className="text-center py-16 text-slate-400">
-            <p className="text-base font-medium">No entries found</p>
-            <p className="text-sm mt-1">Upload a CSV to populate the whitelist.</p>
+            <p className="text-base font-medium">{listError ? "Could not load the whitelist" : "No entries found"}</p>
+            <p className="text-sm mt-1">
+              {listError ? "Check your connection and try again." : "Upload a CSV to populate the whitelist."}
+            </p>
           </div>
         ) : (
           <div className="bg-background shadow-neo neo-transition rounded-xl overflow-hidden">
@@ -688,8 +722,29 @@ export default function WhitelistPage() {
                 </div>
               ))}
             </div>
-            <div className="px-4 py-2.5 border-t border-slate-100 text-xs text-slate-400">
-              {entries.length} entr{entries.length !== 1 ? "ies" : "y"} shown
+            <div className="px-4 py-2.5 border-t border-slate-100 flex items-center justify-between text-xs text-slate-400">
+              <span>
+                Showing {rangeStart} to {rangeEnd} of {total.toLocaleString()} entr{total !== 1 ? "ies" : "y"}
+              </span>
+              <div className="flex items-center gap-2">
+                <span>Page {page} of {totalPages}</span>
+                <button
+                  onClick={() => setPage((p) => Math.max(1, p - 1))}
+                  disabled={page <= 1}
+                  aria-label="Previous page"
+                  className="p-1.5 rounded-lg border border-slate-200 text-slate-500 hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed"
+                >
+                  <ChevronLeft className="w-4 h-4" strokeWidth={1.75} />
+                </button>
+                <button
+                  onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+                  disabled={page >= totalPages}
+                  aria-label="Next page"
+                  className="p-1.5 rounded-lg border border-slate-200 text-slate-500 hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed"
+                >
+                  <ChevronRight className="w-4 h-4" strokeWidth={1.75} />
+                </button>
+              </div>
             </div>
           </div>
         )}
