@@ -141,6 +141,7 @@ export default function WhitelistPage() {
   const [addBusy, setAddBusy] = useState(false);
   const [addError, setAddError] = useState(null);
   const [addSuccess, setAddSuccess] = useState(null);
+  const [addInfo, setAddInfo] = useState(null);
   const [addConflict, setAddConflict] = useState(null);
 
   const fileRef = useRef(null);
@@ -265,7 +266,7 @@ export default function WhitelistPage() {
     const overwriteRows = previewRows.filter((r) => r.status === "overwrite");
     const toSubmit = previewRows
       .filter((r) => r.status === "new" || r.status === "overwrite")
-      .map((r) => ({ id_number: r.id_number, full_name: r.full_name || null }));
+      .map((r) => ({ id_number: r.id_number, full_name: r.full_name }));
 
     if (toSubmit.length === 0) {
       setUploadResult("Nothing to update, every row already matches the current whitelist.");
@@ -305,6 +306,7 @@ export default function WhitelistPage() {
     e.preventDefault();
     setAddError(null);
     setAddSuccess(null);
+    setAddInfo(null);
     setAddConflict(null);
 
     const id_number = addId.trim();
@@ -330,14 +332,16 @@ export default function WhitelistPage() {
       const existing = (json.existing || [])[0];
 
       if (existing && existing.full_name === full_name) {
-        setAddError(`${id_number} is already whitelisted under this exact name. Nothing to change.`);
+        setAddInfo(`${id_number} is already whitelisted under this exact name. Nothing to change.`);
         return;
       }
 
       if (existing) {
-        // Name would change — same "overwrite" concept as the CSV preview,
-        // surfaced here as an explicit confirm step since there's no bulk
-        // preview table to show it in for a single manual entry.
+        /*
+         * Name would change: same "overwrite" concept as the CSV preview,
+         * shown here as an explicit confirm step since a single entry has
+         * no preview table.
+         */
         setAddConflict({ id_number, full_name, existingName: existing.full_name });
         return;
       }
@@ -390,7 +394,8 @@ export default function WhitelistPage() {
 
   const counts = { new: 0, overwrite: 0, unchanged: 0, duplicate: 0, invalid: 0, invalid_name: 0 };
   if (previewRows) previewRows.forEach((r) => counts[r.status]++);
-  const blocking = counts.duplicate + counts.invalid + counts.invalid_name > 0;
+  const blockingCount = counts.duplicate + counts.invalid + counts.invalid_name;
+  const blocking = blockingCount > 0;
   const changeCount = counts.new + counts.overwrite;
 
   return (
@@ -512,7 +517,7 @@ export default function WhitelistPage() {
                 </span>
                 {blocking && (
                   <span className="text-xs font-medium px-2.5 py-1 rounded-full border bg-red-50 text-red-600 border-red-200">
-                    {counts.duplicate + counts.invalid + counts.invalid_name} issue{counts.duplicate + counts.invalid + counts.invalid_name !== 1 ? "s" : ""}
+                    {blockingCount} issue{blockingCount !== 1 ? "s" : ""}
                   </span>
                 )}
               </div>
@@ -555,7 +560,7 @@ export default function WhitelistPage() {
                 <div className="bg-red-50 border border-red-200 rounded-lg px-4 py-3 mb-4 flex gap-2.5">
                   <AlertTriangle className="w-4 h-4 text-red-500 shrink-0 mt-0.5" strokeWidth={1.75} />
                   <p className="text-sm text-red-700">
-                    Fix the flagged row{counts.duplicate + counts.invalid !== 1 ? "s" : ""} in your file, then re-upload. Nothing has been saved yet.
+                    Fix the flagged row{blockingCount !== 1 ? "s" : ""} in your file, then re-upload. Nothing has been saved yet.
                   </p>
                 </div>
               ) : changeCount === 0 ? (
@@ -606,6 +611,11 @@ export default function WhitelistPage() {
           {addError && (
             <div className="bg-red-50 border border-red-200 rounded-lg px-4 py-2.5 text-sm text-red-600 mb-4">
               {addError}
+            </div>
+          )}
+          {addInfo && (
+            <div className="bg-slate-50 border border-slate-200 rounded-lg px-4 py-2.5 text-sm text-slate-600 mb-4">
+              {addInfo}
             </div>
           )}
 

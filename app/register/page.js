@@ -79,7 +79,7 @@ function TermsModal({ onClose }) {
   );
 }
 
-function IdentityConfirmModal({ match, checking, onConfirm, onReject, onClose }) {
+function IdentityConfirmModal({ match, onConfirm, onReject, onClose }) {
   const alreadyRegistered = match?.alreadyRegistered;
 
   return (
@@ -130,15 +130,13 @@ function IdentityConfirmModal({ match, checking, onConfirm, onReject, onClose })
             <div className="flex gap-3">
               <button
                 onClick={onConfirm}
-                disabled={checking}
-                className="flex-1 bg-navy text-white text-sm font-medium py-2 rounded-lg hover:bg-navy-light transition disabled:opacity-50 disabled:cursor-not-allowed"
+                className="flex-1 bg-navy text-white text-sm font-medium py-2 rounded-lg hover:bg-navy-light transition"
               >
-                {checking ? "Creating account…" : "Yes, this is me"}
+                Yes, this is me
               </button>
               <button
                 onClick={onReject}
-                disabled={checking}
-                className="flex-1 bg-slate-100 text-slate-600 text-sm font-medium py-2 rounded-lg hover:bg-slate-200 transition disabled:opacity-50"
+                className="flex-1 bg-slate-100 text-slate-600 text-sm font-medium py-2 rounded-lg hover:bg-slate-200 transition"
               >
                 No, that's not me
               </button>
@@ -309,7 +307,6 @@ export default function RegisterPage() {
       {idMatch && (
         <IdentityConfirmModal
           match={idMatch}
-          checking={loading}
           onConfirm={handleConfirmIdentity}
           onReject={handleRejectIdentity}
           onClose={() => setIdMatch(null)}
