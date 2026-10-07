@@ -1,14 +1,13 @@
 import { NextResponse } from "next/server";
-import { createClient } from "@/lib/supabase/server";
+import { requireActiveUser } from "@/lib/apiAuth";
 
 export async function POST(request, { params }) {
-  const { id } = await params;
-  const supabase = await createClient();
+  // Only student views are tracked (the RLS insert policy enforces the same).
+  const auth = await requireActiveUser(["student"]);
+  if (auth.error) return auth.error;
+  const { supabase, user } = auth;
 
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
+  const { id } = await params;
 
   const { error } = await supabase
     .from("abstract_views")
