@@ -1,21 +1,32 @@
 import { NextResponse } from "next/server";
-import { createClient } from "@/lib/supabase/server";
+import { requireActiveUser } from "@/lib/apiAuth";
 import { createAdminClient } from "@/lib/supabase/admin";
 
 export async function PATCH(request, { params }) {
-  const { id } = await params;
-  const supabase = await createClient();
+  const auth = await requireActiveUser(["student"]);
+  if (auth.error) return auth.error;
+  const { user } = auth;
 
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) return NextResponse.json({ error: "Unauthorized." }, { status: 401 });
+  const { id } = await params;
 
   // Only the student whose ID matches can trigger this
   if (user.id !== id) {
     return NextResponse.json({ error: "Forbidden." }, { status: 403 });
   }
 
-  const body = await request.json();
-  const { adviserId } = body;
+  let body;
+  try {
+    body = await request.json();
+  } catch {
+    return NextResponse.json({ error: "Invalid request body." }, { status: 400 });
+  }
+
+  // adviserId is either a UUID string or null/missing (meaning "no adviser").
+  const rawAdviserId = body?.adviserId ?? null;
+  if (rawAdviserId !== null && typeof rawAdviserId !== "string") {
+    return NextResponse.json({ error: "Invalid adviser selected." }, { status: 400 });
+  }
+  const adviserId = rawAdviserId || null;
 
   const admin = createAdminClient();
 
@@ -36,7 +47,7 @@ export async function PATCH(request, { params }) {
 
   const { error } = await admin
     .from("similarity_reports")
-    .update({ adviser_id: adviserId ?? null })
+    .update({ adviser_id: adviserId })
     .eq("student_id", id);
 
   if (error) {

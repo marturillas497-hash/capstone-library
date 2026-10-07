@@ -1,22 +1,14 @@
 import { NextResponse } from "next/server";
 import { requireActiveUser } from "@/lib/apiAuth";
+import { isValidEmbedding } from "@/lib/embedding";
 import { getPool } from "@/lib/db";
 import { getRiskLevel } from "@/lib/risk";
 import { buildFallbackAdvisoryText } from "@/lib/advisory";
 import { GoogleGenerativeAI } from "@google/generative-ai";
 
 const DAILY_LIMIT = 5;
-const EMBEDDING_DIMENSIONS = 384;
 const MAX_TITLE_LENGTH = 300;
 const MAX_DESCRIPTION_LENGTH = 5000;
-
-function isValidEmbedding(value) {
-  return (
-    Array.isArray(value) &&
-    value.length === EMBEDDING_DIMENSIONS &&
-    value.every((n) => typeof n === "number" && Number.isFinite(n))
-  );
-}
 
 async function getRemainingScans(userId, role) {
   const pool = getPool();
