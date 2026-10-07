@@ -337,10 +337,10 @@ export default function SubmitForm({ profile, userId }) {
       {limitModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center px-4">
           <div
-            className="absolute inset-0 bg-black/40 backdrop-blur-sm"
+            className="absolute inset-0 bg-black/40 backdrop-blur-sm animate-fade-in"
             onClick={() => setLimitModalOpen(false)}
           />
-          <div className="relative bg-white rounded-2xl shadow-xl w-full max-w-sm p-6 text-center animate-pop-in">
+          <div className="relative bg-white rounded-2xl shadow-xl w-full max-w-sm p-6 text-center animate-modal-in">
             <div className="mx-auto mb-4 w-14 h-14 rounded-full bg-orange/10 flex items-center justify-center">
               <Clock className="w-7 h-7 text-orange" strokeWidth={1.75} />
             </div>

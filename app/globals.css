@@ -20,8 +20,30 @@ body {
   font-weight: 600;
 }
 
+@layer base {
+  /*
+    Page transition: every page's content area fades in and rises slightly on
+    navigation. Applied to <main> only, so the sidebar and top bar stay still.
+    Uses the "page-ease-in" animation from tailwind.config.js. That animation
+    deliberately has no "forwards" fill: a leftover transform on <main> would
+    become the containing block for any position:fixed descendant.
+  */
+  main {
+    @apply animate-page-ease-in;
+  }
+}
+
 @layer utilities {
   .neo-transition {
     transition: box-shadow 300ms ease-in-out, transform 300ms ease-in-out;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  main,
+  .animate-page-ease-in,
+  .animate-fade-in,
+  .animate-modal-in {
+    animation: none;
   }
 }

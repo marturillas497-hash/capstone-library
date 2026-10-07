@@ -21,8 +21,8 @@ export default function ResetPasswordModal({ open, onClose, password, fullName }
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center px-4">
-      <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={handleDone} />
-      <div className="relative bg-white rounded-2xl shadow-xl w-full max-w-sm p-6">
+      <div className="absolute inset-0 bg-black/40 backdrop-blur-sm animate-fade-in" onClick={handleDone} />
+      <div className="relative bg-white rounded-2xl shadow-xl w-full max-w-sm p-6 animate-modal-in">
         <div className="flex items-center gap-2.5 mb-4">
           <div className="inline-flex items-center justify-center w-9 h-9 rounded-lg bg-navy">
             <KeyRound className="w-5 h-5 text-white" strokeWidth={1.75} />
