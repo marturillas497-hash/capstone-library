@@ -1,13 +1,24 @@
 import { NextResponse } from "next/server";
-import { createClient } from "@/lib/supabase/server";
+import { requireActiveUser } from "@/lib/apiAuth";
 import { getPool } from "@/lib/db";
 import { getRiskLevel } from "@/lib/risk";
 import { buildFallbackAdvisoryText } from "@/lib/advisory";
 import { GoogleGenerativeAI } from "@google/generative-ai";
 
 const DAILY_LIMIT = 5;
+const EMBEDDING_DIMENSIONS = 384;
+const MAX_TITLE_LENGTH = 300;
+const MAX_DESCRIPTION_LENGTH = 5000;
 
-async function getRemainingScans(supabase, userId, role) {
+function isValidEmbedding(value) {
+  return (
+    Array.isArray(value) &&
+    value.length === EMBEDDING_DIMENSIONS &&
+    value.every((n) => typeof n === "number" && Number.isFinite(n))
+  );
+}
+
+async function getRemainingScans(userId, role) {
   const pool = getPool();
 
   let result;
@@ -144,89 +155,108 @@ function generateFallbackAdvisory(riskLevel) {
 }
 
 export async function POST(request) {
-  const supabase = await createClient();
+  const auth = await requireActiveUser(["student", "capstone_adviser"]);
+  if (auth.error) return auth.error;
+  const { supabase, user, profile } = auth;
 
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) {
-    return NextResponse.json({ error: "Unauthorized." }, { status: 401 });
+  let body;
+  try {
+    body = await request.json();
+  } catch {
+    return NextResponse.json({ error: "Invalid request body." }, { status: 400 });
   }
 
-  const { data: profile } = await supabase
-    .from("profiles")
-    .select("role")
-    .eq("id", user.id)
-    .single();
+  const title = typeof body?.title === "string" ? body.title.trim() : "";
+  const description = typeof body?.description === "string" ? body.description.trim() : "";
+  const embedding = body?.embedding;
 
-  if (!profile || !["student", "capstone_adviser"].includes(profile.role)) {
-    return NextResponse.json({ error: "Unauthorized." }, { status: 403 });
+  // Validate before touching the database or Gemini, so a bad request costs nothing.
+  if (!title || !description) {
+    return NextResponse.json({ error: "Title and abstract are required." }, { status: 400 });
   }
-
-  const body = await request.json();
-  const { title, description, embedding } = body;
-
-  if (!title || !description || !embedding || !Array.isArray(embedding)) {
-    return NextResponse.json({ error: "Missing required fields." }, { status: 400 });
-  }
-
-  const remaining = await getRemainingScans(supabase, user.id, profile.role);
-  if (remaining <= 0) {
+  if (title.length > MAX_TITLE_LENGTH) {
     return NextResponse.json(
-      { error: "You have reached your daily scan limit. Your scans will reset tomorrow." },
-      { status: 429 }
+      { error: `Title is too long. Keep it under ${MAX_TITLE_LENGTH} characters.` },
+      { status: 400 }
     );
   }
+  if (description.length > MAX_DESCRIPTION_LENGTH) {
+    return NextResponse.json(
+      { error: `Abstract is too long. Keep it under ${MAX_DESCRIPTION_LENGTH} characters.` },
+      { status: 400 }
+    );
+  }
+  if (!isValidEmbedding(embedding)) {
+    return NextResponse.json({ error: "Invalid embedding." }, { status: 400 });
+  }
 
-  const pool = getPool();
-  const vectorStr = `[${embedding.join(",")}]`;
+  try {
+    const remaining = await getRemainingScans(user.id, profile.role);
+    if (remaining <= 0) {
+      return NextResponse.json(
+        { error: "You have reached your daily scan limit. Your scans will reset tomorrow." },
+        { status: 429 }
+      );
+    }
 
-  const matchResult = await pool.query(
-    `SELECT * FROM match_abstracts($1::vector, $2, $3)`,
-    [vectorStr, 0, 5]
-  );
+    const pool = getPool();
+    const vectorStr = `[${embedding.join(",")}]`;
 
-  const matches = matchResult.rows;
-  const topScore = matches.length > 0 ? matches[0].similarity : 0;
-  const riskLevel = getRiskLevel(topScore);
+    const matchResult = await pool.query(
+      `SELECT * FROM match_abstracts($1::vector, $2, $3)`,
+      [vectorStr, 0, 5]
+    );
 
-  const advisory = await generateAdvisory(title, description, matches, riskLevel);
+    const matches = matchResult.rows;
+    const topScore = matches.length > 0 ? matches[0].similarity : 0;
+    const riskLevel = getRiskLevel(topScore);
 
-  let studentId = null;
-  let adviserId = null;
+    const advisory = await generateAdvisory(title, description, matches, riskLevel);
 
-  if (profile.role === "student") {
-    studentId = user.id;
-    const { data: meta } = await supabase
-      .from("student_metadata")
-      .select("adviser_id")
-      .eq("profile_id", user.id)
+    let studentId = null;
+    let adviserId = null;
+
+    if (profile.role === "student") {
+      studentId = user.id;
+      const { data: meta } = await supabase
+        .from("student_metadata")
+        .select("adviser_id")
+        .eq("profile_id", user.id)
+        .single();
+      adviserId = meta?.adviser_id ?? null;
+    } else {
+      adviserId = user.id;
+    }
+
+    const { data: report, error: reportError } = await supabase
+      .from("similarity_reports")
+      .insert({
+        student_id: studentId,
+        adviser_id: adviserId,
+        input_title: title,
+        input_description: description,
+        similarity_score: topScore,
+        risk_level: riskLevel,
+        ai_recommendations: advisory.text,
+        results_json: matches,
+      })
+      .select("id")
       .single();
-    adviserId = meta?.adviser_id ?? null;
-  } else {
-    adviserId = user.id;
+
+    if (reportError) {
+      console.error("Report insert error:", reportError);
+      return NextResponse.json({ error: "Failed to save report." }, { status: 500 });
+    }
+
+    return NextResponse.json(
+      { reportId: report.id, usedFallback: advisory.usedFallback },
+      { status: 201 }
+    );
+  } catch (err) {
+    console.error("[POST /api/analyze]", err);
+    return NextResponse.json(
+      { error: "Something went wrong while running the scan. Please try again." },
+      { status: 500 }
+    );
   }
-
-  const { data: report, error: reportError } = await supabase
-    .from("similarity_reports")
-    .insert({
-      student_id: studentId,
-      adviser_id: adviserId,
-      input_title: title,
-      input_description: description,
-      similarity_score: topScore,
-      risk_level: riskLevel,
-      ai_recommendations: advisory.text,
-      results_json: matches,
-    })
-    .select("id")
-    .single();
-
-  if (reportError) {
-    console.error("Report insert error:", reportError);
-    return NextResponse.json({ error: "Failed to save report." }, { status: 500 });
-  }
-
-  return NextResponse.json(
-    { reportId: report.id, usedFallback: advisory.usedFallback },
-    { status: 201 }
-  );
 }

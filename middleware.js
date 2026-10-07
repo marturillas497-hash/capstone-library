@@ -15,6 +15,17 @@ const ADVISER_ONLY = ["/adviser"];
 const ADMIN_ONLY = ["/admin"];
 const PROFILE_ALLOWED_ROLES = ["student", "capstone_adviser"];
 
+// Identity headers this middleware sets for Server Components. Any copy sent
+// by the client is dropped up front, so a request that returns early (public
+// paths) can never carry a spoofed value through to a page.
+const IDENTITY_HEADERS = [
+  "x-user-id",
+  "x-user-role",
+  "x-user-status",
+  "x-user-name",
+  "x-user-email",
+];
+
 function toHome(role, request) {
   const path = HOME[role] ?? "/login";
   return NextResponse.redirect(new URL(path, request.url));
@@ -34,6 +45,7 @@ export async function middleware(request) {
     refresh cookies so rebuilding the response later doesn't drop them.
   */
   let requestHeaders = new Headers(request.headers);
+  for (const name of IDENTITY_HEADERS) requestHeaders.delete(name);
   let response = NextResponse.next({ request: { headers: requestHeaders } });
   let pendingCookies = [];
 
