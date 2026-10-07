@@ -38,7 +38,7 @@ module.exports = {
       keyframes: {
         "page-ease-in": {
           "0%": { opacity: "0", transform: "translateY(10px)" },
-          "100%": { opacity: "1", transform: "translateY(0)" },
+          "100%": { opacity: "1", transform: "none" },
         },
         "pop-in": {
           "0%": { opacity: "0", transform: "scale(0.94)" },
@@ -46,7 +46,7 @@ module.exports = {
         },
       },
       animation: {
-        "page-ease-in": "page-ease-in 450ms ease-in forwards",
+        "page-ease-in": "page-ease-in 300ms ease-out backwards",
         "pop-in": "pop-in 250ms ease-out forwards",
       },
     },

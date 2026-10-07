@@ -193,7 +193,7 @@ function LoginForm() {
 
         {/* Right panel */}
         <div className="flex-1 flex items-center justify-center px-6 py-10 bg-white">
-          <div className="w-full max-w-sm">
+          <div className="w-full max-w-sm animate-page-ease-in">
 
             <h1 className="font-display !font-bold text-navy leading-tight mb-1">
               <span className="block text-3xl">MIST - BSIS</span>
