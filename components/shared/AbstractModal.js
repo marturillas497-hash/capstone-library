@@ -102,11 +102,11 @@ export default function AbstractModal({
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center px-4">
       <div
-        className="absolute inset-0 bg-black/40 backdrop-blur-sm"
+        className="absolute inset-0 bg-black/40 backdrop-blur-sm animate-fade-in"
         onClick={editing ? undefined : onClose}
       />
 
-      <div className="relative bg-white rounded-2xl shadow-xl w-full max-w-2xl max-h-[85vh] flex flex-col">
+      <div className="relative bg-white rounded-2xl shadow-xl w-full max-w-2xl max-h-[85vh] flex flex-col animate-modal-in">
 
         {/* Header */}
         <div className="px-6 pt-6 pb-4 border-b border-slate-100">

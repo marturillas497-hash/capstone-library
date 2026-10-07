@@ -94,10 +94,10 @@ export default function ChangePasswordModal({ open, onClose }) {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center px-4">
       <div
-        className="absolute inset-0 bg-black/40 backdrop-blur-sm"
+        className="absolute inset-0 bg-black/40 backdrop-blur-sm animate-fade-in"
         onClick={resetAndClose}
       />
-      <div className="relative bg-white rounded-2xl shadow-xl w-full max-w-sm p-6">
+      <div className="relative bg-white rounded-2xl shadow-xl w-full max-w-sm p-6 animate-modal-in">
         {success ? (
           <div className="text-center py-2">
             <div className="w-12 h-12 rounded-full bg-green-50 flex items-center justify-center mx-auto mb-3">

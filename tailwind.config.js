@@ -40,6 +40,14 @@ module.exports = {
           "0%": { opacity: "0", transform: "translateY(10px)" },
           "100%": { opacity: "1", transform: "none" },
         },
+        "fade-in": {
+          "0%": { opacity: "0" },
+          "100%": { opacity: "1" },
+        },
+        "modal-in": {
+          "0%": { opacity: "0", transform: "translateY(8px) scale(0.97)" },
+          "100%": { opacity: "1", transform: "none" },
+        },
         "pop-in": {
           "0%": { opacity: "0", transform: "scale(0.94)" },
           "100%": { opacity: "1", transform: "scale(1)" },
@@ -47,6 +55,8 @@ module.exports = {
       },
       animation: {
         "page-ease-in": "page-ease-in 300ms ease-out backwards",
+        "fade-in": "fade-in 200ms ease-out backwards",
+        "modal-in": "modal-in 220ms ease-out backwards",
         "pop-in": "pop-in 250ms ease-out forwards",
       },
     },

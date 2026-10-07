@@ -41,7 +41,9 @@ body {
 
 @media (prefers-reduced-motion: reduce) {
   main,
-  .animate-page-ease-in {
+  .animate-page-ease-in,
+  .animate-fade-in,
+  .animate-modal-in {
     animation: none;
   }
 }
