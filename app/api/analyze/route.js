@@ -4,7 +4,7 @@ import { isValidEmbedding } from "@/lib/embedding";
 import { getPool } from "@/lib/db";
 import { getRiskLevel } from "@/lib/risk";
 import { buildFallbackAdvisoryText } from "@/lib/advisory";
-import { GoogleGenerativeAI } from "@google/generative-ai";
+import { generateText } from "@/lib/gemini";
 
 const DAILY_LIMIT = 5;
 const MAX_TITLE_LENGTH = 300;
@@ -76,9 +76,6 @@ function sanitizeAdvisoryText(text) {
 async function generateAdvisory(inputTitle, inputDescription, matches, riskLevel) {
   const GEMINI_TIMEOUT_MS = 25000;
   try {
-    const genAI = new GoogleGenerativeAI(process.env.GOOGLE_GEMINI_API_KEY);
-    const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
-
     const matchContext = buildMatchContext(matches, riskLevel);
     const overlapInstruction = OVERLAP_GUIDANCE[riskLevel] ?? OVERLAP_GUIDANCE.DEFAULT;
     const verdictInstruction = VERDICT_GUIDANCE[riskLevel] ?? VERDICT_GUIDANCE.GREEN;
@@ -120,13 +117,9 @@ Exactly 3 titles, one per line, numbered 1, 2, and 3. No description, label, or 
 ALTERNATIVE RESEARCH DIRECTIONS
 Exactly 3 directions, one per line, numbered 1, 2, and 3 in the same style as the titles above — this numbering is for structure only and will not be shown to the student, so do not refer to the numbers in the text itself. Each is a direct statement of what the student can build — not a suggestion — applied to a different function, beneficiary, or record type not yet covered by the matched studies. Maximum 2 sentences per direction, written as flowing prose. No headers or bullets.`;
 
-    const result = await Promise.race([
-      model.generateContent(prompt),
-      new Promise((_, reject) =>
-        setTimeout(() => reject(new Error("Gemini request timed out")), GEMINI_TIMEOUT_MS)
-      ),
-    ]);
-    return { text: sanitizeAdvisoryText(result.response.text()), usedFallback: false };
+    // Key failover and the shared timeout live in lib/gemini.js.
+    const text = await generateText(prompt, { timeoutMs: GEMINI_TIMEOUT_MS });
+    return { text: sanitizeAdvisoryText(text), usedFallback: false };
   } catch (err) {
     console.error("Gemini error:", err);
     return { text: generateFallbackAdvisory(riskLevel), usedFallback: true };
