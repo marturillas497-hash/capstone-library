@@ -3,7 +3,7 @@
 import { useState, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
-import { Mail, Lock, Eye, EyeOff, ScanLine, Lightbulb, BookOpen } from "lucide-react";
+import { User, Lock, Eye, EyeOff, ScanLine, Lightbulb, BookOpen } from "lucide-react";
 
 const STATUS_MESSAGES = {
   pending:
@@ -41,7 +41,7 @@ function LoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
 
-  const [email, setEmail] = useState("");
+  const [identifier, setIdentifier] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -58,13 +58,33 @@ function LoginForm() {
     setError("");
 
     const supabase = createClient();
-    const { error: authError } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    });
+    const id = identifier.trim();
+    let authFailed = false;
 
-    if (authError) {
-      setError("Invalid email or password. Please try again.");
+    if (id.includes("@")) {
+      // Email login: unchanged, straight to Supabase Auth from the browser.
+      const { error: authError } = await supabase.auth.signInWithPassword({
+        email: id,
+        password,
+      });
+      authFailed = !!authError;
+    } else {
+      // Student ID login: the server resolves the ID to an email and signs in,
+      // so the email address is never sent back to the browser.
+      try {
+        const res = await fetch("/api/auth/login-id", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ studentId: id, password }),
+        });
+        authFailed = !res.ok;
+      } catch {
+        authFailed = true;
+      }
+    }
+
+    if (authFailed) {
+      setError("Invalid email, student ID, or password. Please try again.");
       setLoading(false);
       return;
     }
@@ -217,14 +237,15 @@ function LoginForm() {
 
             <form onSubmit={handleLogin} className="space-y-4">
               <div className="relative">
-                <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" strokeWidth={1.75} />
+                <User className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" strokeWidth={1.75} />
                 <input
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
+                  type="text"
+                  value={identifier}
+                  onChange={(e) => setIdentifier(e.target.value)}
                   required
-                  autoComplete="email"
-                  placeholder="Email"
+                  autoComplete="username"
+                  autoCapitalize="none"
+                  placeholder="Email or Student ID"
                   className="w-full pl-11 pr-4 py-3 rounded-2xl bg-background shadow-neo-inset border-none text-sm text-foreground placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-navy/20 transition neo-transition"
                 />
               </div>
