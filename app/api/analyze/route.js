@@ -100,7 +100,7 @@ GLOBAL RULES — apply to everything you write below:
 - Plain conversational English throughout, like an adviser talking to their own advisee one-on-one. No academic jargon, no citation-style language. Contractions are fine.
 - Plain text only. No markdown, asterisks, bold text, bullet points, section numbers, greeting, or sign-off.
 - Address the student directly as you/your, never third person.
-- No hedging language anywhere (e.g. may, might, perhaps, could potentially, you might also, could consider). Every statement is direct and confident.
+- No hedging language in the VERDICT and CRITICAL ANALYSIS OF OVERLAP sections (e.g. may, might, perhaps, could potentially, you might also, could consider). Every statement there is direct and confident. ALTERNATIVE RESEARCH DIRECTIONS follows its own tone rule below.
 - Silently identify the core system type of the proposal in one short phrase (e.g. a document request and status tracking system, an inventory management system). Do not print this phrase. Every title and direction below must be that same core system type, applied differently as instructed per section. No exceptions.
 - Never name a specific real organization. Describe the organization only by general type (e.g. "a small barangay office," "a local convenience store," "a rural health unit") — never a proper name.
 - Every organization type and scenario must be realistic for a small city or municipality in the Makilala or Kidapawan area of North Cotabato, Philippines. Do not suggest anything that would not plausibly exist or apply there (e.g. no snow, no large-city-only infrastructure, no industries absent from the area).
@@ -119,7 +119,7 @@ Exactly 3 titles, one per line, numbered 1, 2, and 3. No description, label, or 
 3. Same core system type, with exactly one AI feature added as the system's core differentiator that must be useful to the system and not just added for the sake of it. Only one technology may appear in this title.
 
 ALTERNATIVE RESEARCH DIRECTIONS
-Exactly 3 directions, one per line, numbered 1, 2, and 3 in the same style as the titles above — this numbering is for structure only and will not be shown to the student, so do not refer to the numbers in the text itself. Each is a direct statement of what the student can build — not a suggestion — applied to a different function, beneficiary, or record type not yet covered by the matched studies. Maximum 2 sentences per direction, written as flowing prose. No headers or bullets.`;
+Exactly 3 directions, one per line, numbered 1, 2, and 3 in the same style as the titles above — this numbering is for structure only and will not be shown to the student, so do not refer to the numbers in the text itself. Each one offers a different project the student can take on, applied to a different function, beneficiary, or record type not yet covered by the matched studies. Write them as an adviser laying out open options the student can choose from, not as orders or predictions. Open each direction differently, using phrasing like "You can build", "You could apply this to", "Another route is", or "This same system fits". Never start two directions with the same words, and never use "You will" or "You must". Maximum 2 sentences per direction, written as flowing prose. No headers or bullets.`;
 
     // Key failover and the shared timeout live in lib/gemini.js.
     const text = await generateText(prompt, { timeoutMs: GEMINI_TIMEOUT_MS });
