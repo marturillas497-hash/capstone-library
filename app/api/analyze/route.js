@@ -7,6 +7,9 @@ import { getRiskLevel } from "@/lib/risk";
 import { buildFallbackAdvisoryText } from "@/lib/advisory";
 import { generateText } from "@/lib/gemini";
 
+// Gemini budget (34s) plus the DB work must fit inside this and the 45s client timeout.
+export const maxDuration = 60;
+
 const DAILY_LIMIT = 5;
 const MAX_TITLE_LENGTH = 300;
 const MAX_DESCRIPTION_LENGTH = 5000;
@@ -75,7 +78,7 @@ function sanitizeAdvisoryText(text) {
 }
 
 async function generateAdvisory(inputTitle, inputDescription, matches, riskLevel) {
-  const GEMINI_TIMEOUT_MS = 25000;
+  const GEMINI_TIMEOUT_MS = 34000;
   try {
     const matchContext = buildMatchContext(matches, riskLevel);
     const overlapInstruction = OVERLAP_GUIDANCE[riskLevel] ?? OVERLAP_GUIDANCE.DEFAULT;
