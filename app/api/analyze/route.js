@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { requireActiveUser } from "@/lib/apiAuth";
+import { createAdminClient } from "@/lib/supabase/admin";
 import { isValidEmbedding } from "@/lib/embedding";
 import { getPool } from "@/lib/db";
 import { getRiskLevel } from "@/lib/risk";
@@ -112,7 +113,7 @@ PROPOSED UNIQUE TITLES
 Exactly 3 titles, one per line, numbered 1, 2, and 3. No description, label, or sub-header before or after any title. Each title: 12-15 words, describes one system with one clear purpose (never a feasibility study, analysis, assessment, or review), and follows its specific rule below:
 1. Same core system type, but scoped to a narrower or different specific function or record type than what the matched studies cover.
 2. Same core system type, applied to a different sector or beneficiary group.
-3. Same core system type, with exactly one AI feature added as the system's core differentiator. Only one technology may appear in this title.
+3. Same core system type, with exactly one AI feature added as the system's core differentiator that must be useful to the system and not just added for the sake of it. Only one technology may appear in this title.
 
 ALTERNATIVE RESEARCH DIRECTIONS
 Exactly 3 directions, one per line, numbered 1, 2, and 3 in the same style as the titles above — this numbering is for structure only and will not be shown to the student, so do not refer to the numbers in the text itself. Each is a direct statement of what the student can build — not a suggestion — applied to a different function, beneficiary, or record type not yet covered by the matched studies. Maximum 2 sentences per direction, written as flowing prose. No headers or bullets.`;
@@ -213,7 +214,9 @@ export async function POST(request) {
       adviserId = user.id;
     }
 
-    const { data: report, error: reportError } = await supabase
+    // Service role insert: clients have no INSERT policy on similarity_reports, so the
+    // daily limit enforced above cannot be bypassed by writing rows directly from the browser.
+    const { data: report, error: reportError } = await createAdminClient()
       .from("similarity_reports")
       .insert({
         student_id: studentId,
