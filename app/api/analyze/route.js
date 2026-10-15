@@ -7,7 +7,7 @@ import { getRiskLevel } from "@/lib/risk";
 import { buildFallbackAdvisoryText } from "@/lib/advisory";
 import { generateText } from "@/lib/gemini";
 
-// Gemini budget (34s) plus the DB work must fit inside this and the 45s client timeout.
+// The AI call budget (34s) plus the DB work must fit inside this and the 45s client timeout.
 export const maxDuration = 60;
 
 const DAILY_LIMIT = 5;
@@ -41,7 +41,7 @@ async function getRemainingScans(userId, role) {
 
 // Per-risk-level guidance injected into the prompt. Keeping this as data
 // rather than four full prompt variants is what makes the risk-aware
-// behavior maintainable — one sentence to edit per band, not four prompts.
+// behavior maintainable: one sentence to edit per band, not four prompts.
 const VERDICT_GUIDANCE = {
   RED: "State plainly that this topic overlaps too heavily with existing studies as it is currently scoped and needs a real change in function, beneficiary, or scope to stand apart. If the student still wants to pursue this exact idea after reading the analysis below, tell them directly that their next step is a conversation with their capstone adviser.",
   ORANGE: "State that the topic overlaps strongly with existing studies and needs a specific pivot, such as a narrower function, a different beneficiary, or a different scope, to stand apart from what already exists.",
@@ -55,8 +55,8 @@ const OVERLAP_GUIDANCE = {
 };
 
 function buildMatchContext(matches, riskLevel) {
-  // GREEN scores mean nothing shown is a meaningful overlap — passing all 5
-  // as if they were invites Gemini to manufacture a false overlap analysis.
+  // GREEN scores mean nothing shown is a meaningful overlap, so passing all 5
+  // as if they were invites the AI to manufacture a false overlap analysis.
   const relevant = riskLevel === "GREEN" ? matches.slice(0, 2) : matches;
   return relevant
     .map(
@@ -66,8 +66,8 @@ function buildMatchContext(matches, riskLevel) {
     .join("\n\n");
 }
 
-// Strips markdown Gemini was told not to use but may emit anyway. Defense in
-// depth alongside the prompt instruction — see PRD Section 21 note on why
+// Strips markdown the AI was told not to use but may emit anyway. Defense in
+// depth alongside the prompt instruction. See PRD Section 21 note on why
 // both layers are kept rather than relying on the prompt alone.
 function sanitizeAdvisoryText(text) {
   return text
@@ -78,7 +78,7 @@ function sanitizeAdvisoryText(text) {
 }
 
 async function generateAdvisory(inputTitle, inputDescription, matches, riskLevel) {
-  const GEMINI_TIMEOUT_MS = 34000;
+  const AI_TIMEOUT_MS = 34000;
   try {
     const matchContext = buildMatchContext(matches, riskLevel);
     const overlapInstruction = OVERLAP_GUIDANCE[riskLevel] ?? OVERLAP_GUIDANCE.DEFAULT;
@@ -120,11 +120,11 @@ Exactly 3 titles, one per line, numbered 1, 2, 3, with no label or description. 
 ALTERNATIVE RESEARCH DIRECTIONS
 Exactly 3 directions, one per line, numbered 1, 2, 3 (structure only, so never refer to the numbers in the text). Each is a different project the student can take on, applied to a function, beneficiary, or record type the matched studies don't cover. Write them as open options, not orders or predictions. Open each one differently, e.g. "You can build", "You could apply this to", "Another route is", "This same system fits". Never start two the same way, and never use "You will" or "You must". Maximum 2 sentences each, flowing prose.`;
 
-    // One call, no retries. lib/gemini.js owns the timeout. Any failure lands in the catch below, which returns the fallback advisory.
-    const text = await generateText(prompt, { timeoutMs: GEMINI_TIMEOUT_MS });
+    // One call, no retries. The provider module owns the timeout. Any failure lands in the catch below, which returns the fallback advisory.
+    const text = await generateText(prompt, { timeoutMs: AI_TIMEOUT_MS });
     return { text: sanitizeAdvisoryText(text), usedFallback: false };
   } catch (err) {
-    console.error("Gemini error:", err);
+    console.error("AI error:", err);
     return { text: generateFallbackAdvisory(riskLevel), usedFallback: true };
   }
 }
@@ -158,7 +158,7 @@ export async function POST(request) {
   const description = typeof body?.description === "string" ? body.description.trim() : "";
   const embedding = body?.embedding;
 
-  // Validate before touching the database or Gemini, so a bad request costs nothing.
+  // Validate before touching the database or the AI call, so a bad request costs nothing.
   if (!title || !description) {
     return NextResponse.json({ error: "Title and abstract are required." }, { status: 400 });
   }
