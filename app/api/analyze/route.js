@@ -43,9 +43,9 @@ async function getRemainingScans(userId, role) {
 // rather than four full prompt variants is what makes the risk-aware
 // behavior maintainable — one sentence to edit per band, not four prompts.
 const VERDICT_GUIDANCE = {
-  RED: "State plainly that this topic is too similar to existing studies to move forward as it is currently scoped. If the student still wants to pursue this exact idea after reading the analysis below, tell them directly that their next step is a conversation with their capstone adviser.",
-  ORANGE: "State that the topic is viable but needs a specific pivot — a narrower function, a different beneficiary, or a different scope — to stand apart from what already exists.",
-  YELLOW: "State that the topic can move forward with one clear change: a more specific function, beneficiary, or record type not yet covered by similar studies.",
+  RED: "State plainly that this topic overlaps too heavily with existing studies as it is currently scoped and needs a real change in function, beneficiary, or scope to stand apart. If the student still wants to pursue this exact idea after reading the analysis below, tell them directly that their next step is a conversation with their capstone adviser.",
+  ORANGE: "State that the topic overlaps strongly with existing studies and needs a specific pivot, such as a narrower function, a different beneficiary, or a different scope, to stand apart from what already exists.",
+  YELLOW: "State that the topic shares some themes with existing studies and would stand apart with one clear change: a more specific function, beneficiary, or record type not yet covered by similar studies.",
   GREEN: "State that the topic is distinct from the existing library. Focus entirely on making the scope more concrete. Do not mention duplication or overlap, since none was found.",
 };
 
@@ -100,6 +100,7 @@ GLOBAL RULES — apply to everything you write below:
 - Plain conversational English throughout, like an adviser talking to their own advisee one-on-one. No academic jargon, no citation-style language. Contractions are fine.
 - Plain text only. No markdown, asterisks, bold text, bullet points, section numbers, greeting, or sign-off.
 - Address the student directly as you/your, never third person.
+- You give feedback, you do not make decisions. Never say or imply that a topic is approved, rejected, accepted, denied, cleared, or permitted. Only the student's capstone adviser and panel decide that. Describe what you found, not what the student is allowed to do.
 - No hedging language in the VERDICT and CRITICAL ANALYSIS OF OVERLAP sections (e.g. may, might, perhaps, could potentially, you might also, could consider). Every statement there is direct and confident. ALTERNATIVE RESEARCH DIRECTIONS follows its own tone rule below.
 - Silently identify the core system type of the proposal in one short phrase (e.g. a document request and status tracking system, an inventory management system). Do not print this phrase. Every title and direction below must be that same core system type, applied differently as instructed per section. No exceptions.
 - Never name a specific real organization. Describe the organization only by general type (e.g. "a small barangay office," "a local convenience store," "a rural health unit") — never a proper name.
@@ -121,7 +122,7 @@ Exactly 3 titles, one per line, numbered 1, 2, and 3. No description, label, or 
 ALTERNATIVE RESEARCH DIRECTIONS
 Exactly 3 directions, one per line, numbered 1, 2, and 3 in the same style as the titles above — this numbering is for structure only and will not be shown to the student, so do not refer to the numbers in the text itself. Each one offers a different project the student can take on, applied to a different function, beneficiary, or record type not yet covered by the matched studies. Write them as an adviser laying out open options the student can choose from, not as orders or predictions. Open each direction differently, using phrasing like "You can build", "You could apply this to", "Another route is", or "This same system fits". Never start two directions with the same words, and never use "You will" or "You must". Maximum 2 sentences per direction, written as flowing prose. No headers or bullets.`;
 
-    // Key failover and the shared timeout live in lib/gemini.js.
+    // One call, no retries. lib/gemini.js owns the timeout. Any failure lands in the catch below, which returns the fallback advisory.
     const text = await generateText(prompt, { timeoutMs: GEMINI_TIMEOUT_MS });
     return { text: sanitizeAdvisoryText(text), usedFallback: false };
   } catch (err) {
