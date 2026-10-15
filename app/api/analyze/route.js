@@ -5,9 +5,9 @@ import { isValidEmbedding } from "@/lib/embedding";
 import { getPool } from "@/lib/db";
 import { getRiskLevel } from "@/lib/risk";
 import { buildFallbackAdvisoryText } from "@/lib/advisory";
-import { generateText } from "@/lib/gemini";
+import { generateText } from "@/lib/claude";
 
-// Gemini budget (34s) plus the DB work must fit inside this and the 45s client timeout.
+// AI budget (34s) plus the DB work must fit inside this and the 45s client timeout.
 export const maxDuration = 60;
 
 const DAILY_LIMIT = 5;
@@ -56,7 +56,7 @@ const OVERLAP_GUIDANCE = {
 
 function buildMatchContext(matches, riskLevel) {
   // GREEN scores mean nothing shown is a meaningful overlap — passing all 5
-  // as if they were invites Gemini to manufacture a false overlap analysis.
+  // as if they were invites the model to manufacture a false overlap analysis.
   const relevant = riskLevel === "GREEN" ? matches.slice(0, 2) : matches;
   return relevant
     .map(
@@ -66,7 +66,7 @@ function buildMatchContext(matches, riskLevel) {
     .join("\n\n");
 }
 
-// Strips markdown Gemini was told not to use but may emit anyway. Defense in
+// Strips markdown the model was told not to use but may emit anyway. Defense in
 // depth alongside the prompt instruction — see PRD Section 21 note on why
 // both layers are kept rather than relying on the prompt alone.
 function sanitizeAdvisoryText(text) {
@@ -78,7 +78,7 @@ function sanitizeAdvisoryText(text) {
 }
 
 async function generateAdvisory(inputTitle, inputDescription, matches, riskLevel) {
-  const GEMINI_TIMEOUT_MS = 34000;
+  const AI_TIMEOUT_MS = 34000;
   try {
     const matchContext = buildMatchContext(matches, riskLevel);
     const overlapInstruction = OVERLAP_GUIDANCE[riskLevel] ?? OVERLAP_GUIDANCE.DEFAULT;
@@ -122,11 +122,11 @@ Exactly 3 titles, one per line, numbered 1, 2, and 3. No description, label, or 
 ALTERNATIVE RESEARCH DIRECTIONS
 Exactly 3 directions, one per line, numbered 1, 2, and 3 in the same style as the titles above — this numbering is for structure only and will not be shown to the student, so do not refer to the numbers in the text itself. Each one offers a different project the student can take on, applied to a different function, beneficiary, or record type not yet covered by the matched studies. Write them as an adviser laying out open options the student can choose from, not as orders or predictions. Open each direction differently, using phrasing like "You can build", "You could apply this to", "Another route is", or "This same system fits". Never start two directions with the same words, and never use "You will" or "You must". Maximum 2 sentences per direction, written as flowing prose. No headers or bullets.`;
 
-    // One call, no retries. lib/gemini.js owns the timeout. Any failure lands in the catch below, which returns the fallback advisory.
-    const text = await generateText(prompt, { timeoutMs: GEMINI_TIMEOUT_MS });
+    // One call, no retries. lib/claude.js owns the timeout. Any failure lands in the catch below, which returns the fallback advisory.
+    const text = await generateText(prompt, { timeoutMs: AI_TIMEOUT_MS });
     return { text: sanitizeAdvisoryText(text), usedFallback: false };
   } catch (err) {
-    console.error("Gemini error:", err);
+    console.error("Advisory generation error:", err);
     return { text: generateFallbackAdvisory(riskLevel), usedFallback: true };
   }
 }
@@ -160,7 +160,7 @@ export async function POST(request) {
   const description = typeof body?.description === "string" ? body.description.trim() : "";
   const embedding = body?.embedding;
 
-  // Validate before touching the database or Gemini, so a bad request costs nothing.
+  // Validate before touching the database or the AI call, so a bad request costs nothing.
   if (!title || !description) {
     return NextResponse.json({ error: "Title and abstract are required." }, { status: 400 });
   }
