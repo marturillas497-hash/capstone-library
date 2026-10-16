@@ -12,7 +12,7 @@ A capstone system built for the Bachelor of Science in Information Systems (BSIS
 
 - **Digital catalog** of completed BSIS capstone studies (title, authors, year, accession ID, abstract, keywords), searchable and filterable by anyone logged in.
 - **Semantic similarity detection** — a proposed title and abstract are converted into a 384-dimension embedding client-side and compared against the library using cosine similarity (pgvector), not keyword matching.
-- **AI-generated advisory feedback** (Google Gemini 2.5 Flash) — a verdict, a critical analysis of the overlap, alternative title suggestions, and alternative research directions, grounded only in the institution's own capstone records.
+- **AI-generated advisory feedback** (Claude Haiku 5.5) — a verdict, a critical analysis of the overlap, alternative title suggestions, and alternative research directions, grounded only in the institution's own capstone records.
 - **Three roles**, each with a dedicated portal: **Student**, **Capstone Adviser**, and **Admin**.
 
 This is a similarity-detection and recommendation tool, **not** a plagiarism checker — it compares conceptual closeness, not manuscript text, and it only ever compares against MIST's own BSIS library.
@@ -47,7 +47,7 @@ This is a similarity-detection and recommendation tool, **not** a plagiarism che
 | Database | Supabase (PostgreSQL) + pgvector |
 | Embeddings | `@xenova/transformers`, `Xenova/all-MiniLM-L6-v2` — runs client-side via WebAssembly |
 | Vector search | Direct `pg` connection via Supabase's Transaction Pooler (bypasses PostgREST, which can't pass a JS array as pgvector's `vector` type) |
-| AI advisory | Google Gemini 2.5 Flash |
+| AI advisory | Anthropic Claude Haiku 5.5 |
 | Auth | Supabase Auth |
 | Email | Nodemailer + Gmail SMTP (adviser approval/rejection only) |
 | Deployment | Vercel |
@@ -64,7 +64,7 @@ This is a similarity-detection and recommendation tool, **not** a plagiarism che
 
 - Node.js (LTS)
 - A Supabase project with the `pgvector` extension enabled
-- A Google Gemini API key
+- An Anthropic API key
 - A Gmail account with an App Password (for adviser approval emails)
 
 ### Install
@@ -85,7 +85,7 @@ NEXT_PUBLIC_SUPABASE_ANON_KEY=
 SUPABASE_SERVICE_ROLE_KEY=
 SUPABASE_TRANSACTION_POOLER_URL=
 
-GOOGLE_GEMINI_API_KEY=
+ANTHROPIC_API_KEY=
 
 GMAIL_USER=
 GMAIL_APP_PASSWORD=

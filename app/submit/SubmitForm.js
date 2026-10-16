@@ -15,11 +15,11 @@ const DAILY_LIMIT = 5;
 // client-side promise. The middle stage's timing is an estimate, not a
 // live server signal, since /api/analyze is one atomic request with no
 // intermediate checkpoints. The advisory stage holds until the request
-// actually resolves rather than guessing when Gemini finishes.
+// actually resolves rather than guessing when the AI finishes.
 const STAGES = [
   { key: "embedding", label: "Generating embedding…", description: "Converting your title and abstract into a semantic fingerprint." },
   { key: "matching", label: "Comparing against the capstone library…", description: "Checking your proposed topic against existing BSIS studies." },
-  { key: "advisory", label: "Generating AI advisory…", description: "Gemini is drafting structured feedback based on your closest matches." },
+  { key: "advisory", label: "Generating AI advisory…", description: "Claude is drafting structured feedback based on your closest matches." },
 ];
 
 const MATCHING_STAGE_DELAY_MS = 1600;
