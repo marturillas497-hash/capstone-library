@@ -50,19 +50,32 @@ const VERDICT_GUIDANCE = {
 };
 
 const OVERLAP_GUIDANCE = {
-  GREEN: "No meaningful overlap was found. Say this clearly in one or two sentences. You may mention the closest study shown below only to note that you checked, not as a warning.",
-  DEFAULT: "Explain in plain, simple language which specific parts of the proposal overlap with the studies shown below. Name each matching study you discuss by its exact title, accession ID, and similarity score. You do not need to discuss every match: skip any whose overlap is only superficial rather than stretching a justification for it.",
+  GREEN: "No meaningful overlap was found. Say this clearly in one or two sentences, never more than two. You may mention the closest study shown below only to note that you checked, not as a warning.",
+  DEFAULT: "Explain in plain, simple language which specific parts of the proposal overlap with the studies shown below. Name each matching study you discuss by its exact title, accession ID, and similarity score, in the same order they are numbered above. Only describe what a study's abstract above actually says, never attribute features to it that the text does not mention. You do not need to discuss every match, but always discuss match #1, saying plainly if its overlap is only superficial. Never mention or explain any other study you leave out, and never use first person about your own choices. Maximum 5 sentences.",
 };
 
+// Long enough to reach what a study actually builds, not just its background.
+const ABSTRACT_SNIPPET_CHARS = 600;
+
 function buildMatchContext(matches, riskLevel) {
-  // GREEN scores mean nothing shown is a meaningful overlap, so passing all 5
-  // as if they were invites the AI to manufacture a false overlap analysis.
-  const relevant = riskLevel === "GREEN" ? matches.slice(0, 2) : matches;
+  // Matches arrive sorted by similarity, so every filter here keeps a prefix
+  // and the numbering still matches the order the report page shows.
+  // GREEN: nothing shown is a meaningful overlap, so only the top 2 are sent.
+  // Other bands: the top match plus any other match that is not GREEN on its
+  // own score. Weaker matches invite the AI to manufacture a false overlap.
+  const relevant =
+    riskLevel === "GREEN"
+      ? matches.slice(0, 2)
+      : matches.filter((m, i) => i === 0 || getRiskLevel(m.similarity) !== "GREEN");
   return relevant
-    .map(
-      (m, i) =>
-        `${i + 1}. Title: ${m.title}\n   Accession ID: ${m.accession_id ?? "N/A"}\n   Authors: ${m.authors ?? "Unknown"} (${m.year ?? "N/A"})\n   Abstract: ${m.abstract_text?.slice(0, 300)}...\n   Similarity: ${(m.similarity * 100).toFixed(1)}%`
-    )
+    .map((m, i) => {
+      const abstract = m.abstract_text ?? "";
+      const snippet =
+        abstract.length > ABSTRACT_SNIPPET_CHARS
+          ? `${abstract.slice(0, ABSTRACT_SNIPPET_CHARS)}...`
+          : abstract;
+      return `${i + 1}. Title: ${m.title}\n   Accession ID: ${m.accession_id ?? "N/A"}\n   Authors: ${m.authors ?? "Unknown"} (${m.year ?? "N/A"})\n   Abstract: ${snippet}\n   Similarity: ${(m.similarity * 100).toFixed(1)}%`;
+    })
     .join("\n\n");
 }
 
@@ -109,16 +122,16 @@ VERDICT
 Exactly two sentences. ${verdictInstruction}
 
 CRITICAL ANALYSIS OF OVERLAP
-${overlapInstruction} Discuss matches in the same order they are numbered above. If you skip match #1 as superficial, add one short clause saying why before moving on, since the student's report shows it first. Maximum 5 sentences.
+${overlapInstruction}
 
 PROPOSED UNIQUE TITLES
 Exactly 3 titles, one per line, numbered 1, 2, 3, with no label or description. Each is 12-15 words and describes one system with one clear purpose (never a feasibility study, analysis, assessment, or review):
-1. Same core system type, scoped to a narrower or different function or record type than the matched studies cover.
+1. Same core system type, scoped to a narrower or different function or record type than the matched studies cover (never one their abstracts already name).
 2. Same core system type, applied to a different sector or beneficiary group.
 3. Same core system type, plus exactly one AI feature as its core differentiator that is genuinely useful to the system. Only one technology in this title.
 
 ALTERNATIVE RESEARCH DIRECTIONS
-Exactly 3 directions, one per line, numbered 1, 2, 3 (structure only, so never refer to the numbers in the text). Each is a different project the student can take on, applied to a function, beneficiary, or record type the matched studies don't cover. Write them as open options, not orders or predictions. Open each one differently, e.g. "You can build", "You could apply this to", "Another route is", "This same system fits". Never start two the same way, and never use "You will" or "You must". Maximum 2 sentences each, flowing prose.`;
+Exactly 3 directions, one per line, numbered 1, 2, 3 (structure only, so never refer to the numbers in the text). Each is a different project the student can take on, applied to a function, beneficiary, or record type the matched studies don't cover, and to a sector or beneficiary that none of the three titles above uses. Write them as open options, not orders or predictions. Start each one with a different natural opening, for instance by leading with the sector or the beneficiary. Never use "You will" or "You must". Maximum 2 sentences each, flowing prose.`;
 
     // One call, no retries. The provider module owns the timeout. Any failure lands in the catch below, which returns the fallback advisory.
     const text = await generateText(prompt, { timeoutMs: AI_TIMEOUT_MS });
