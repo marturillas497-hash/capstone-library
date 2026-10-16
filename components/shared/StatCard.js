@@ -9,7 +9,7 @@ const TONES = {
 /* Icon in a tinted circle, big value, small label. `hint` is an optional muted line. */
 export default function StatCard({ icon: Icon, tone = "navy", value, label, hint, loading = false }) {
   return (
-    <div className="flex-1 min-w-[min(100%,200px)] bg-white border border-slate-200 rounded-2xl shadow-card p-5 flex items-center gap-4">
+    <div className="flex-1 min-w-[min(100%,200px)] bg-background shadow-neo rounded-2xl p-5 flex items-center gap-4">
       <div className={`w-[52px] h-[52px] rounded-full flex items-center justify-center shrink-0 ${TONES[tone]}`}>
         <Icon className="w-[22px] h-[22px]" strokeWidth={1.75} />
       </div>

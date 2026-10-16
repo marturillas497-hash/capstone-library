@@ -71,7 +71,7 @@ export default async function AdviserPage() {
           />
         </div>
 
-        <div className="bg-white border border-slate-200 rounded-2xl shadow-card p-6">
+        <div className="bg-background shadow-neo rounded-2xl p-6">
           <div className="flex items-baseline justify-between gap-3 mb-2">
             <h2 className="text-base font-bold text-navy">Students</h2>
             <span className="text-xs text-slate-400">Highest risk first</span>

@@ -10,7 +10,7 @@ import StatCard from "@/components/shared/StatCard";
 import DonutCard from "@/components/shared/DonutChart";
 import { riskSegments } from "@/lib/risk";
 
-const CARD = "bg-white border border-slate-200 rounded-2xl shadow-card p-6";
+const CARD = "bg-background shadow-neo rounded-2xl p-6";
 
 export default function AdminPage() {
   const supabase = createClient();

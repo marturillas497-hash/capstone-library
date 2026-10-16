@@ -53,7 +53,7 @@ export function DonutChart({ segments, centerValue, centerLabel, size = 150 }) {
 /** Card wrapper: title, donut on the left, legend with counts on the right. */
 export default function DonutCard({ title, segments, centerValue, centerLabel, footer }) {
   return (
-    <div className="flex-1 min-w-[min(100%,300px)] bg-white border border-slate-200 rounded-2xl shadow-card p-6">
+    <div className="flex-1 min-w-[min(100%,300px)] bg-background shadow-neo rounded-2xl p-6">
       <h2 className="text-base font-bold text-navy mb-5">{title}</h2>
       <div className="flex flex-wrap items-center gap-6">
         <DonutChart segments={segments} centerValue={centerValue} centerLabel={centerLabel} />

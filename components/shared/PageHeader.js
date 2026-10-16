@@ -57,7 +57,7 @@ function Banner({ title, subtitle, eyebrow, actions, children }) {
 
 function Stats({ title, subtitle, icon: Icon, stats = [], children }) {
   return (
-    <div className="bg-white border border-slate-200 rounded-2xl shadow-card px-6 py-6 mb-8 flex flex-wrap items-center justify-between gap-6">
+    <div className="bg-background shadow-neo rounded-2xl px-6 py-6 mb-8 flex flex-wrap items-center justify-between gap-6">
       <div className="flex items-center gap-4 min-w-0">
         {Icon && (
           <div className="relative w-[60px] h-[60px] rounded-2xl bg-navy/10 flex items-center justify-center shrink-0">

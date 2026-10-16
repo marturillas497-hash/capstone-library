@@ -132,7 +132,7 @@ export default function UserTable({
   }
 
   return (
-    <div className="bg-white border border-slate-200 shadow-card rounded-2xl">
+    <div className="bg-background shadow-neo rounded-2xl">
       {/* Desktop table */}
       <div className="hidden lg:block">
         <div className="flex items-center gap-3 px-4 py-3 bg-slate-50 rounded-t-2xl border-b border-slate-100 text-xs font-bold text-slate-400 uppercase tracking-wider">

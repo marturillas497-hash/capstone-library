@@ -113,8 +113,8 @@ export default function AnalyticsPage() {
           ]}
         />
 
-        <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,1.35fr)_minmax(0,1fr)] gap-6 mb-6 items-start">
-          <div className="bg-white border border-slate-200 rounded-2xl shadow-card p-6">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6 items-start">
+          <div className="bg-background shadow-neo rounded-2xl p-6">
             <h2 className="text-[17px] font-bold text-navy">Top 10 most viewed</h2>
             <p className="text-[13px] text-slate-500 mt-0.5 mb-5">
               All time, by number of students who opened the abstract
@@ -134,7 +134,7 @@ export default function AnalyticsPage() {
             )}
           </div>
 
-          <div className="bg-white border border-slate-200 rounded-2xl shadow-card p-6">
+          <div className="bg-background shadow-neo rounded-2xl p-6">
             <h2 className="text-[17px] font-bold text-navy">Trending this week</h2>
             <p className="text-[13px] text-slate-500 mt-0.5 mb-5">Top 5 over the last 7 days</p>
             {loading ? (
@@ -151,7 +151,7 @@ export default function AnalyticsPage() {
           </div>
         </div>
 
-        <div className="bg-white border border-slate-200 rounded-2xl shadow-card overflow-hidden">
+        <div className="bg-background shadow-neo rounded-2xl overflow-hidden">
           <div className="px-6 py-5 border-b border-slate-100">
             <h2 className="text-[17px] font-bold text-navy flex items-center gap-2">
               <History className="w-4 h-4 text-slate-500" strokeWidth={1.75} />
