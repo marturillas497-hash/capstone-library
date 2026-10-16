@@ -1,6 +1,7 @@
 "use client";
 
-import { Ban, RotateCcw, KeyRound } from "lucide-react";
+import { useState, useEffect, useRef } from "react";
+import { Ban, RotateCcw, KeyRound, MoreVertical } from "lucide-react";
 
 const STATUS_META = {
   active: { label: "Active", className: "bg-green-50 text-green-700 border-green-200" },
@@ -16,30 +17,81 @@ export function StatusPill({ status }) {
   );
 }
 
-function ActionButtons({ row, busy, onToggleStatus, onResetPassword }) {
+// Three-dot menu. Closes on outside click or Escape. Rows near the bottom of
+// the list open upward so the menu is not cut off by the page edge.
+function RowMenu({ row, busy, dropUp, onToggleStatus, onResetPassword }) {
+  const [open, setOpen] = useState(false);
+  const ref = useRef(null);
   const isActive = row.status === "active";
+
+  useEffect(() => {
+    if (!open) return;
+    function onDown(e) {
+      if (ref.current && !ref.current.contains(e.target)) setOpen(false);
+    }
+    function onKey(e) {
+      if (e.key === "Escape") setOpen(false);
+    }
+    document.addEventListener("mousedown", onDown);
+    document.addEventListener("keydown", onKey);
+    return () => {
+      document.removeEventListener("mousedown", onDown);
+      document.removeEventListener("keydown", onKey);
+    };
+  }, [open]);
+
+  function pick(handler) {
+    setOpen(false);
+    handler(row);
+  }
+
   return (
-    <div className="flex items-center gap-1.5">
+    <div ref={ref} className={`relative ${open ? "z-20" : ""}`}>
       <button
-        onClick={() => onToggleStatus(row)}
+        onClick={() => setOpen((v) => !v)}
         disabled={busy}
-        title={isActive ? "Suspend" : "Unsuspend"}
-        className={`p-1.5 rounded-lg border transition-colors disabled:opacity-50 ${
-          isActive
-            ? "border-red-200 text-red-500 hover:bg-red-50"
-            : "border-green-200 text-green-600 hover:bg-green-50"
+        aria-label={`Actions for ${row.full_name || "this account"}`}
+        aria-haspopup="menu"
+        aria-expanded={open}
+        className={`w-9 h-9 flex items-center justify-center rounded-lg border transition-colors disabled:opacity-50 ${
+          open ? "bg-slate-100 border-slate-300" : "border-transparent hover:bg-slate-100"
         }`}
       >
-        {isActive ? <Ban className="w-4 h-4" strokeWidth={1.75} /> : <RotateCcw className="w-4 h-4" strokeWidth={1.75} />}
+        <MoreVertical className="w-5 h-5 text-slate-600" strokeWidth={1.75} />
       </button>
-      <button
-        onClick={() => onResetPassword(row)}
-        disabled={busy}
-        title="Reset password"
-        className="p-1.5 rounded-lg border border-slate-200 text-slate-500 hover:bg-slate-50 transition-colors disabled:opacity-50"
-      >
-        <KeyRound className="w-4 h-4" strokeWidth={1.75} />
-      </button>
+
+      {open && (
+        <div
+          role="menu"
+          className={`absolute right-0 w-52 bg-white border border-slate-200 rounded-xl shadow-lg p-1.5 animate-fade-in ${
+            dropUp ? "bottom-full mb-1.5" : "top-full mt-1.5"
+          }`}
+        >
+          <button
+            role="menuitem"
+            onClick={() => pick(onResetPassword)}
+            className="w-full flex items-center gap-2.5 px-3 py-2.5 rounded-lg text-sm font-semibold text-navy hover:bg-slate-100 transition-colors"
+          >
+            <KeyRound className="w-[18px] h-[18px]" strokeWidth={1.75} />
+            Reset password
+          </button>
+          <div className="h-px bg-slate-100 my-1 mx-1.5" />
+          <button
+            role="menuitem"
+            onClick={() => pick(onToggleStatus)}
+            className={`w-full flex items-center gap-2.5 px-3 py-2.5 rounded-lg text-sm font-semibold transition-colors ${
+              isActive ? "text-red-700 hover:bg-red-50" : "text-green-700 hover:bg-green-50"
+            }`}
+          >
+            {isActive ? (
+              <Ban className="w-[18px] h-[18px]" strokeWidth={1.75} />
+            ) : (
+              <RotateCcw className="w-[18px] h-[18px]" strokeWidth={1.75} />
+            )}
+            {isActive ? "Suspend account" : "Unsuspend account"}
+          </button>
+        </div>
+      )}
     </div>
   );
 }
@@ -80,18 +132,18 @@ export default function UserTable({
   }
 
   return (
-    <div className="bg-background shadow-neo neo-transition rounded-xl overflow-hidden">
+    <div className="bg-white border border-slate-200 shadow-card rounded-2xl">
       {/* Desktop table */}
-      <div className="hidden md:block">
-        <div className="flex items-center gap-3 px-4 py-2.5 bg-slate-50 border-b border-slate-100 text-xs font-medium text-slate-500 uppercase tracking-wide">
+      <div className="hidden lg:block">
+        <div className="flex items-center gap-3 px-4 py-3 bg-slate-50 rounded-t-2xl border-b border-slate-100 text-xs font-bold text-slate-400 uppercase tracking-wider">
           <span className="flex-[1.3] min-w-0">{identifier.label}</span>
           {columns.map((col) => (
             <span key={col.key} className="flex-1 min-w-0">{col.label}</span>
           ))}
-          <span className="w-[76px] shrink-0 text-right">Actions</span>
+          <span className="w-9 shrink-0 text-right"><span className="sr-only">Actions</span></span>
         </div>
         <div className="divide-y divide-slate-50">
-          {rows.map((row) => (
+          {rows.map((row, index) => (
             <div key={row.id || row.profile_id} className="flex items-center gap-3 px-4 py-3 text-sm">
               <span className="flex-[1.3] min-w-0 font-medium text-foreground truncate">
                 {identifier.render(row)}
@@ -101,10 +153,11 @@ export default function UserTable({
                   {col.render(row)}
                 </span>
               ))}
-              <span className="w-[76px] shrink-0 flex justify-end">
-                <ActionButtons
+              <span className="w-9 shrink-0 flex justify-end">
+                <RowMenu
                   row={row}
                   busy={busyId === (row.id || row.profile_id)}
+                  dropUp={rows.length > 3 && index >= rows.length - 2}
                   onToggleStatus={onToggleStatus}
                   onResetPassword={onResetPassword}
                 />
@@ -115,7 +168,7 @@ export default function UserTable({
       </div>
 
       {/* Mobile cards */}
-      <div className="md:hidden divide-y divide-slate-50">
+      <div className="lg:hidden divide-y divide-slate-50">
         {rows.map((row) => (
           <div key={row.id || row.profile_id} className="px-4 py-3">
             <div className="flex items-start justify-between gap-2 mb-2">
@@ -123,19 +176,22 @@ export default function UserTable({
                 <p className="text-sm font-medium text-foreground truncate">{identifier.render(row)}</p>
                 <p className="text-xs text-slate-400 mt-0.5">{formatDate(row.created_at)}</p>
               </div>
-              <StatusPill status={row.status} />
+              <div className="flex items-center gap-1.5 shrink-0">
+                <StatusPill status={row.status} />
+                <RowMenu
+                  row={row}
+                  busy={busyId === (row.id || row.profile_id)}
+                  dropUp={false}
+                  onToggleStatus={onToggleStatus}
+                  onResetPassword={onResetPassword}
+                />
+              </div>
             </div>
             <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-slate-500 mb-3">
               {columns.filter((col) => col.key !== "status").map((col) => (
                 <span key={col.key}>{col.render(row)}</span>
               ))}
             </div>
-            <ActionButtons
-              row={row}
-              busy={busyId === (row.id || row.profile_id)}
-              onToggleStatus={onToggleStatus}
-              onResetPassword={onResetPassword}
-            />
           </div>
         ))}
       </div>

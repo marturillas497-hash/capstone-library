@@ -34,6 +34,7 @@ module.exports = {
         neo: "8px 8px 16px #b6c0cf, -8px -8px 16px #ffffff",
         "neo-hover": "14px 14px 30px #9aa6b8, -10px -10px 24px #ffffff",
         "neo-inset": "inset 4px 4px 8px #b6c0cf, inset -4px -4px 8px #ffffff",
+        card: "0 6px 20px rgba(0, 51, 102, 0.06)",
       },
       keyframes: {
         "page-ease-in": {

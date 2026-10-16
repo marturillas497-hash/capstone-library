@@ -52,6 +52,7 @@ export default async function ReportPage({ params }) {
 
         <PageHeader
           compact
+          crumbs={["Dashboard", "Similarity Report"]}
           title={report.input_title}
           subtitle={
             <>

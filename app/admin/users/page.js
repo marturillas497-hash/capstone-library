@@ -19,6 +19,7 @@ export default function UsersPage() {
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
+  const [total, setTotal] = useState(0);
 
   const [query, setQuery] = useState("");
   const [sort, setSort] = useState("date");
@@ -66,9 +67,11 @@ export default function UsersPage() {
       const json = await res.json();
       setRows(json.rows || []);
       setTotalPages(json.totalPages || 1);
+      setTotal(json.total || 0);
     } catch {
       setRows([]);
       setTotalPages(1);
+      setTotal(0);
     } finally {
       setLoading(false);
     }
@@ -192,10 +195,15 @@ export default function UsersPage() {
       <Navbar role={profile.role} fullName={profile.fullName} />
       <main className="flex-1 max-w-5xl mx-auto px-4 py-10">
         <PageHeader
+          variant="dense"
           title="User Management"
-          subtitle="View registered students and advisers, suspend or unsuspend an account, or reset a password."
+          subtitle="Suspend, unsuspend, or reset the password of any account"
           icon={Users}
-          iconBg="bg-navy"
+          badge={
+            <span className="bg-orange/10 text-[#B84E00] text-[13px] font-bold rounded-full px-2.5 py-0.5">
+              {total}
+            </span>
+          }
         />
 
         <div className="flex gap-2 mb-6">
