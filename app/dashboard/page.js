@@ -1,9 +1,15 @@
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import Navbar from "@/components/shared/Navbar";
-import { RISK_LABELS, RISK_BADGE as RISK_COLORS } from "@/lib/risk";
-import { Plus } from "lucide-react";
 import PageHeader from "@/components/shared/PageHeader";
+import StatCard from "@/components/shared/StatCard";
+import DonutCard from "@/components/shared/DonutChart";
+import { RISK_LABELS_SHORT, RISK_BADGE, riskSegments } from "@/lib/risk";
+import { getStudentScanStats } from "@/lib/dashboardStats";
+import { DAILY_SCAN_LIMIT } from "@/lib/constants";
+import { Plus, ScanLine, Clock, ShieldAlert } from "lucide-react";
+
+const RISK_TONE = { RED: "red", ORANGE: "orange", YELLOW: "gold", GREEN: "green" };
 
 export default async function DashboardPage() {
   const supabase = await createClient();
@@ -19,67 +25,89 @@ export default async function DashboardPage() {
 
   if (!profile || profile.role !== "student") redirect("/login");
 
-  const { data: meta } = await supabase
-    .from("student_metadata")
-    .select("id_number, year_level, section")
-    .eq("profile_id", user.id)
-    .single();
+  const [{ data: meta }, { data: reports }, stats] = await Promise.all([
+    supabase
+      .from("student_metadata")
+      .select("id_number, year_level, section")
+      .eq("profile_id", user.id)
+      .single(),
+    supabase
+      .from("similarity_reports")
+      .select("id, input_title, similarity_score, risk_level, created_at")
+      .eq("student_id", user.id)
+      .order("created_at", { ascending: false })
+      .limit(10),
+    getStudentScanStats(user.id),
+  ]);
 
-  const { data: reports, count } = await supabase
-    .from("similarity_reports")
-    .select("id, input_title, similarity_score, risk_level, created_at", { count: "exact" })
-    .eq("student_id", user.id)
-    .order("created_at", { ascending: false })
-    .limit(10);
+  const latestRisk = reports?.[0]?.risk_level;
+  const used = Math.min(stats.today, DAILY_SCAN_LIMIT);
+  const left = DAILY_SCAN_LIMIT - used;
+
+  const subtitle = [
+    meta?.id_number,
+    meta?.year_level && (meta?.section ? `${meta.year_level}, Section ${meta.section}` : meta.year_level),
+  ]
+    .filter(Boolean)
+    .join(" · ") || "BSIS Student";
 
   return (
     <div className="min-h-screen bg-background md:flex">
       <Navbar role={profile.role} fullName={profile.full_name} />
 
-      <main className="flex-1 max-w-4xl mx-auto px-4 py-8">
-
-        {/* Page header */}
+      <main className="flex-1 max-w-6xl mx-auto px-4 py-8">
         <PageHeader
+          variant="banner"
+          eyebrow="Student Dashboard"
           title={`Welcome, ${profile.full_name.split(" ")[0]}`}
-          subtitle={
-            <>
-              {meta?.id_number && `${meta.id_number} · `}
-              {meta?.year_level && `${meta.year_level} `}
-              {meta?.section && `— Section ${meta.section}`}
-              {!meta?.year_level && !meta?.section && "BSIS Student"}
-            </>
+          subtitle={subtitle}
+          actions={
+            <a
+              href="/submit"
+              className="inline-flex items-center gap-2 bg-gold text-navy text-sm font-semibold px-[18px] py-3 rounded-xl hover:bg-gold-light transition"
+            >
+              <Plus className="w-[18px] h-[18px]" strokeWidth={1.75} />
+              New Similarity Scan
+            </a>
           }
         />
 
-        {/* Stats row */}
-        <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mb-8">
-          <div className="bg-background shadow-neo neo-transition rounded-xl p-4">
-            <p className="text-xs text-slate-500 mb-1">Total Scans</p>
-            <p className="font-display text-3xl text-navy">{count ?? 0}</p>
-          </div>
-          <div className="bg-background shadow-neo neo-transition rounded-xl p-4">
-            <p className="text-xs text-slate-500 mb-1">Latest Risk</p>
-            <p className="font-display text-3xl text-navy">
-              {reports?.[0]?.risk_level ?? "—"}
-            </p>
-          </div>
-          <div className="col-span-2 md:col-span-1 bg-navy rounded-xl p-4 flex flex-col justify-between">
-            <p className="text-xs text-white mb-3">Ready to check your topic?</p>
-            <a
-              href="/submit"
-              className="inline-flex items-center justify-center gap-2 bg-gold text-navy text-sm font-semibold px-4 py-2 rounded-lg hover:bg-gold-light transition"
-            >
-              <Plus className="w-4 h-4" strokeWidth={1.75} />
-              New Similarity Scan
-            </a>
-          </div>
+        <div className="flex flex-wrap gap-4 mb-6">
+          <StatCard icon={ScanLine} tone="navy" value={stats.total} label="Total scans" />
+          <StatCard
+            icon={Clock}
+            tone="orange"
+            value={`${left} of ${DAILY_SCAN_LIMIT}`}
+            label="Scans left today"
+          />
+          <StatCard
+            icon={ShieldAlert}
+            tone={latestRisk ? RISK_TONE[latestRisk] : "navy"}
+            value={latestRisk ? RISK_LABELS_SHORT[latestRisk] : "None yet"}
+            label="Latest risk"
+          />
         </div>
 
-        {/* Recent reports */}
+        <div className="flex flex-wrap gap-6 mb-6">
+          <DonutCard
+            title="My scans by risk level"
+            segments={riskSegments(stats.counts)}
+            centerValue={stats.total}
+            centerLabel={stats.total === 1 ? "scan" : "scans"}
+          />
+          <DonutCard
+            title="Daily scan limit"
+            segments={[
+              { label: "Used today", value: used, color: "#003366" },
+              { label: "Remaining", value: left, color: "#E2E8F0" },
+            ]}
+            centerValue={`${used}/${DAILY_SCAN_LIMIT}`}
+            centerLabel="used"
+          />
+        </div>
+
         <div>
-          <h2 className="font-sans font-semibold text-foreground mb-4">
-            Recent Scans
-          </h2>
+          <h2 className="text-base font-bold text-navy mb-4">Recent Scans</h2>
 
           {!reports || reports.length === 0 ? (
             <div className="bg-background shadow-neo neo-transition rounded-xl p-8 text-center">
@@ -110,11 +138,9 @@ export default async function DashboardPage() {
                     </div>
                     {report.risk_level && (
                       <span
-                        className={`shrink-0 text-xs font-medium px-2.5 py-1 rounded-full border ${
-                          RISK_COLORS[report.risk_level]
-                        }`}
+                        className={`shrink-0 text-xs font-semibold px-2.5 py-1 rounded-full border ${RISK_BADGE[report.risk_level]}`}
                       >
-                        {RISK_LABELS[report.risk_level]}
+                        {RISK_LABELS_SHORT[report.risk_level]}
                       </span>
                     )}
                   </div>

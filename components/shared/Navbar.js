@@ -69,6 +69,36 @@ function groupLinks(links) {
   return groups;
 }
 
+const ROLE_LABELS = {
+  student: "Student",
+  capstone_adviser: "Capstone Adviser",
+  admin: "Administrator",
+};
+
+// Name and role chip for the top of the desktop sidebar footer. Students and
+// advisers link to /profile; the admin has no profile page, so it renders as
+// plain text.
+function UserChip({ role, fullName, initials }) {
+  const body = (
+    <>
+      <div className="w-9 h-9 rounded-full bg-gold flex items-center justify-center shrink-0">
+        <span className="text-xs font-bold text-navy leading-none">{initials}</span>
+      </div>
+      <div className="min-w-0 leading-tight text-left">
+        <p className="text-[13px] font-semibold text-white truncate">{fullName}</p>
+        <p className="text-[11px] text-white/50">{ROLE_LABELS[role]}</p>
+      </div>
+    </>
+  );
+  const base = "flex items-center gap-2.5 rounded-lg px-2 py-2 mb-2";
+  if (role === "admin") return <div className={base}>{body}</div>;
+  return (
+    <a href="/profile" className={`${base} hover:bg-white/10 transition`}>
+      {body}
+    </a>
+  );
+}
+
 export default function Navbar({ role, fullName }) {
   const router = useRouter();
   const pathname = usePathname();
@@ -99,7 +129,10 @@ export default function Navbar({ role, fullName }) {
   }
 
   function isActive(href) {
-    if (href === "/dashboard" || href === "/admin" || href === "/adviser") {
+    if (href === "/adviser") {
+      return pathname === href || pathname.startsWith("/adviser/students");
+    }
+    if (href === "/dashboard" || href === "/admin") {
       return pathname === href;
     }
     return pathname.startsWith(href);
@@ -271,12 +304,7 @@ export default function Navbar({ role, fullName }) {
         </nav>
 
         <div className="border-t border-white/10 px-4 py-4">
-          <div className="flex items-center gap-2.5 mb-3">
-            <div className="w-7 h-7 rounded-full bg-gold flex items-center justify-center shrink-0">
-              <span className="text-[11px] font-bold text-navy leading-none">{initials}</span>
-            </div>
-            <span className="text-[12.5px] text-white/70 truncate">{fullName}</span>
-          </div>
+          {fullName && <UserChip role={role} fullName={fullName} initials={initials} />}
           <button
             onClick={() => setChangePasswordOpen(true)}
             className="block w-full text-left text-[12.5px] font-medium text-white/50 hover:text-white transition py-1"

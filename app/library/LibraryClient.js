@@ -5,7 +5,7 @@ import { createClient } from "@/lib/supabase/client";
 import Navbar from "@/components/shared/Navbar";
 import AbstractModal from "@/components/shared/AbstractModal";
 import { useEmbedding } from "@/components/shared/EmbeddingProvider";
-import { Search, X, ChevronDown, BookOpen } from "lucide-react";
+import { Search, X, ChevronDown } from "lucide-react";
 import PageHeader from "@/components/shared/PageHeader";
 import { sanitizeFilterValue } from "@/lib/postgrest";
 import ScanProgress from "@/components/shared/ScanProgress";
@@ -242,10 +242,9 @@ export default function LibraryClient({ profile }) {
 
         {/* Page header */}
         <PageHeader
+          crumbs={["Library", "Browse"]}
           title="Capstone Library"
           subtitle="Browse completed BSIS capstone studies. Use the accession ID to request the physical document from the librarian."
-          icon={BookOpen}
-          iconBg="bg-gold"
         />
 
         <form onSubmit={onSearchSubmit} className="flex flex-col sm:flex-row gap-3 mb-4">
