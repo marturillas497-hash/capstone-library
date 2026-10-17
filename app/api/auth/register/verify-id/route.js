@@ -1,46 +1,28 @@
 import { NextResponse } from "next/server";
 import { getPool } from "@/lib/db";
-import { getClientIp, rateLimit } from "@/lib/rateLimit";
 
 // Public, unauthenticated route, called from the register page before an
-// account is created. Given a student ID, returns the registrar's name on
-// file for that ID (if any) so the register page can show an "Is this you?"
+// account is created. Given a student ID, returns the registrar name on file
+// for that ID (if any) so the register page can show an "Is this you?"
 // confirmation before submitting. The name is masked (see maskName below).
-// /api/auth/register remains the source of
-// truth and re-validates independently at final submit.
+// /api/auth/register remains the source of truth and re-validates
+// independently at final submit.
 //
-// Because it is public and returns a name, it is rate limited per IP so the
-// ID space cannot be walked to collect names (Data Privacy Act exposure).
-// 60 per 10 minutes leaves room for a whole computer lab sharing one campus
-// IP, while capping a single client at 360 guesses per hour.
-const LIMIT = 60;
-const WINDOW_SEC = 600;
+// Request volume is limited by a Vercel Firewall rate limit rule on
+// /api/auth/register*, configured in the dashboard, not in this file.
 const MAX_ID_LENGTH = 20;
 
-// The registrar's name is masked before it leaves the server, so a harvested
+// The registrar name is masked before it leaves the server, so a harvested
 // response yields almost nothing while a real student still recognizes their
 // own name. Each word keeps its first letter, e.g. "Juan D. Dela Cruz"
 // becomes "J*** D. D*** C***". Single letter initials are left as is.
 function maskName(name) {
-  return String(name ?? "").replace(/[\p{L}\p{M}][\p{L}\p{M}'\u2019-]*/gu, (w) =>
+  return String(name ?? "").replace(/[\p{L}\p{M}][\p{L}\p{M}\x27\u2019-]*/gu, (w) =>
     w.length <= 1 ? w : `${w[0]}***`
   );
 }
 
 export async function POST(request) {
-  const ip = getClientIp(request);
-  const { ok, retryAfter } = await rateLimit(`verify-id:${ip}`, {
-    limit: LIMIT,
-    windowSec: WINDOW_SEC,
-  });
-
-  if (!ok) {
-    return NextResponse.json(
-      { error: "Too many attempts. Please wait a few minutes and try again." },
-      { status: 429, headers: { "Retry-After": String(retryAfter) } }
-    );
-  }
-
   let body;
   try {
     body = await request.json();
