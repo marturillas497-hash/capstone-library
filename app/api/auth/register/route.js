@@ -1,8 +1,22 @@
 import { NextResponse } from "next/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
+import { getClientIp, rateLimit } from "@/lib/rateLimit";
 
 export async function POST(request) {
+  // Per IP cap on registration attempts. Stops account spam (advisers have no
+  // whitelist) and slows the whitelisted vs already-registered probing.
+  const { ok, retryAfter } = await rateLimit(`register:${getClientIp(request)}`, {
+    limit: 30,
+    windowSec: 3600,
+  });
+  if (!ok) {
+    return NextResponse.json(
+      { error: "Too many attempts. Please try again later." },
+      { status: 429, headers: { "Retry-After": String(retryAfter) } }
+    );
+  }
+
   const body = await request.json();
   const { role, fullName, email, password, studentId, adviserId, agreedToTerms } = body;
 
