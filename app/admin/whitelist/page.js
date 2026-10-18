@@ -410,6 +410,7 @@ export default function WhitelistPage() {
       <Navbar role={profile.role} fullName={profile.fullName} />
       <main className="flex-1 max-w-4xl mx-auto px-4 py-10">
         <PageHeader
+          variant="stats"
           title="Student Whitelist"
           subtitle="Manage the pre-registration access control list. Only whitelisted student IDs can register."
           icon={User}

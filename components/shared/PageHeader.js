@@ -7,15 +7,15 @@
  *    short orange segment. Used by most pages.
  *  - "banner": navy card with gold eyebrow and a right-side action. Used by the
  *    three role dashboards.
- *  - "stats": white card with an icon tile and inline stat pills. Used by
- *    pages whose header doubles as a summary (Analytics).
+ *  - "stats": white card with an icon tile, optional stat pills, crumbs,
+ *    badge and actions. Used by Analytics and most standard pages.
  *  - "dense": single row with icon, title and count badge, for table pages.
  *
  * Props:
  *  - title (required), subtitle
  *  - variant: "editorial" | "banner" | "stats" | "dense"
  *  - compact: smaller editorial title for long dynamic titles (report pages)
- *  - crumbs: string[] shown above an editorial title, last item highlighted
+ *  - crumbs: string[] shown above an editorial or stats header, last item highlighted
  *  - eyebrow: small uppercase label above a banner title
  *  - actions: node on the right (e.g. a primary button)
  *  - stats: [{ label, value, tone }] for the stats variant
@@ -75,28 +75,35 @@ function Banner({ title, subtitle, eyebrow, actions, children }) {
   );
 }
 
-function Stats({ title, subtitle, icon: Icon, stats = [], children }) {
+function Stats({ title, subtitle, icon: Icon, stats = [], crumbs, badge, actions, children }) {
   return (
-    <div className="bg-background shadow-neo rounded-2xl px-6 py-6 mb-8 flex flex-wrap items-center justify-between gap-6">
-      <div className="flex items-center gap-4 min-w-0">
-        {Icon && <IconTile icon={Icon} />}
-        <div className="min-w-0">
-          <h1 className="font-display text-3xl leading-tight text-navy">{title}</h1>
-          {subtitle && <p className="text-sm text-slate-500 mt-1">{subtitle}</p>}
-          {children}
-        </div>
-      </div>
-      {stats.length > 0 && (
-        <div className="flex flex-wrap gap-3">
-          {stats.map((s) => (
-            <div key={s.label} className={`rounded-xl px-[18px] py-2.5 ${s.tone === "navy" ? "bg-navy/10" : "bg-slate-100"}`}>
-              <p className="text-xs text-slate-500">{s.label}</p>
-              <p className="text-2xl font-bold text-navy leading-tight">{s.value}</p>
+    <>
+      {crumbs && crumbs.length > 0 && <Crumbs items={crumbs} />}
+      <div className="bg-background shadow-neo rounded-2xl px-6 py-6 mb-8 flex flex-wrap items-center justify-between gap-6">
+        <div className="flex items-center gap-4 min-w-0">
+          {Icon && <IconTile icon={Icon} />}
+          <div className="min-w-0">
+            <div className="flex flex-wrap items-center gap-3">
+              <h1 className="font-display text-3xl leading-tight text-navy">{title}</h1>
+              {badge}
             </div>
-          ))}
+            {subtitle && <p className="text-sm text-slate-500 mt-1">{subtitle}</p>}
+            {children}
+          </div>
         </div>
-      )}
-    </div>
+        {stats.length > 0 && (
+          <div className="flex flex-wrap gap-3">
+            {stats.map((s) => (
+              <div key={s.label} className={`rounded-xl px-[18px] py-2.5 ${s.tone === "navy" ? "bg-navy/10" : "bg-slate-100"}`}>
+                <p className="text-xs text-slate-500">{s.label}</p>
+                <p className="text-2xl font-bold text-navy leading-tight">{s.value}</p>
+              </div>
+            ))}
+          </div>
+        )}
+        {actions && <div className="shrink-0">{actions}</div>}
+      </div>
+    </>
   );
 }
 

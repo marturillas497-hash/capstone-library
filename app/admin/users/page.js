@@ -195,7 +195,7 @@ export default function UsersPage() {
       <Navbar role={profile.role} fullName={profile.fullName} />
       <main className="flex-1 max-w-5xl mx-auto px-4 py-10">
         <PageHeader
-          variant="dense"
+          variant="stats"
           title="User Management"
           subtitle="Suspend, unsuspend, or reset the password of any account"
           icon={Users}

@@ -62,6 +62,7 @@ export default async function StudentScansPage({ searchParams }) {
 
       <main className="flex-1 max-w-4xl mx-auto px-4 py-8">
         <PageHeader
+          variant="stats"
           crumbs={["Dashboard", "My Scans"]}
           title="My Scans"
           icon={Clock}

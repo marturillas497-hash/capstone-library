@@ -242,6 +242,7 @@ export default function LibraryClient({ profile }) {
 
         {/* Page header */}
         <PageHeader
+          variant="stats"
           crumbs={["Library", "Browse"]}
           title="Capstone Library"
           icon={BookOpen}
