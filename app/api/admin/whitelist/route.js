@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { sanitizeFilterValue } from "@/lib/postgrest";
+import { STUDENT_ID_PATTERN } from "@/lib/constants";
 
 const PAGE_SIZE = 25;
 
@@ -114,6 +115,12 @@ export async function POST(request) {
       if (!id_number) {
         return NextResponse.json(
           { error: "One or more rows is missing a student ID. Fix the file and re-upload." },
+          { status: 400 }
+        );
+      }
+      if (!STUDENT_ID_PATTERN.test(id_number)) {
+        return NextResponse.json(
+          { error: `Student ID "${id_number}" must contain numbers only. Fix the file and re-upload.` },
           { status: 400 }
         );
       }

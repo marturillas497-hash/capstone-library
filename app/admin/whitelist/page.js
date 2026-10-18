@@ -5,6 +5,7 @@ import { createClient } from "@/lib/supabase/client";
 import Navbar from "@/components/shared/Navbar";
 import { UploadCloud, Search, User, AlertTriangle, CheckCircle2, RotateCcw, UserPlus, ChevronLeft, ChevronRight } from "lucide-react";
 import PageHeader from "@/components/shared/PageHeader";
+import { STUDENT_ID_PATTERN } from "@/lib/constants";
 
 const STATUS_META = {
   new: { label: "New", className: "bg-navy/10 text-navy border-navy/20" },
@@ -13,6 +14,7 @@ const STATUS_META = {
   duplicate: { label: "Duplicate in file", className: "bg-red-50 text-red-600 border-red-200" },
   invalid: { label: "Missing ID", className: "bg-red-50 text-red-600 border-red-200" },
   invalid_name: { label: "Missing Name", className: "bg-red-50 text-red-600 border-red-200" },
+  invalid_format: { label: "Invalid ID", className: "bg-red-50 text-red-600 border-red-200" },
 };
 
 /*
@@ -99,6 +101,7 @@ function classifyRows(rows, existingMap) {
 
   return rows.map((r) => {
     if (!r.id_number) return { ...r, status: "invalid" };
+    if (!STUDENT_ID_PATTERN.test(r.id_number)) return { ...r, status: "invalid_format" };
     if (counts[r.id_number] > 1) return { ...r, status: "duplicate" };
     if (!r.full_name) return { ...r, status: "invalid_name" };
 
@@ -225,7 +228,7 @@ export default function WhitelistPage() {
 
     setCheckingExisting(true);
     try {
-      const uniqueIds = [...new Set(rows.map((r) => r.id_number).filter(Boolean))];
+      const uniqueIds = [...new Set(rows.map((r) => r.id_number).filter((id) => STUDENT_ID_PATTERN.test(id)))];
       const res = await fetch("/api/admin/whitelist/check", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -316,6 +319,10 @@ export default function WhitelistPage() {
       setAddError("Both a student ID and full name are required.");
       return;
     }
+    if (!STUDENT_ID_PATTERN.test(id_number)) {
+      setAddError("Student ID must contain numbers only.");
+      return;
+    }
 
     setAddBusy(true);
     try {
@@ -392,9 +399,9 @@ export default function WhitelistPage() {
   const rangeStart = total === 0 ? 0 : (page - 1) * pageSize + 1;
   const rangeEnd = rangeStart + entries.length - 1;
 
-  const counts = { new: 0, overwrite: 0, unchanged: 0, duplicate: 0, invalid: 0, invalid_name: 0 };
+  const counts = { new: 0, overwrite: 0, unchanged: 0, duplicate: 0, invalid: 0, invalid_name: 0, invalid_format: 0 };
   if (previewRows) previewRows.forEach((r) => counts[r.status]++);
-  const blockingCount = counts.duplicate + counts.invalid + counts.invalid_name;
+  const blockingCount = counts.duplicate + counts.invalid + counts.invalid_name + counts.invalid_format;
   const blocking = blockingCount > 0;
   const changeCount = counts.new + counts.overwrite;
 
@@ -532,7 +539,7 @@ export default function WhitelistPage() {
                 <div className="divide-y divide-slate-50">
                   {previewRows.map((r) => {
                     const meta = STATUS_META[r.status];
-                    const isIssue = r.status === "duplicate" || r.status === "invalid" || r.status === "invalid_name";
+                    const isIssue = r.status === "duplicate" || r.status === "invalid" || r.status === "invalid_name" || r.status === "invalid_format";
                     return (
                       <div
                         key={r.rowNumber}
@@ -654,8 +661,10 @@ export default function WhitelistPage() {
             <form onSubmit={handleManualAdd} className="flex flex-col sm:flex-row gap-3">
               <input
                 type="text"
+                inputMode="numeric"
+                maxLength={20}
                 value={addId}
-                onChange={(e) => setAddId(e.target.value)}
+                onChange={(e) => setAddId(e.target.value.replace(/\D/g, ""))}
                 placeholder="Student ID"
                 className="flex-1 border border-slate-200 rounded-lg px-3 py-2.5 text-sm text-foreground bg-white shadow-sm focus:outline-none focus:ring-2 focus:ring-navy/30"
               />
