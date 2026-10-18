@@ -19,11 +19,31 @@
  *  - eyebrow: small uppercase label above a banner title
  *  - actions: node on the right (e.g. a primary button)
  *  - stats: [{ label, value, tone }] for the stats variant
- *  - icon: lucide icon for the stats and dense variants
+ *  - icon: lucide icon for the stats, dense and editorial variants, drawn by
+ *    the shared IconTile (soft navy tile with an orange dot, as on Analytics)
  *  - badge: node next to the title (e.g. a count pill)
  *  - children: extra content under the subtitle
  *  - iconBg: accepted for backward compatibility and ignored
  */
+/* Single source for the header icon, so every page that shows one matches. */
+function IconTile({ icon: Icon, size = "lg" }) {
+  const lg = size === "lg";
+  return (
+    <div
+      className={`relative rounded-2xl bg-navy/10 flex items-center justify-center shrink-0 ${
+        lg ? "w-[60px] h-[60px]" : "w-11 h-11"
+      }`}
+    >
+      <Icon className={lg ? "w-7 h-7 text-navy" : "w-5 h-5 text-navy"} strokeWidth={1.75} />
+      <span
+        className={`absolute -right-1 -top-1 rounded-full bg-orange border-white ${
+          lg ? "h-3.5 w-3.5 border-[3px]" : "h-3 w-3 border-2"
+        }`}
+      />
+    </div>
+  );
+}
+
 function Crumbs({ items }) {
   return (
     <p className="text-[13px] font-semibold text-slate-500 mb-2">
@@ -59,12 +79,7 @@ function Stats({ title, subtitle, icon: Icon, stats = [], children }) {
   return (
     <div className="bg-background shadow-neo rounded-2xl px-6 py-6 mb-8 flex flex-wrap items-center justify-between gap-6">
       <div className="flex items-center gap-4 min-w-0">
-        {Icon && (
-          <div className="relative w-[60px] h-[60px] rounded-2xl bg-navy/10 flex items-center justify-center shrink-0">
-            <Icon className="w-7 h-7 text-navy" strokeWidth={1.75} />
-            <span className="absolute -right-1 -top-1 h-3.5 w-3.5 rounded-full bg-orange border-[3px] border-white" />
-          </div>
-        )}
+        {Icon && <IconTile icon={Icon} />}
         <div className="min-w-0">
           <h1 className="font-display text-3xl leading-tight text-navy">{title}</h1>
           {subtitle && <p className="text-sm text-slate-500 mt-1">{subtitle}</p>}
@@ -89,11 +104,7 @@ function Dense({ title, subtitle, icon: Icon, badge, actions, children }) {
   return (
     <div className="border-b border-slate-200 pb-4 mb-6 flex flex-wrap items-center justify-between gap-4">
       <div className="flex items-center gap-3.5 min-w-0">
-        {Icon && (
-          <div className="w-10 h-10 rounded-[10px] bg-navy flex items-center justify-center shrink-0">
-            <Icon className="w-5 h-5 text-white" strokeWidth={1.75} />
-          </div>
-        )}
+        {Icon && <IconTile icon={Icon} size="md" />}
         <h1 className="font-display text-2xl text-navy">{title}</h1>
         {badge}
         {children}
@@ -105,25 +116,30 @@ function Dense({ title, subtitle, icon: Icon, badge, actions, children }) {
   );
 }
 
-function Editorial({ title, subtitle, crumbs, compact, badge, actions, children }) {
+function Editorial({ title, subtitle, crumbs, compact, icon: Icon, badge, actions, children }) {
   return (
     <div className={`relative border-b border-slate-200 pb-5 ${compact ? "mb-6" : "mb-8"}`}>
       <span className="absolute left-0 -bottom-px h-[3px] w-[72px] rounded-full bg-orange" />
       <div className="flex flex-wrap items-end justify-between gap-6">
         <div className="min-w-0">
           {crumbs && crumbs.length > 0 && <Crumbs items={crumbs} />}
-          <div className="flex items-center gap-3">
-            <h1
-              className={`font-display text-navy tracking-tight ${
-                compact ? "text-2xl leading-snug" : "text-3xl md:text-[40px] leading-tight"
-              }`}
-            >
-              {title}
-            </h1>
-            {badge}
+          <div className="flex items-center gap-4">
+            {Icon && <IconTile icon={Icon} size={compact ? "md" : "lg"} />}
+            <div className="min-w-0">
+              <div className="flex items-center gap-3">
+                <h1
+                  className={`font-display text-navy tracking-tight ${
+                    compact ? "text-2xl leading-snug" : "text-3xl md:text-[40px] leading-tight"
+                  }`}
+                >
+                  {title}
+                </h1>
+                {badge}
+              </div>
+              {subtitle && <p className="text-slate-500 mt-2 text-[15px]">{subtitle}</p>}
+              {children}
+            </div>
           </div>
-          {subtitle && <p className="text-slate-500 mt-2 text-[15px]">{subtitle}</p>}
-          {children}
         </div>
         {actions && <div className="shrink-0">{actions}</div>}
       </div>

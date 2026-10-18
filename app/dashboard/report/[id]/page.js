@@ -5,7 +5,7 @@ import Navbar from "@/components/shared/Navbar";
 import { RISK_LABELS, RISK_BADGE as riskBadgeColor, RISK_BAR as riskBarColor } from "@/lib/risk";
 import { parseAdvisory, isFallbackAdvisory, getFallbackMessage } from "@/lib/advisory";
 import MatchesList from "@/components/shared/MatchesList";
-import { ArrowLeft, Sparkles, Info } from "lucide-react";
+import { ArrowLeft, Sparkles, Info, FileText } from "lucide-react";
 import PageHeader from "@/components/shared/PageHeader";
 
 export default async function ReportPage({ params }) {
@@ -52,6 +52,7 @@ export default async function ReportPage({ params }) {
 
         <PageHeader
           compact
+          icon={FileText}
           crumbs={["Dashboard", "Similarity Report"]}
           title={report.input_title}
           subtitle={

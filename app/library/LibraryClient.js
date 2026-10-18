@@ -5,7 +5,7 @@ import { createClient } from "@/lib/supabase/client";
 import Navbar from "@/components/shared/Navbar";
 import AbstractModal from "@/components/shared/AbstractModal";
 import { useEmbedding } from "@/components/shared/EmbeddingProvider";
-import { Search, X, ChevronDown } from "lucide-react";
+import { Search, X, ChevronDown, BookOpen } from "lucide-react";
 import PageHeader from "@/components/shared/PageHeader";
 import { sanitizeFilterValue } from "@/lib/postgrest";
 import ScanProgress from "@/components/shared/ScanProgress";
@@ -244,6 +244,7 @@ export default function LibraryClient({ profile }) {
         <PageHeader
           crumbs={["Library", "Browse"]}
           title="Capstone Library"
+          icon={BookOpen}
           subtitle="Browse completed BSIS capstone studies. Use the accession ID to request the physical document from the librarian."
         />
 

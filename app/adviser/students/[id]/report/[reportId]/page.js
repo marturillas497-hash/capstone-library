@@ -5,7 +5,7 @@ import { RISK_LABELS, RISK_BADGE as riskBadgeColor, RISK_BAR as riskBarColor } f
 import { parseAdvisory, isFallbackAdvisory, getFallbackMessage } from "@/lib/advisory";
 import MatchesList from "@/components/shared/MatchesList";
 import Link from "next/link";
-import { ArrowLeft, Sparkles, Info } from "lucide-react";
+import { ArrowLeft, Sparkles, Info, FileText } from "lucide-react";
 import PageHeader from "@/components/shared/PageHeader";
 
 export default async function AdviserStudentReportPage({ params }) {
@@ -67,6 +67,7 @@ export default async function AdviserStudentReportPage({ params }) {
         {/* Page header */}
         <PageHeader
           compact
+          icon={FileText}
           title={report.input_title}
           subtitle={
             <>

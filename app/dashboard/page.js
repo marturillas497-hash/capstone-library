@@ -7,8 +7,9 @@ import DonutCard from "@/components/shared/DonutChart";
 import { RISK_LABELS_SHORT, RISK_BADGE, riskSegments } from "@/lib/risk";
 import { getStudentScanStats } from "@/lib/dashboardStats";
 import { DAILY_SCAN_LIMIT } from "@/lib/constants";
-import { Plus, ScanLine, Clock, ShieldAlert } from "lucide-react";
+import { Plus, ScanLine, Clock, ShieldAlert, ArrowRight } from "lucide-react";
 
+const RECENT_LIMIT = 5;
 const RISK_TONE = { RED: "red", ORANGE: "orange", YELLOW: "gold", GREEN: "green" };
 
 export default async function DashboardPage() {
@@ -36,7 +37,7 @@ export default async function DashboardPage() {
       .select("id, input_title, similarity_score, risk_level, created_at")
       .eq("student_id", user.id)
       .order("created_at", { ascending: false })
-      .limit(10),
+      .limit(RECENT_LIMIT),
     getStudentScanStats(user.id),
   ]);
 
@@ -107,7 +108,18 @@ export default async function DashboardPage() {
         </div>
 
         <div>
-          <h2 className="text-base font-bold text-navy mb-4">Recent Scans</h2>
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-base font-bold text-navy">Recent Scans</h2>
+            {stats.total > RECENT_LIMIT && (
+              <a
+                href="/dashboard/scans"
+                className="inline-flex items-center gap-1 text-sm font-semibold text-navy hover:text-navy-light transition"
+              >
+                View all {stats.total}
+                <ArrowRight className="w-4 h-4" strokeWidth={1.75} />
+              </a>
+            )}
+          </div>
 
           {!reports || reports.length === 0 ? (
             <div className="bg-background shadow-neo neo-transition rounded-xl p-8 text-center">
@@ -130,6 +142,7 @@ export default async function DashboardPage() {
                       </p>
                       <p className="text-xs text-slate-500 mt-0.5">
                         {new Date(report.created_at).toLocaleDateString("en-PH", {
+                          timeZone: "Asia/Manila",
                           year: "numeric",
                           month: "short",
                           day: "numeric",
