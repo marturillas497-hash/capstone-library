@@ -4,7 +4,7 @@ import Navbar from "@/components/shared/Navbar";
 import PageHeader from "@/components/shared/PageHeader";
 import StudentList from "../StudentList";
 import { getAdviserOverview } from "@/lib/adviserData";
-import { FileText } from "lucide-react";
+import { FileText, Users } from "lucide-react";
 
 export default async function AdviserStudentsPage() {
   const supabase = await createClient();
@@ -29,6 +29,7 @@ export default async function AdviserStudentsPage() {
         <PageHeader
           crumbs={["My Students", "All students"]}
           title="All Students"
+          icon={Users}
           subtitle="Search every student who has assigned you as their capstone adviser."
           badge={
             students.length > 0 && (

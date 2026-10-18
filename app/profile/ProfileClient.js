@@ -123,6 +123,7 @@ export default function ProfileClient({ profile }) {
 
         <main className="flex-1 max-w-xl mx-auto px-4 py-8">
           <PageHeader
+            variant="stats"
             title="My Profile"
             subtitle="Your account details on file with the institution."
             icon={UserCog}
@@ -194,6 +195,7 @@ export default function ProfileClient({ profile }) {
 
       <main className="flex-1 max-w-xl mx-auto px-4 py-8">
         <PageHeader
+          variant="stats"
           title="My Profile"
           subtitle="Update your year level, section, and assigned adviser."
           icon={UserCog}

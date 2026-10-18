@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { getPool } from "@/lib/db";
+import { STUDENT_ID_PATTERN } from "@/lib/constants";
 
 // Public, unauthenticated route, called from the register page before an
 // account is created. Given a student ID, returns the registrar name on file
@@ -32,7 +33,7 @@ export async function POST(request) {
 
   const studentId = String(body?.studentId ?? "").trim();
 
-  if (!studentId || studentId.length > MAX_ID_LENGTH) {
+  if (!studentId || studentId.length > MAX_ID_LENGTH || !STUDENT_ID_PATTERN.test(studentId)) {
     return NextResponse.json({ error: "A valid student ID is required." }, { status: 400 });
   }
 

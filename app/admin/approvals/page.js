@@ -103,36 +103,36 @@ export default function ApprovalsPage() {
       <Navbar role={profile.role} fullName={profile.fullName} />
       <main className="flex-1 max-w-4xl mx-auto px-4 py-10">
         <PageHeader
+          variant="stats"
           title="Adviser Applications"
           subtitle="Review pending registrations and browse past decisions."
           icon={Clock}
-          iconBg="bg-orange"
-        >
-          <div className="flex gap-1 mt-5 border-b border-slate-200">
-            {TABS.map((tab) => {
-              const count = advisersByTab[tab.key]?.length ?? 0;
-              const isActive = activeTab === tab.key;
-              return (
-                <button
-                  key={tab.key}
-                  onClick={() => setActiveTab(tab.key)}
-                  className={`relative px-4 py-2.5 text-sm font-medium transition-colors
-                    ${isActive ? "text-navy" : "text-slate-400 hover:text-slate-600"}`}
-                >
-                  <span className="flex items-center gap-1.5">
-                    {tab.label}
-                    <span className={`text-xs rounded-full px-1.5 py-0.5 ${isActive ? "bg-navy/10 text-navy" : "bg-slate-100 text-slate-400"}`}>
-                      {count}
-                    </span>
+        />
+
+        <div className="flex gap-1 mb-6 border-b border-slate-200">
+          {TABS.map((tab) => {
+            const count = advisersByTab[tab.key]?.length ?? 0;
+            const isActive = activeTab === tab.key;
+            return (
+              <button
+                key={tab.key}
+                onClick={() => setActiveTab(tab.key)}
+                className={`relative px-4 py-2.5 text-sm font-medium transition-colors
+                  ${isActive ? "text-navy" : "text-slate-400 hover:text-slate-600"}`}
+              >
+                <span className="flex items-center gap-1.5">
+                  {tab.label}
+                  <span className={`text-xs rounded-full px-1.5 py-0.5 ${isActive ? "bg-navy/10 text-navy" : "bg-slate-100 text-slate-400"}`}>
+                    {count}
                   </span>
-                  {isActive && (
-                    <span className="absolute left-0 right-0 -bottom-px h-0.5 bg-orange rounded-full" />
-                  )}
-                </button>
-              );
-            })}
-          </div>
-        </PageHeader>
+                </span>
+                {isActive && (
+                  <span className="absolute left-0 right-0 -bottom-px h-0.5 bg-orange rounded-full" />
+                )}
+              </button>
+            );
+          })}
+        </div>
 
         {loading ? (
           <div className="space-y-3">

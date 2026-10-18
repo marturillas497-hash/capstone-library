@@ -33,6 +33,7 @@ export default async function AdviserScansPage() {
       <main className="flex-1 max-w-4xl mx-auto px-4 py-8">
 
         <PageHeader
+          variant="stats"
           title="My Scans"
           subtitle="Your own similarity scan history. This does not include scans submitted by your assigned students."
           icon={ScanLine}

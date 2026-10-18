@@ -31,6 +31,7 @@ import ChangePasswordModal from "./ChangePasswordModal";
 const NAV_LINKS = {
   student: [
     { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard, group: "Overview" },
+    { href: "/dashboard/scans", label: "My Scans", icon: Clock, group: "Overview" },
     { href: "/library", label: "Library", icon: BookOpen, group: "Library", chip: "gold" },
     { href: "/submit", label: "New Scan", icon: ScanLine, group: "Library", chip: "orange" },
     { href: "/profile", label: "Profile", icon: User, group: "Account" },

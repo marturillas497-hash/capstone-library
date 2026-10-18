@@ -149,6 +149,7 @@ export default function EditAbstractPage({ params }) {
         </Link>
 
         <PageHeader
+          variant="stats"
           title="Edit Abstract"
           subtitle="Changes will regenerate the embedding from the updated title and abstract text."
           icon={Pencil}

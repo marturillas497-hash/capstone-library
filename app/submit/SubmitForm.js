@@ -206,6 +206,7 @@ export default function SubmitForm({ profile, userId }) {
 
         {/* Page header */}
         <PageHeader
+          variant="stats"
           title="New Similarity Scan"
           subtitle="Enter your proposed capstone title and abstract to check for conceptual overlap with existing BSIS studies."
           icon={ScanLine}
