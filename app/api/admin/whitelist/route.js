@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { sanitizeFilterValue } from "@/lib/postgrest";
-import { STUDENT_ID_PATTERN } from "@/lib/constants";
+import { STUDENT_ID_PATTERN, MAX_WHITELIST_ROWS, MAX_NAME_LENGTH, normalizeName, isValidName } from "@/lib/constants";
 
 const PAGE_SIZE = 25;
 
@@ -105,12 +105,18 @@ export async function POST(request) {
     if (!rows || rows.length === 0) {
       return NextResponse.json({ error: "No rows provided" }, { status: 400 });
     }
+    if (rows.length > MAX_WHITELIST_ROWS) {
+      return NextResponse.json(
+        { error: `Too many rows. The limit is ${MAX_WHITELIST_ROWS} per upload.` },
+        { status: 400 }
+      );
+    }
 
     const cleaned = [];
     const seen = new Set();
     for (const row of rows) {
       const id_number = typeof row.id_number === "string" ? row.id_number.trim() : "";
-      const full_name = typeof row.full_name === "string" ? row.full_name.trim() : "";
+      const full_name = typeof row.full_name === "string" ? normalizeName(row.full_name) : "";
 
       if (!id_number) {
         return NextResponse.json(
@@ -127,6 +133,12 @@ export async function POST(request) {
       if (!full_name) {
         return NextResponse.json(
           { error: "One or more rows is missing a name. Fix the file and re-upload." },
+          { status: 400 }
+        );
+      }
+      if (!isValidName(full_name)) {
+        return NextResponse.json(
+          { error: `Name "${full_name}" is not valid. Names need letters, no numbers, and at most ${MAX_NAME_LENGTH} characters.` },
           { status: 400 }
         );
       }

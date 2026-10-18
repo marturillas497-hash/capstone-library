@@ -5,7 +5,7 @@ import { createClient } from "@/lib/supabase/client";
 import Navbar from "@/components/shared/Navbar";
 import { UploadCloud, Search, User, AlertTriangle, CheckCircle2, RotateCcw, UserPlus, ChevronLeft, ChevronRight } from "lucide-react";
 import PageHeader from "@/components/shared/PageHeader";
-import { STUDENT_ID_PATTERN } from "@/lib/constants";
+import { STUDENT_ID_PATTERN, MAX_WHITELIST_ROWS, MAX_NAME_LENGTH, normalizeName, isValidName } from "@/lib/constants";
 
 const STATUS_META = {
   new: { label: "New", className: "bg-navy/10 text-navy border-navy/20" },
@@ -15,7 +15,11 @@ const STATUS_META = {
   invalid: { label: "Missing ID", className: "bg-red-50 text-red-600 border-red-200" },
   invalid_name: { label: "Missing Name", className: "bg-red-50 text-red-600 border-red-200" },
   invalid_format: { label: "Invalid ID", className: "bg-red-50 text-red-600 border-red-200" },
+  bad_name: { label: "Invalid Name", className: "bg-red-50 text-red-600 border-red-200" },
 };
+
+// Statuses that hard-block Confirm.
+const BLOCKING = ["duplicate", "invalid", "invalid_name", "invalid_format", "bad_name"];
 
 /*
  * Quote-aware CSV field split for a single line. Handles a name written
@@ -69,6 +73,10 @@ function parseCsv(text) {
     throw new Error("The CSV must include a header row with columns: id_number, full_name.");
   }
 
+  if (lines.length - 1 > MAX_WHITELIST_ROWS) {
+    throw new Error(`The file has more than ${MAX_WHITELIST_ROWS} rows. Split it into smaller files and upload them separately.`);
+  }
+
   const rows = [];
   for (let i = 1; i < lines.length; i++) {
     const { raw, lineNo } = lines[i];
@@ -85,7 +93,7 @@ function parseCsv(text) {
     rows.push({
       rowNumber: lineNo,
       id_number: cols[idCol] || "",
-      full_name: cols[nameCol] || "",
+      full_name: normalizeName(cols[nameCol]),
     });
   }
 
@@ -104,12 +112,18 @@ function classifyRows(rows, existingMap) {
     if (!STUDENT_ID_PATTERN.test(r.id_number)) return { ...r, status: "invalid_format" };
     if (counts[r.id_number] > 1) return { ...r, status: "duplicate" };
     if (!r.full_name) return { ...r, status: "invalid_name" };
+    if (!isValidName(r.full_name)) return { ...r, status: "bad_name" };
 
-    const existingName = existingMap.get(r.id_number);
-    if (existingName === undefined) return { ...r, status: "new" };
+    const existing = existingMap.get(r.id_number);
+    if (!existing) return { ...r, status: "new" };
 
-    const nameMatches = (existingName || "") === (r.full_name || "");
-    return { ...r, status: nameMatches ? "unchanged" : "overwrite", existingName };
+    const nameMatches = normalizeName(existing.full_name) === r.full_name;
+    return {
+      ...r,
+      status: nameMatches ? "unchanged" : "overwrite",
+      existingName: existing.full_name,
+      registered: existing.registered,
+    };
   });
 }
 
@@ -236,7 +250,7 @@ export default function WhitelistPage() {
       });
       const json = await res.json();
       if (!res.ok) throw new Error(json.error || "Check failed");
-      const existingMap = new Map((json.existing || []).map((e) => [e.id_number, e.full_name]));
+      const existingMap = new Map((json.existing || []).map((e) => [e.id_number, e]));
       setPreviewRows(classifyRows(rows, existingMap));
     } catch {
       setParseError("Could not check the file against the current whitelist. Try again.");
@@ -293,6 +307,7 @@ export default function WhitelistPage() {
               id_number: r.id_number,
               oldName: r.existingName || "unnamed",
               newName: r.full_name || "unnamed",
+              registered: r.registered,
             }))
           : null
       );
@@ -313,7 +328,7 @@ export default function WhitelistPage() {
     setAddConflict(null);
 
     const id_number = addId.trim();
-    const full_name = addName.trim();
+    const full_name = normalizeName(addName);
 
     if (!id_number || !full_name) {
       setAddError("Both a student ID and full name are required.");
@@ -321,6 +336,10 @@ export default function WhitelistPage() {
     }
     if (!STUDENT_ID_PATTERN.test(id_number)) {
       setAddError("Student ID must contain numbers only.");
+      return;
+    }
+    if (!isValidName(full_name)) {
+      setAddError(`Name must contain letters, no numbers, and be at most ${MAX_NAME_LENGTH} characters.`);
       return;
     }
 
@@ -338,7 +357,7 @@ export default function WhitelistPage() {
       }
       const existing = (json.existing || [])[0];
 
-      if (existing && existing.full_name === full_name) {
+      if (existing && normalizeName(existing.full_name) === full_name) {
         setAddInfo(`${id_number} is already whitelisted under this exact name. Nothing to change.`);
         return;
       }
@@ -349,7 +368,7 @@ export default function WhitelistPage() {
          * shown here as an explicit confirm step since a single entry has
          * no preview table.
          */
-        setAddConflict({ id_number, full_name, existingName: existing.full_name });
+        setAddConflict({ id_number, full_name, existingName: existing.full_name, registered: existing.registered });
         return;
       }
 
@@ -399,11 +418,14 @@ export default function WhitelistPage() {
   const rangeStart = total === 0 ? 0 : (page - 1) * pageSize + 1;
   const rangeEnd = rangeStart + entries.length - 1;
 
-  const counts = { new: 0, overwrite: 0, unchanged: 0, duplicate: 0, invalid: 0, invalid_name: 0, invalid_format: 0 };
+  const counts = { new: 0, overwrite: 0, unchanged: 0, duplicate: 0, invalid: 0, invalid_name: 0, invalid_format: 0, bad_name: 0 };
   if (previewRows) previewRows.forEach((r) => counts[r.status]++);
-  const blockingCount = counts.duplicate + counts.invalid + counts.invalid_name + counts.invalid_format;
+  const blockingCount = BLOCKING.reduce((n, k) => n + counts[k], 0);
   const blocking = blockingCount > 0;
   const changeCount = counts.new + counts.overwrite;
+  const registeredOverwrites = previewRows
+    ? previewRows.filter((r) => r.status === "overwrite" && r.registered).length
+    : 0;
 
   return (
     <div className="min-h-screen bg-background md:flex">
@@ -452,6 +474,14 @@ export default function WhitelistPage() {
                         <span className="text-slate-400 truncate">{r.oldName}</span>
                         <span className="text-orange-dark">&rarr;</span>
                         <span className="text-orange-dark font-medium truncate">{r.newName}</span>
+                        {r.registered && (
+                          <span
+                            className="text-[10px] text-slate-500 border border-slate-200 rounded-full px-1.5 py-px"
+                            title="This student already has an account, which keeps its original name."
+                          >
+                            Has account
+                          </span>
+                        )}
                       </div>
                     ))}
                   </div>
@@ -540,7 +570,7 @@ export default function WhitelistPage() {
                 <div className="divide-y divide-slate-50">
                   {previewRows.map((r) => {
                     const meta = STATUS_META[r.status];
-                    const isIssue = r.status === "duplicate" || r.status === "invalid" || r.status === "invalid_name" || r.status === "invalid_format";
+                    const isIssue = BLOCKING.includes(r.status);
                     return (
                       <div
                         key={r.rowNumber}
@@ -557,6 +587,9 @@ export default function WhitelistPage() {
                           <span className={`text-xs font-medium px-2 py-0.5 rounded-full border ${meta.className}`}>
                             {meta.label}
                           </span>
+                          {r.status === "overwrite" && r.registered && (
+                            <span className="block text-[10px] text-slate-400 mt-0.5">Has account</span>
+                          )}
                         </span>
                       </div>
                     );
@@ -564,6 +597,15 @@ export default function WhitelistPage() {
                 </div>
               </div>
 
+              {registeredOverwrites > 0 && (
+                <div className="bg-orange/5 border border-orange/30 rounded-lg px-4 py-3 mb-4 flex gap-2.5">
+                  <AlertTriangle className="w-4 h-4 text-orange-dark shrink-0 mt-0.5" strokeWidth={1.75} />
+                  <p className="text-sm text-slate-600">
+                    Some updated names ({registeredOverwrites}) belong to students who already have an account.
+                    The whitelist name will change, but the name on their account will not.
+                  </p>
+                </div>
+              )}
               {blocking ? (
                 <div className="bg-red-50 border border-red-200 rounded-lg px-4 py-3 mb-4 flex gap-2.5">
                   <AlertTriangle className="w-4 h-4 text-red-500 shrink-0 mt-0.5" strokeWidth={1.75} />
@@ -637,6 +679,7 @@ export default function WhitelistPage() {
                   <span className="font-medium">{addConflict.existingName}</span>. Adding it
                   now will overwrite that name with{" "}
                   <span className="font-medium">{addConflict.full_name}</span>.
+                  {addConflict.registered && " This student already has an account, which keeps its original name."}
                 </p>
               </div>
               <div className="flex gap-2">
@@ -671,6 +714,7 @@ export default function WhitelistPage() {
               />
               <input
                 type="text"
+                maxLength={MAX_NAME_LENGTH}
                 value={addName}
                 onChange={(e) => setAddName(e.target.value)}
                 placeholder="Full name"
